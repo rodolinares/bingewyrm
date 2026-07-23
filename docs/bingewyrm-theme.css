@@ -1,0 +1,94 @@
+/*
+  BingeWyrm design tokens
+  Palette derived from theater/cinema marquee references:
+  warm amber/rust/maroon against near-black, with a cool
+  slate-teal/sage neutral to keep the UI from being all-warm.
+
+  Drop into globals.css alongside shadcn/ui's default setup.
+  Dark mode is the intended default (cinematic feel); light mode
+  is provided for completeness.
+*/
+
+@layer base {
+  :root {
+    /* Light mode */
+    --background: 48 33% 92%;          /* cream #F2EEE0 */
+    --foreground: 228 14% 11%;         /* near-black navy #191B22 */
+
+    --card: 40 60% 96%;
+    --card-foreground: 228 14% 11%;
+
+    --popover: 40 60% 96%;
+    --popover-foreground: 228 14% 11%;
+
+    --primary: 38 80% 40%;             /* marquee amber, darkened for contrast */
+    --primary-foreground: 48 33% 96%;
+
+    --secondary: 0 64% 22%;            /* deep maroon */
+    --secondary-foreground: 48 33% 96%;
+
+    --muted: 48 20% 85%;
+    --muted-foreground: 195 10% 35%;
+
+    --accent: 20 74% 45%;              /* rust orange-red — vote-yes */
+    --accent-foreground: 48 33% 96%;
+
+    --destructive: 0 65% 35%;
+    --destructive-foreground: 48 33% 96%;
+
+    --border: 48 15% 80%;
+    --input: 48 15% 80%;
+    --ring: 38 80% 40%;
+
+    /* App-specific tokens */
+    --vote-yes: 20 74% 45%;            /* rust orange-red */
+    --vote-no: 108 8% 45%;             /* sage green-gray */
+    --marquee-highlight: 40 100% 79%;  /* light gold #FFD98A */
+  }
+
+  .dark {
+    --background: 228 14% 11%;         /* near-black navy #191B22 */
+    --foreground: 48 33% 92%;          /* cream #F2EEE0 */
+
+    --card: 195 22% 20%;               /* slate teal-gray #28383E */
+    --card-foreground: 48 33% 92%;
+
+    --popover: 195 22% 20%;
+    --popover-foreground: 48 33% 92%;
+
+    --primary: 38 80% 45%;             /* marquee amber #CF8B17 */
+    --primary-foreground: 228 14% 11%;
+
+    --secondary: 0 64% 16%;            /* deep maroon #450F0F */
+    --secondary-foreground: 48 33% 92%;
+
+    --muted: 195 15% 25%;
+    --muted-foreground: 48 15% 65%;
+
+    --accent: 20 74% 47%;              /* rust orange-red #D8531A — vote-yes */
+    --accent-foreground: 228 14% 11%;
+
+    --destructive: 0 55% 28%;
+    --destructive-foreground: 48 33% 92%;
+
+    --border: 195 15% 28%;
+    --input: 195 15% 28%;
+    --ring: 38 80% 45%;
+
+    /* App-specific tokens */
+    --vote-yes: 20 74% 47%;            /* rust orange-red — swipe right */
+    --vote-no: 108 8% 52%;             /* sage green-gray — swipe left / skip */
+    --marquee-highlight: 40 100% 79%;  /* light gold #FFD98A — winner highlight in results */
+  }
+}
+
+/*
+  Suggested non-standard uses:
+  - --vote-yes / --vote-no: swipe card border/glow during a voting session
+  - --marquee-highlight: rank #1 highlight on the results screen
+  - Media-type badges (optional distinct look per watchlist type):
+      movie        -> primary (amber)
+      series       -> secondary (maroon)
+      anime        -> accent (rust)
+      anime movie  -> marquee-highlight (gold), text in foreground for contrast
+*/
