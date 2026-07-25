@@ -99,3 +99,76 @@ export function useEndSession() {
     }
   })
 }
+
+export function useSessionVotes(sessionId: string) {
+  return useQuery({
+    queryKey: ['session-votes', sessionId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('votes').select('*').eq('session_id', sessionId)
+      if (error) throw error
+      return data as Vote[]
+    },
+    enabled: !!sessionId
+  })
+}
+
+export function useSessionParticipants(sessionId: string) {
+  return useQuery({
+    queryKey: ['session-participants', sessionId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('session_participants').select('user_id').eq('session_id', sessionId)
+      if (error) throw error
+      return (data ?? []).map(p => p.user_id)
+    },
+    enabled: !!sessionId
+  })
+}
+
+export function useLastUnresolvedSession(watchlistId: string) {
+  return useQuery({
+    queryKey: ['last-unresolved-session', watchlistId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sessions')
+        .select('*')
+        .eq('watchlist_id', watchlistId)
+        .eq('status', 'ended')
+        .is('outcome', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (error) throw error
+      return data as Session | null
+    },
+    enabled: !!watchlistId
+  })
+}
+
+export function useResolveOutcome() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      sessionId,
+      outcome,
+      discardItemIds
+    }: {
+      sessionId: string
+      outcome: 'saved' | 'recycled' | 'discarded'
+      discardItemIds?: string[]
+    }) => {
+      const { error } = await supabase.from('sessions').update({ outcome }).eq('id', sessionId)
+      if (error) throw error
+
+      if (outcome === 'discarded' && discardItemIds && discardItemIds.length > 0) {
+        const now = new Date().toISOString()
+        const { error: delError } = await supabase.from('items').update({ removed_at: now }).in('id', discardItemIds)
+        if (delError) throw delError
+      }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['session', variables.sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['session-votes', variables.sessionId] })
+    }
+  })
+}

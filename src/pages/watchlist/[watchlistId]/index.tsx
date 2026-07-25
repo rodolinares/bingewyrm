@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router'
 import { useItems, useWatchlist, useRemoveItem, useToggleWatched, useActiveSession } from '@/queries/watchlists'
 import { useUser } from '@/hooks/use-user'
+import { useLastUnresolvedSession } from '@/queries/sessions'
 import { AddItemDialog } from '@/components/watchlist/add-item-dialog'
 import { Button } from '@/components/ui/button'
 import { useGroups } from '@/queries/groups'
@@ -23,6 +24,7 @@ export default function WatchlistDetail() {
   const { data: watchlist } = useWatchlist(watchlistId!)
   const { data: groups } = useGroups()
   const { data: activeSession } = useActiveSession(watchlistId!)
+  const { data: unresolvedSession } = useLastUnresolvedSession(watchlistId!)
 
   if (isLoading) {
     return (
@@ -61,7 +63,14 @@ export default function WatchlistDetail() {
         <div className="flex gap-2">
           {isLeader && (
             <>
-              {activeSession ? (
+              {unresolvedSession ? (
+                <Link
+                  to={`/session/${unresolvedSession.id}/results`}
+                  className="inline-flex h-8 items-center justify-center rounded-lg bg-accent px-2.5 text-sm font-medium text-accent-foreground transition-all hover:bg-accent/80"
+                >
+                  View Results
+                </Link>
+              ) : activeSession ? (
                 <Link
                   to={`/session/${activeSession.id}/vote`}
                   className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
