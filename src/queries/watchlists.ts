@@ -129,3 +129,60 @@ export function useRemoveItem() {
     }
   })
 }
+
+export interface Session {
+  id: string
+  watchlist_id: string
+  item_ids: string[]
+  status: 'active' | 'ended'
+  start_time: string
+  end_time: string
+  end_reason: 'all_voted' | 'time_limit' | 'manual' | null
+  outcome: 'saved' | 'recycled' | 'discarded' | null
+  created_at: string
+}
+
+export function useActiveSession(watchlistId: string) {
+  return useQuery({
+    queryKey: ['active-session', watchlistId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sessions')
+        .select('*')
+        .eq('watchlist_id', watchlistId)
+        .eq('status', 'active')
+        .maybeSingle()
+
+      if (error) throw error
+      return data as Session | null
+    },
+    enabled: !!watchlistId
+  })
+}
+
+export function useStartSession() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      watchlistId,
+      itemIds,
+      duration
+    }: {
+      watchlistId: string
+      itemIds: string[]
+      duration: string
+    }) => {
+      const { data, error } = await supabase.rpc('start_session', {
+        p_watchlist_id: watchlistId,
+        p_item_ids: itemIds,
+        p_duration: duration
+      })
+      if (error) throw error
+      return data as Session
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['active-session', variables.watchlistId] })
+    }
+  })
+}

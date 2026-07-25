@@ -1,8 +1,9 @@
 import { useParams, Link } from 'react-router'
-import { useItems, useWatchlist, useRemoveItem, useToggleWatched } from '@/queries/watchlists'
+import { useItems, useWatchlist, useRemoveItem, useToggleWatched, useActiveSession } from '@/queries/watchlists'
 import { useUser } from '@/hooks/use-user'
 import { AddItemDialog } from '@/components/watchlist/add-item-dialog'
 import { Button } from '@/components/ui/button'
+import { useGroups } from '@/queries/groups'
 
 const MEDIA_LABELS: Record<string, string> = {
   movie: 'Movies',
@@ -20,6 +21,8 @@ export default function WatchlistDetail() {
   const removeItem = useRemoveItem()
   const toggleWatched = useToggleWatched()
   const { data: watchlist } = useWatchlist(watchlistId!)
+  const { data: groups } = useGroups()
+  const { data: activeSession } = useActiveSession(watchlistId!)
 
   if (isLoading) {
     return (
@@ -43,6 +46,9 @@ export default function WatchlistDetail() {
     return `${TMDB_IMG}${item.poster_path}`
   }
 
+  const isLeader = groups?.some(g => g.id === watchlist?.group_id && g.leader_id === user?.id)
+  const eligibleCount = items?.filter(i => !i.watched).length ?? 0
+
   return (
     <div className="p-6">
       <div className="mb-6 flex items-center justify-between">
@@ -52,14 +58,39 @@ export default function WatchlistDetail() {
           </Link>
           <h1 className="mt-2 text-2xl font-bold text-foreground">{MEDIA_LABELS[watchlist.media_type]}</h1>
         </div>
-        {user && (
-          <AddItemDialog
-            watchlistId={watchlistId!}
-            mediaType={watchlist.media_type}
-            userId={user.id}
-            onAdded={() => {}}
-          />
-        )}
+        <div className="flex gap-2">
+          {isLeader && (
+            <>
+              {activeSession ? (
+                <Link
+                  to={`/session/${activeSession.id}/vote`}
+                  className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
+                >
+                  Active Session
+                </Link>
+              ) : (
+                <Link
+                  to={`/watchlist/${watchlistId}/start-session`}
+                  className={`inline-flex h-8 items-center justify-center rounded-lg px-2.5 text-sm font-medium transition-all ${
+                    eligibleCount < 2
+                      ? 'pointer-events-none cursor-not-allowed opacity-50'
+                      : 'bg-primary text-primary-foreground hover:bg-primary/80'
+                  }`}
+                >
+                  Start Session
+                </Link>
+              )}
+            </>
+          )}
+          {user && (
+            <AddItemDialog
+              watchlistId={watchlistId!}
+              mediaType={watchlist.media_type}
+              userId={user.id}
+              onAdded={() => {}}
+            />
+          )}
+        </div>
       </div>
 
       {!items || items.length === 0 ? (
