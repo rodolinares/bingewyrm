@@ -3,9 +3,16 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod/v4'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
-import { useUpdateGroup, useDeleteGroup, useRegenerateInvite, useGroupMembers } from '@/queries/groups'
+import {
+  useUpdateGroup,
+  useDeleteGroup,
+  useRegenerateInvite,
+  useGroupMembers,
+  useTransferLeader
+} from '@/queries/groups'
 import type { Group } from '@/queries/groups'
 import { useState } from 'react'
+import { useUser } from '@/hooks/use-user'
 
 interface Context {
   group: Group
@@ -24,9 +31,13 @@ export default function GroupSettings() {
   const updateGroup = useUpdateGroup()
   const deleteGroup = useDeleteGroup()
   const regenerateInvite = useRegenerateInvite()
+  const transferLeader = useTransferLeader()
   const { data: members } = useGroupMembers(group.id)
+  const { user } = useUser()
   const [copied, setCopied] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [confirmTransfer, setConfirmTransfer] = useState(false)
+  const [newLeaderId, setNewLeaderId] = useState('')
 
   const form = useForm<RenameForm>({
     resolver: zodResolver(renameSchema),
@@ -53,6 +64,13 @@ export default function GroupSettings() {
     await deleteGroup.mutateAsync(group.id)
     navigate('/groups', { replace: true })
   }
+
+  const handleTransfer = async () => {
+    await transferLeader.mutateAsync({ groupId: group.id, newLeaderId })
+    navigate('/groups', { replace: true })
+  }
+
+  const otherMembers = members?.filter(m => m.user_id !== user?.id) ?? []
 
   return (
     <div className="mx-auto max-w-2xl space-y-8 p-6">
@@ -116,6 +134,51 @@ export default function GroupSettings() {
         </div>
         <p className="text-xs text-muted-foreground">Anyone with this link can join the group automatically.</p>
       </section>
+
+      {/* Transfer leadership (leader only, requires other members) */}
+      {isLeader && otherMembers.length > 0 && (
+        <section className="space-y-3 border-t border-border pt-6">
+          <h2 className="text-lg font-semibold text-foreground">Transfer Leadership</h2>
+          <p className="text-sm text-muted-foreground">
+            Transferring leadership will remove you from the group. This cannot be undone.
+          </p>
+          {!confirmTransfer ? (
+            <div className="space-y-2">
+              <select
+                value={newLeaderId}
+                onChange={e => setNewLeaderId(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="">Select a member...</option>
+                {otherMembers.map(m => (
+                  <option key={m.user_id} value={m.user_id}>
+                    {m.users.display_name ?? 'Unnamed'}
+                  </option>
+                ))}
+              </select>
+              <Button variant="destructive" disabled={!newLeaderId} onClick={() => setConfirmTransfer(true)}>
+                Transfer & Leave
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm text-destructive">
+                You will be removed from the group and{' '}
+                {otherMembers.find(m => m.user_id === newLeaderId)?.users.display_name ?? 'the selected member'} will
+                become the new leader. This cannot be undone.
+              </p>
+              <div className="flex gap-2">
+                <Button variant="destructive" onClick={handleTransfer} disabled={transferLeader.isPending}>
+                  {transferLeader.isPending ? 'Transferring...' : 'Confirm'}
+                </Button>
+                <Button variant="outline" onClick={() => setConfirmTransfer(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Delete group (leader only) */}
       {isLeader && (

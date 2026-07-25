@@ -142,6 +142,23 @@ export function useGroupMembers(groupId: string | undefined) {
   })
 }
 
+export function useTransferLeader() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ groupId, newLeaderId }: { groupId: string; newLeaderId: string }) => {
+      const { error } = await supabase.rpc('transfer_leader', {
+        p_group_id: groupId,
+        p_new_leader_id: newLeaderId
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] })
+    }
+  })
+}
+
 export function useJoinGroup() {
   const queryClient = useQueryClient()
 
