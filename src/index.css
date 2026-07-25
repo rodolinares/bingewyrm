@@ -1,0 +1,192 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource-variable/geist';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-vote-yes: hsl(var(--vote-yes));
+  --color-vote-no: hsl(var(--vote-no));
+  --color-marquee-highlight: hsl(var(--marquee-highlight));
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  /* shadcn chart/sidebar tokens — not used yet, kept for component compat */
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+@layer base {
+  :root {
+    --radius: 0.625rem;
+
+    /* Light mode */
+    --background: 48 33% 92%;
+    --foreground: 228 14% 11%;
+
+    --card: 40 60% 96%;
+    --card-foreground: 228 14% 11%;
+
+    --popover: 40 60% 96%;
+    --popover-foreground: 228 14% 11%;
+
+    --primary: 38 80% 40%;
+    --primary-foreground: 48 33% 96%;
+
+    --secondary: 0 64% 22%;
+    --secondary-foreground: 48 33% 96%;
+
+    --muted: 48 20% 85%;
+    --muted-foreground: 195 10% 35%;
+
+    --accent: 20 74% 45%;
+    --accent-foreground: 48 33% 96%;
+
+    --destructive: 0 65% 35%;
+    --destructive-foreground: 48 33% 96%;
+
+    --border: 48 15% 80%;
+    --input: 48 15% 80%;
+    --ring: 38 80% 40%;
+
+    /* App-specific tokens */
+    --vote-yes: 20 74% 45%;
+    --vote-no: 108 8% 45%;
+    --marquee-highlight: 40 100% 79%;
+
+    /* chart/sidebar stubs */
+    --chart-1: 38 80% 40%;
+    --chart-2: 0 64% 22%;
+    --chart-3: 20 74% 45%;
+    --chart-4: 108 8% 45%;
+    --chart-5: 40 100% 79%;
+    --sidebar: 48 33% 96%;
+    --sidebar-foreground: 228 14% 11%;
+    --sidebar-primary: 38 80% 40%;
+    --sidebar-primary-foreground: 48 33% 96%;
+    --sidebar-accent: 48 20% 85%;
+    --sidebar-accent-foreground: 228 14% 11%;
+    --sidebar-border: 48 15% 80%;
+    --sidebar-ring: 38 80% 40%;
+  }
+
+  .dark {
+    --background: 228 14% 11%;
+    --foreground: 48 33% 92%;
+
+    --card: 195 22% 20%;
+    --card-foreground: 48 33% 92%;
+
+    --popover: 195 22% 20%;
+    --popover-foreground: 48 33% 92%;
+
+    --primary: 38 80% 45%;
+    --primary-foreground: 228 14% 11%;
+
+    --secondary: 0 64% 16%;
+    --secondary-foreground: 48 33% 92%;
+
+    --muted: 195 15% 25%;
+    --muted-foreground: 48 15% 65%;
+
+    --accent: 20 74% 47%;
+    --accent-foreground: 228 14% 11%;
+
+    --destructive: 0 55% 28%;
+    --destructive-foreground: 48 33% 92%;
+
+    --border: 195 15% 28%;
+    --input: 195 15% 28%;
+    --ring: 38 80% 45%;
+
+    --vote-yes: 20 74% 47%;
+    --vote-no: 108 8% 52%;
+    --marquee-highlight: 40 100% 79%;
+
+    --chart-1: 38 80% 45%;
+    --chart-2: 0 64% 16%;
+    --chart-3: 20 74% 47%;
+    --chart-4: 108 8% 52%;
+    --chart-5: 40 100% 79%;
+    --sidebar: 195 22% 20%;
+    --sidebar-foreground: 48 33% 92%;
+    --sidebar-primary: 38 80% 45%;
+    --sidebar-primary-foreground: 228 14% 11%;
+    --sidebar-accent: 195 15% 25%;
+    --sidebar-accent-foreground: 48 33% 92%;
+    --sidebar-border: 195 15% 28%;
+    --sidebar-ring: 38 80% 45%;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}

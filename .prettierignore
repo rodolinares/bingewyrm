@@ -1,0 +1,14 @@
+# dependencies
+node_modules
+pnpm-lock.yaml
+
+# build output
+dist
+
+# docs
+docs
+
+# generated
+src/components/ui
+src/vite-env.d.ts
+src/index.css
