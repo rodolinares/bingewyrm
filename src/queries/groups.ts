@@ -1,0 +1,160 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { supabase } from '@/lib/supabase'
+import { useUser } from '@/hooks/use-user'
+
+export interface Group {
+  id: string
+  name: string
+  leader_id: string
+  invite_code: string
+  created_at: string
+  member_count?: number
+}
+
+interface GroupMemberRow {
+  group_id: string
+  groups: Omit<Group, 'member_count'>
+}
+
+interface MemberCountRow {
+  group_id: string
+  count: number
+}
+
+export function useGroups() {
+  const { user } = useUser()
+
+  return useQuery({
+    queryKey: ['groups'],
+    queryFn: async () => {
+      if (!user) return []
+      const { data, error } = await supabase
+        .from('group_members')
+        .select('group_id, groups(id, name, leader_id, invite_code, created_at)')
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      const rows = data as unknown as GroupMemberRow[]
+      const groupIds = rows.map(m => m.group_id)
+      if (groupIds.length === 0) return []
+
+      const { data: counts } = await supabase.rpc('get_member_count', {
+        p_group_ids: groupIds
+      })
+
+      const countMap = new Map<string, number>()
+      if (Array.isArray(counts)) {
+        for (const c of counts as MemberCountRow[]) {
+          countMap.set(c.group_id, Number(c.count))
+        }
+      }
+
+      return rows.map(m => ({
+        ...m.groups,
+        member_count: countMap.get(m.group_id) ?? 0
+      }))
+    },
+    enabled: !!user
+  })
+}
+
+export function useCreateGroup() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (name: string) => {
+      const { data, error } = await supabase.rpc('create_group', { p_name: name })
+      if (error) throw error
+      return data as Group
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] })
+    }
+  })
+}
+
+export function useUpdateGroup() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      const { error } = await supabase.from('groups').update({ name }).eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] })
+    }
+  })
+}
+
+export function useDeleteGroup() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('groups').delete().eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] })
+    }
+  })
+}
+
+export function useRegenerateInvite() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (groupId: string) => {
+      const { data, error } = await supabase.rpc('regenerate_invite_code', {
+        p_group_id: groupId
+      })
+      if (error) throw error
+      return data as string
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] })
+    }
+  })
+}
+
+interface GroupMemberWithUser {
+  user_id: string
+  joined_at: string
+  users: { display_name: string | null }
+}
+
+export function useGroupMembers(groupId: string | undefined) {
+  return useQuery({
+    queryKey: ['group-members', groupId],
+    queryFn: async () => {
+      if (!groupId) return []
+      const { data, error } = await supabase
+        .from('group_members')
+        .select('user_id, joined_at, users(display_name)')
+        .eq('group_id', groupId)
+
+      if (error) throw error
+      return (data as unknown as GroupMemberWithUser[]) ?? []
+    },
+    enabled: !!groupId
+  })
+}
+
+export function useJoinGroup() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (inviteCode: string) => {
+      const { data, error } = await supabase.rpc('join_group', {
+        p_invite_code: inviteCode
+      })
+      if (error) throw error
+      return data as Group
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] })
+    }
+  })
+}

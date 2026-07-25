@@ -4,14 +4,10 @@ import { supabase } from '@/lib/supabase'
 import Login from '@/pages/auth/login'
 import AuthCallback from '@/pages/auth/callback'
 import Onboarding from '@/pages/onboarding'
-
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div className="flex h-full items-center justify-center">
-      <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-    </div>
-  )
-}
+import GroupList from '@/pages/groups/index'
+import GroupLayout from '@/pages/groups/[groupId]/index'
+import GroupSettings from '@/pages/groups/[groupId]/settings'
+import InviteJoin from '@/pages/invite/[code]'
 
 function AppLayout() {
   return (
@@ -38,29 +34,31 @@ async function requireOnboarding() {
 }
 
 const protectedChildren: RouteObject[] = [
+  { path: 'groups', element: <GroupList /> },
   {
-    path: 'groups',
+    path: 'groups/:groupId',
+    element: <GroupLayout />,
     children: [
-      { index: true, element: <Placeholder title="My Groups" /> },
+      { index: true, element: <div className="p-6 text-muted-foreground">Watchlists coming in Phase 5.</div> },
+      { path: 'settings', element: <GroupSettings /> },
       {
-        path: ':groupId',
-        children: [
-          { index: true, element: <Placeholder title="Group Home" /> },
-          { path: 'settings', element: <Placeholder title="Group Settings" /> },
-          { path: 'transfer-leader', element: <Placeholder title="Transfer Leader" /> }
-        ]
+        path: 'transfer-leader',
+        element: <div className="p-6 text-muted-foreground">Transfer leader coming in Phase 4.</div>
       }
     ]
   },
-  { path: 'invite/:code', element: <Placeholder title="Joining group..." /> },
+  { path: 'invite/:code', element: <InviteJoin /> },
   {
     path: 'watchlist/:watchlistId',
     children: [
-      { index: true, element: <Placeholder title="Watchlist" /> },
-      { path: 'start-session', element: <Placeholder title="Start Session" /> },
-      { path: 'vote', element: <Placeholder title="Vote" /> },
-      { path: 'results', element: <Placeholder title="Results" /> },
-      { path: 'history', element: <Placeholder title="History" /> }
+      { index: true, element: <div className="p-6 text-muted-foreground">Watchlist coming in Phase 5.</div> },
+      {
+        path: 'start-session',
+        element: <div className="p-6 text-muted-foreground">Session start coming in Phase 7.</div>
+      },
+      { path: 'vote', element: <div className="p-6 text-muted-foreground">Voting coming in Phase 8.</div> },
+      { path: 'results', element: <div className="p-6 text-muted-foreground">Results coming in Phase 9.</div> },
+      { path: 'history', element: <div className="p-6 text-muted-foreground">History coming in Phase 9.</div> }
     ]
   }
 ]
