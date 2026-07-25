@@ -1,4 +1,9 @@
-import { createBrowserRouter, Navigate, Outlet } from 'react-router'
+import { createBrowserRouter, Navigate, Outlet, redirect } from 'react-router'
+import type { RouteObject } from 'react-router'
+import { supabase } from '@/lib/supabase'
+import Login from '@/pages/auth/login'
+import AuthCallback from '@/pages/auth/callback'
+import Onboarding from '@/pages/onboarding'
 
 function Placeholder({ title }: { title: string }) {
   return (
@@ -18,39 +23,69 @@ function AppLayout() {
   )
 }
 
+async function requireAuth() {
+  const { data } = await supabase.auth.getSession()
+  if (!data.session) throw redirect('/auth/login')
+}
+
+async function requireOnboarding() {
+  const { data } = await supabase.auth.getSession()
+  if (!data.session) throw redirect('/auth/login')
+
+  const { data: profile } = await supabase.from('users').select('display_name').eq('id', data.session.user.id).single()
+
+  if (!profile?.display_name) throw redirect('/onboarding')
+}
+
+const protectedChildren: RouteObject[] = [
+  {
+    path: 'groups',
+    children: [
+      { index: true, element: <Placeholder title="My Groups" /> },
+      {
+        path: ':groupId',
+        children: [
+          { index: true, element: <Placeholder title="Group Home" /> },
+          { path: 'settings', element: <Placeholder title="Group Settings" /> },
+          { path: 'transfer-leader', element: <Placeholder title="Transfer Leader" /> }
+        ]
+      }
+    ]
+  },
+  { path: 'invite/:code', element: <Placeholder title="Joining group..." /> },
+  {
+    path: 'watchlist/:watchlistId',
+    children: [
+      { index: true, element: <Placeholder title="Watchlist" /> },
+      { path: 'start-session', element: <Placeholder title="Start Session" /> },
+      { path: 'vote', element: <Placeholder title="Vote" /> },
+      { path: 'results', element: <Placeholder title="Results" /> },
+      { path: 'history', element: <Placeholder title="History" /> }
+    ]
+  }
+]
+
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
     children: [
       { index: true, element: <Navigate to="/groups" replace /> },
+
+      { path: 'auth/login', element: <Login /> },
+      { path: 'auth/callback', element: <AuthCallback /> },
+
       {
-        path: 'groups',
-        children: [
-          { index: true, element: <Placeholder title="My Groups" /> },
-          {
-            path: ':groupId',
-            children: [
-              { index: true, element: <Placeholder title="Group Home" /> },
-              { path: 'settings', element: <Placeholder title="Group Settings" /> },
-              { path: 'transfer-leader', element: <Placeholder title="Transfer Leader" /> }
-            ]
-          }
-        ]
+        path: 'onboarding',
+        loader: requireAuth,
+        element: <Onboarding />
       },
-      { path: 'invite/:code', element: <Placeholder title="Joining group..." /> },
+
       {
-        path: 'watchlist/:watchlistId',
-        children: [
-          { index: true, element: <Placeholder title="Watchlist" /> },
-          { path: 'start-session', element: <Placeholder title="Start Session" /> },
-          { path: 'vote', element: <Placeholder title="Vote" /> },
-          { path: 'results', element: <Placeholder title="Results" /> },
-          { path: 'history', element: <Placeholder title="History" /> }
-        ]
+        loader: requireOnboarding,
+        children: protectedChildren
       },
-      { path: 'onboarding', element: <Placeholder title="Set Display Name" /> },
-      { path: 'auth/callback', element: <Placeholder title="Signing in..." /> },
+
       { path: '*', element: <Navigate to="/groups" replace /> }
     ]
   }
