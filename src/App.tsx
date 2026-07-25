@@ -9,6 +9,7 @@ import GroupLayout, { GroupWatchlists } from '@/pages/groups/[groupId]/index'
 import GroupSettings from '@/pages/groups/[groupId]/settings'
 import WatchlistDetail from '@/pages/watchlist/[watchlistId]/index'
 import SessionStart from '@/pages/watchlist/[watchlistId]/start-session'
+import VotingPage from '@/pages/session/[sessionId]/voting'
 import InviteJoin from '@/pages/invite/[code]'
 
 function AppLayout() {
@@ -56,7 +57,7 @@ const protectedChildren: RouteObject[] = [
   {
     path: 'session/:sessionId',
     children: [
-      { path: 'vote', element: <div className="p-6 text-muted-foreground">Voting coming in Phase 7.</div> },
+      { path: 'vote', element: <VotingPage /> },
       { path: 'results', element: <div className="p-6 text-muted-foreground">Results coming in Phase 8.</div> }
     ]
   }
