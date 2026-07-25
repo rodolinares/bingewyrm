@@ -4,6 +4,7 @@ import { useUser } from '@/hooks/use-user'
 import { useGroups } from '@/queries/groups'
 import { useWatchlist } from '@/queries/watchlists'
 import { useSession, useSessionItems, useMyVotes, useCastVote, useEndSession } from '@/queries/sessions'
+import { useRealtimeSession } from '@/hooks/use-realtime'
 import { seededShuffle } from '@/lib/shuffle'
 import { Button } from '@/components/ui/button'
 
@@ -20,6 +21,7 @@ export default function VotingPage() {
   const endSession = useEndSession()
   const { data: watchlist } = useWatchlist(session?.watchlist_id ?? '')
   const { data: groups } = useGroups()
+  useRealtimeSession(sessionId!)
 
   const [index, setIndex] = useState(0)
   const [animating, setAnimating] = useState<'yes' | 'no' | null>(null)

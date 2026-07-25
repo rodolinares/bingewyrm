@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router'
 import { useItems, useWatchlist, useRemoveItem, useToggleWatched, useActiveSession } from '@/queries/watchlists'
 import { useUser } from '@/hooks/use-user'
 import { useLastUnresolvedSession } from '@/queries/sessions'
+import { useRealtimeItems } from '@/hooks/use-realtime'
 import { AddItemDialog } from '@/components/watchlist/add-item-dialog'
 import { Button } from '@/components/ui/button'
 import { useGroups } from '@/queries/groups'
@@ -25,6 +26,7 @@ export default function WatchlistDetail() {
   const { data: groups } = useGroups()
   const { data: activeSession } = useActiveSession(watchlistId!)
   const { data: unresolvedSession } = useLastUnresolvedSession(watchlistId!)
+  useRealtimeItems(watchlistId!)
 
   if (isLoading) {
     return (
