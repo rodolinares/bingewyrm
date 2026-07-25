@@ -5,8 +5,9 @@ import Login from '@/pages/auth/login'
 import AuthCallback from '@/pages/auth/callback'
 import Onboarding from '@/pages/onboarding'
 import GroupList from '@/pages/groups/index'
-import GroupLayout from '@/pages/groups/[groupId]/index'
+import GroupLayout, { GroupWatchlists } from '@/pages/groups/[groupId]/index'
 import GroupSettings from '@/pages/groups/[groupId]/settings'
+import WatchlistDetail from '@/pages/watchlist/[watchlistId]/index'
 import InviteJoin from '@/pages/invite/[code]'
 
 function AppLayout() {
@@ -39,27 +40,14 @@ const protectedChildren: RouteObject[] = [
     path: 'groups/:groupId',
     element: <GroupLayout />,
     children: [
-      { index: true, element: <div className="p-6 text-muted-foreground">Watchlists coming in Phase 5.</div> },
-      { path: 'settings', element: <GroupSettings /> },
-      {
-        path: 'transfer-leader',
-        element: <div className="p-6 text-muted-foreground">Transfer leader coming in Phase 4.</div>
-      }
+      { index: true, element: <GroupWatchlists /> },
+      { path: 'settings', element: <GroupSettings /> }
     ]
   },
   { path: 'invite/:code', element: <InviteJoin /> },
   {
     path: 'watchlist/:watchlistId',
-    children: [
-      { index: true, element: <div className="p-6 text-muted-foreground">Watchlist coming in Phase 5.</div> },
-      {
-        path: 'start-session',
-        element: <div className="p-6 text-muted-foreground">Session start coming in Phase 7.</div>
-      },
-      { path: 'vote', element: <div className="p-6 text-muted-foreground">Voting coming in Phase 8.</div> },
-      { path: 'results', element: <div className="p-6 text-muted-foreground">Results coming in Phase 9.</div> },
-      { path: 'history', element: <div className="p-6 text-muted-foreground">History coming in Phase 9.</div> }
-    ]
+    children: [{ index: true, element: <WatchlistDetail /> }]
   }
 ]
 
