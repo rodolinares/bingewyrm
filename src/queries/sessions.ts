@@ -144,6 +144,43 @@ export function useLastUnresolvedSession(watchlistId: string) {
   })
 }
 
+export function useLastResolvedSession(watchlistId: string) {
+  return useQuery({
+    queryKey: ['last-resolved-session', watchlistId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sessions')
+        .select('*')
+        .eq('watchlist_id', watchlistId)
+        .eq('status', 'ended')
+        .not('outcome', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (error) throw error
+      return data as Session | null
+    },
+    enabled: !!watchlistId
+  })
+}
+
+export function usePastSessions(watchlistId: string) {
+  return useQuery({
+    queryKey: ['past-sessions', watchlistId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sessions')
+        .select('*')
+        .eq('watchlist_id', watchlistId)
+        .eq('status', 'ended')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data as Session[]
+    },
+    enabled: !!watchlistId
+  })
+}
+
 export function useResolveOutcome() {
   const queryClient = useQueryClient()
 

@@ -9,6 +9,7 @@ import GroupLayout, { GroupWatchlists } from '@/pages/groups/[groupId]/index'
 import GroupSettings from '@/pages/groups/[groupId]/settings'
 import WatchlistDetail from '@/pages/watchlist/[watchlistId]/index'
 import SessionStart from '@/pages/watchlist/[watchlistId]/start-session'
+import SessionHistory from '@/pages/watchlist/[watchlistId]/history'
 import VotingPage from '@/pages/session/[sessionId]/voting'
 import ResultsPage from '@/pages/session/[sessionId]/results'
 import InviteJoin from '@/pages/invite/[code]'
@@ -52,7 +53,8 @@ const protectedChildren: RouteObject[] = [
     path: 'watchlist/:watchlistId',
     children: [
       { index: true, element: <WatchlistDetail /> },
-      { path: 'start-session', element: <SessionStart /> }
+      { path: 'start-session', element: <SessionStart /> },
+      { path: 'history', element: <SessionHistory /> }
     ]
   },
   {

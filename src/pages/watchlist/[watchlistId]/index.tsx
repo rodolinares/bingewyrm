@@ -1,7 +1,12 @@
 import { useParams, Link } from 'react-router'
 import { useItems, useWatchlist, useRemoveItem, useToggleWatched, useActiveSession } from '@/queries/watchlists'
 import { useUser } from '@/hooks/use-user'
-import { useLastUnresolvedSession } from '@/queries/sessions'
+import {
+  useLastUnresolvedSession,
+  useLastResolvedSession,
+  useSessionVotes,
+  useSessionParticipants
+} from '@/queries/sessions'
 import { useRealtimeItems } from '@/hooks/use-realtime'
 import { AddItemDialog } from '@/components/watchlist/add-item-dialog'
 import { Button } from '@/components/ui/button'
@@ -26,6 +31,9 @@ export default function WatchlistDetail() {
   const { data: groups } = useGroups()
   const { data: activeSession } = useActiveSession(watchlistId!)
   const { data: unresolvedSession } = useLastUnresolvedSession(watchlistId!)
+  const { data: resolvedSession } = useLastResolvedSession(watchlistId!)
+  const { data: resolvedVotes } = useSessionVotes(resolvedSession?.id ?? '')
+  const { data: resolvedParticipants } = useSessionParticipants(resolvedSession?.id ?? '')
   useRealtimeItems(watchlistId!)
 
   if (isLoading) {
@@ -152,6 +160,48 @@ export default function WatchlistDetail() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Last resolved session results */}
+      {resolvedSession && (
+        <div className="mt-8 border-t border-border pt-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground">Latest Results</h2>
+            <Link to={`/watchlist/${watchlistId}/history`} className="text-sm text-primary hover:underline">
+              Full history
+            </Link>
+          </div>
+          <Link
+            to={`/session/${resolvedSession.id}/results`}
+            className="block rounded-md border border-border p-3 transition-colors hover:bg-muted/50"
+          >
+            <p className="text-sm text-muted-foreground">
+              {new Date(resolvedSession.created_at).toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              })}
+              {' · '}
+              {resolvedSession.item_ids.length} items
+            </p>
+            {resolvedVotes && resolvedParticipants && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {resolvedVotes.filter(v => v.value).length} total yes votes across {resolvedParticipants.length} voters
+              </p>
+            )}
+            <span
+              className={`mt-2 inline-block rounded px-1.5 py-0.5 text-xs font-medium ${
+                resolvedSession.outcome === 'saved'
+                  ? 'bg-green-500/20 text-green-400'
+                  : resolvedSession.outcome === 'recycled'
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : 'bg-destructive/20 text-destructive'
+              }`}
+            >
+              {resolvedSession.outcome}
+            </span>
+          </Link>
         </div>
       )}
     </div>
