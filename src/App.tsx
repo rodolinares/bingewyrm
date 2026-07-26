@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, Outlet, redirect } from 'react-router'
+import { createBrowserRouter, Link, Navigate, Outlet, redirect } from 'react-router'
 import type { RouteObject } from 'react-router'
 import { supabase } from '@/lib/supabase'
 import { useUser } from '@/hooks/use-user'
@@ -26,7 +26,10 @@ function AppLayout() {
   return (
     <div className="flex h-screen flex-col">
       {user && (
-        <header className="flex items-center justify-end border-b border-border px-4 py-2">
+        <header className="flex items-center justify-between border-b border-border px-4 py-2">
+          <Link to="/groups" className="text-sm font-bold text-foreground">
+            BingeWyrm
+          </Link>
           <button onClick={handleSignOut} className="text-sm text-muted-foreground hover:text-foreground">
             Sign out
           </button>
