@@ -41,7 +41,7 @@ function AppLayout() {
       <main className="flex-1 overflow-auto">
         <Outlet />
       </main>
-      <footer className="border-t border-border px-4 py-2 text-center text-xs text-muted-foreground">
+      <footer className="border-t border-border px-4 py-2 text-center text-[10px] text-muted-foreground">
         This product uses the TMDb API but is not endorsed or certified by TMDb.
       </footer>
     </div>

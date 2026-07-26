@@ -36,7 +36,7 @@ export default function GroupLayout() {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-40px)] flex-col sm:h-screen sm:flex-row">
+    <div className="flex h-full flex-col sm:flex-row">
       {/* Desktop sidebar */}
       <aside className="hidden w-60 flex-col border-r border-border bg-card sm:flex">
         <div className="border-b border-border p-4">
@@ -63,12 +63,12 @@ export default function GroupLayout() {
       </div>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto pb-14 sm:pb-0">
+      <main className="flex-1 overflow-auto sm:pb-0">
         <Outlet context={{ group, isLeader }} />
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex border-t border-border bg-card sm:hidden">
+      <nav className="flex shrink-0 border-t border-border bg-card sm:hidden">
         <BottomNavLink to={`/groups/${groupId}`} label="Watchlists" />
         <BottomNavLink to={`/groups/${groupId}/settings`} label="Settings" />
       </nav>
