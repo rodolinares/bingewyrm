@@ -156,7 +156,7 @@ export default function WatchlistDetail() {
                 >
                   {item.watched ? 'Unwatch' : 'Watched'}
                 </Button>
-                {item.added_by === user?.id && (
+                {(item.added_by === user?.id || isLeader) && (
                   <Button
                     variant="ghost"
                     size="sm"

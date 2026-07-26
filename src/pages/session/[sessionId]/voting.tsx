@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useParams, Link, useNavigate } from 'react-router'
 import { useUser } from '@/hooks/use-user'
 import { useGroups } from '@/queries/groups'
@@ -25,6 +25,10 @@ export default function VotingPage() {
 
   const [index, setIndex] = useState(0)
   const [animating, setAnimating] = useState<'yes' | 'no' | null>(null)
+  const [dragX, setDragX] = useState(0)
+  const touchStartX = useRef(0)
+  const touchStartY = useRef(0)
+  const isDragging = useRef(false)
 
   const myVotedIds = useMemo(() => new Set((votes ?? []).filter(v => !v.is_auto).map(v => v.item_id)), [votes])
 
@@ -63,6 +67,44 @@ export default function VotingPage() {
       setIndex(i => i + 1)
     }, 200)
   }
+
+  const SWIPE_THRESHOLD = 80
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0]!.clientX
+    touchStartY.current = e.touches[0]!.clientY
+    isDragging.current = false
+  }, [])
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (animating) return
+      const dx = e.touches[0]!.clientX - touchStartX.current
+      const dy = e.touches[0]!.clientY - touchStartY.current
+      if (!isDragging.current && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+        isDragging.current = true
+      }
+      if (isDragging.current) {
+        e.preventDefault()
+        setDragX(dx)
+      }
+    },
+    [animating]
+  )
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isDragging.current) return
+    isDragging.current = false
+    if (dragX > SWIPE_THRESHOLD) {
+      setDragX(0)
+      handleVote(true)
+    } else if (dragX < -SWIPE_THRESHOLD) {
+      setDragX(0)
+      handleVote(false)
+    } else {
+      setDragX(0)
+    }
+  }, [dragX, handleVote])
 
   const handleEndEarly = async () => {
     if (!session) return
@@ -132,7 +174,13 @@ export default function VotingPage() {
         className={`flex w-full max-w-sm flex-col items-center rounded-xl border border-border bg-card p-6 shadow-lg transition-transform ${
           animating === 'yes' ? 'translate-x-8 opacity-0' : animating === 'no' ? '-translate-x-8 opacity-0' : ''
         }`}
-        style={{ transitionDuration: '200ms' }}
+        style={{
+          transitionDuration: dragX === 0 ? '200ms' : '0ms',
+          transform: dragX !== 0 ? `translateX(${dragX}px) rotate(${dragX * 0.05}deg)` : undefined
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         {posterUrl ? (
           <img src={posterUrl} alt="" className="mb-4 h-64 w-44 rounded-lg object-cover" />
