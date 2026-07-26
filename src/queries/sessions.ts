@@ -64,7 +64,6 @@ export function useCastVote() {
     }: {
       sessionId: string
       itemId: string
-      userId: string
       value: boolean
     }) => {
       const { error } = await supabase.rpc('cast_vote', {
@@ -75,7 +74,7 @@ export function useCastVote() {
       if (error) throw error
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['votes', variables.sessionId, variables.userId] })
+      queryClient.invalidateQueries({ queryKey: ['votes', variables.sessionId] })
     }
   })
 }
@@ -118,19 +117,19 @@ export function useSessionParticipants(sessionId: string) {
   })
 }
 
-export function useLastUnresolvedSession(watchlistId: string) {
+function useLastSessionByOutcome(watchlistId: string, resolved: boolean) {
   return useQuery({
-    queryKey: ['last-unresolved-session', watchlistId],
+    queryKey: [resolved ? 'last-resolved-session' : 'last-unresolved-session', watchlistId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const base = supabase
         .from('sessions')
         .select('*')
         .eq('watchlist_id', watchlistId)
         .eq('status', 'ended')
-        .is('outcome', null)
         .order('created_at', { ascending: false })
         .limit(1)
-        .maybeSingle()
+
+      const { data, error } = await (resolved ? base.not('outcome', 'is', null) : base.is('outcome', null)).maybeSingle()
       if (error) throw error
       return data as Session | null
     },
@@ -138,24 +137,12 @@ export function useLastUnresolvedSession(watchlistId: string) {
   })
 }
 
+export function useLastUnresolvedSession(watchlistId: string) {
+  return useLastSessionByOutcome(watchlistId, false)
+}
+
 export function useLastResolvedSession(watchlistId: string) {
-  return useQuery({
-    queryKey: ['last-resolved-session', watchlistId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sessions')
-        .select('*')
-        .eq('watchlist_id', watchlistId)
-        .eq('status', 'ended')
-        .not('outcome', 'is', null)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-      if (error) throw error
-      return data as Session | null
-    },
-    enabled: !!watchlistId
-  })
+  return useLastSessionByOutcome(watchlistId, true)
 }
 
 export function usePastSessions(watchlistId: string) {

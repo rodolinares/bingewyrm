@@ -51,14 +51,12 @@ function AppLayout() {
 async function requireAuth() {
   const { data } = await supabase.auth.getSession()
   if (!data.session) throw redirect('/auth/login')
+  return data.session
 }
 
 async function requireOnboarding() {
-  const { data } = await supabase.auth.getSession()
-  if (!data.session) throw redirect('/auth/login')
-
-  const { data: profile } = await supabase.from('users').select('display_name').eq('id', data.session.user.id).single()
-
+  const session = await requireAuth()
+  const { data: profile } = await supabase.from('users').select('display_name').eq('id', session.user.id).single()
   if (!profile?.display_name) throw redirect('/onboarding')
 }
 

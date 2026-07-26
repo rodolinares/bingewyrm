@@ -55,7 +55,6 @@ export default function VotingPage() {
       await castVote.mutateAsync({
         sessionId: session.id,
         itemId: item.id,
-        userId: user.id,
         value
       })
     } catch {

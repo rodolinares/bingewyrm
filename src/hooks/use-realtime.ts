@@ -2,48 +2,47 @@ import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
-export function useRealtimeSession(sessionId: string | null | undefined) {
+interface RealtimeOptions {
+  channel: string
+  table: string
+  event: 'INSERT' | 'UPDATE' | '*'
+  filter: string
+  queryKey: (string | null | undefined)[]
+}
+
+function useRealtime({ channel, table, event, filter, queryKey }: RealtimeOptions) {
   const queryClient = useQueryClient()
 
   useEffect(() => {
-    if (!sessionId) return
-
-    const channel = supabase
-      .channel(`session:${sessionId}`)
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'sessions', filter: `id=eq.${sessionId}` },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['session', sessionId] })
-        }
-      )
+    const ch = supabase
+      .channel(channel)
+      .on('postgres_changes', { event, schema: 'public', table, filter }, () => {
+        queryClient.invalidateQueries({ queryKey })
+      })
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      supabase.removeChannel(ch)
     }
-  }, [sessionId, queryClient])
+  }, [channel, table, event, filter, queryKey, queryClient])
+}
+
+export function useRealtimeSession(sessionId: string | null | undefined) {
+  useRealtime({
+    channel: `session:${sessionId}`,
+    table: 'sessions',
+    event: 'UPDATE',
+    filter: `id=eq.${sessionId}`,
+    queryKey: ['session', sessionId]
+  })
 }
 
 export function useRealtimeItems(watchlistId: string | null | undefined) {
-  const queryClient = useQueryClient()
-
-  useEffect(() => {
-    if (!watchlistId) return
-
-    const channel = supabase
-      .channel(`items:${watchlistId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'items', filter: `watchlist_id=eq.${watchlistId}` },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['items', watchlistId] })
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [watchlistId, queryClient])
+  useRealtime({
+    channel: `items:${watchlistId}`,
+    table: 'items',
+    event: 'INSERT',
+    filter: `watchlist_id=eq.${watchlistId}`,
+    queryKey: ['items', watchlistId]
+  })
 }
