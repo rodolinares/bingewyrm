@@ -7,13 +7,21 @@ import { CreateGroupDialog } from '@/components/group/create-group-dialog'
 
 export default function GroupList() {
   const { profile } = useUser()
-  const { data: groups, isLoading } = useGroups()
+  const { data: groups, isLoading, isError } = useGroups()
   const [createOpen, setCreateOpen] = useState(false)
 
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-muted-foreground">Loading groups...</p>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-destructive">Failed to load groups.</p>
       </div>
     )
   }

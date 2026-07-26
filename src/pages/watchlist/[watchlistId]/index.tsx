@@ -24,7 +24,7 @@ const TMDB_IMG = 'https://image.tmdb.org/t/p/w200'
 export default function WatchlistDetail() {
   const { watchlistId } = useParams<{ watchlistId: string }>()
   const { user } = useUser()
-  const { data: items, isLoading } = useItems(watchlistId!)
+  const { data: items, isLoading, isError } = useItems(watchlistId!)
   const removeItem = useRemoveItem()
   const toggleWatched = useToggleWatched()
   const { data: watchlist } = useWatchlist(watchlistId!)
@@ -40,6 +40,14 @@ export default function WatchlistDetail() {
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-muted-foreground">Loading watchlist...</p>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-destructive">Failed to load watchlist.</p>
       </div>
     )
   }

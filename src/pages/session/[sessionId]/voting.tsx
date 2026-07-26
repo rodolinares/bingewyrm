@@ -14,7 +14,7 @@ export default function VotingPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
   const { user } = useUser()
-  const { data: session, isLoading: sessionLoading } = useSession(sessionId!)
+  const { data: session, isLoading: sessionLoading, isError: sessionError } = useSession(sessionId!)
   const { data: allItems, isLoading: itemsLoading } = useSessionItems(session?.item_ids ?? [])
   const { data: votes } = useMyVotes(sessionId!, user?.id)
   const castVote = useCastVote()
@@ -78,10 +78,10 @@ export default function VotingPage() {
     )
   }
 
-  if (!session) {
+  if (sessionError || !session) {
     return (
-      <div className="p-6">
-        <p className="text-muted-foreground">Session not found.</p>
+      <div className="flex h-full items-center justify-center">
+        <p className="text-destructive">Failed to load session.</p>
       </div>
     )
   }

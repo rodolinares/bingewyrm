@@ -13,16 +13,24 @@ const MEDIA_LABELS: Record<string, string> = {
 
 export default function GroupLayout() {
   const { groupId } = useParams()
-  const { data: groups } = useGroups()
+  const { data: groups, isLoading, isError } = useGroups()
   const { profile } = useUser()
 
   const group = groups?.find(g => g.id === groupId)
   const isLeader = group?.leader_id === profile?.id
 
-  if (!group) {
+  if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-muted-foreground">Loading group...</p>
+      </div>
+    )
+  }
+
+  if (isError || !group) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-destructive">Failed to load group.</p>
       </div>
     )
   }
@@ -62,7 +70,7 @@ function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
 
 export function GroupWatchlists() {
   const { groupId } = useParams()
-  const { data: watchlists } = useWatchlists(groupId!)
+  const { data: watchlists, isLoading, isError } = useWatchlists(groupId!)
 
   return (
     <div className="p-6">
@@ -76,7 +84,11 @@ export function GroupWatchlists() {
           />
         )}
       </div>
-      {!watchlists || watchlists.length === 0 ? (
+      {isLoading ? (
+        <p className="text-muted-foreground">Loading watchlists...</p>
+      ) : isError ? (
+        <p className="text-destructive">Failed to load watchlists.</p>
+      ) : !watchlists || watchlists.length === 0 ? (
         <p className="text-muted-foreground">No watchlists yet. Create one to get started.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

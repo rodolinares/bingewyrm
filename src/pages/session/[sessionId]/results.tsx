@@ -28,7 +28,7 @@ export default function ResultsPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
   const { user } = useUser()
-  const { data: session, isLoading: sessionLoading } = useSession(sessionId!)
+  const { data: session, isLoading: sessionLoading, isError: sessionError } = useSession(sessionId!)
   const { data: items, isLoading: itemsLoading } = useSessionItems(session?.item_ids ?? [])
   const { data: votes } = useSessionVotes(sessionId!)
   const { data: participants } = useSessionParticipants(sessionId!)
@@ -81,10 +81,10 @@ export default function ResultsPage() {
     )
   }
 
-  if (!session) {
+  if (sessionError || !session) {
     return (
-      <div className="p-6">
-        <p className="text-muted-foreground">Session not found.</p>
+      <div className="flex h-full items-center justify-center">
+        <p className="text-destructive">Failed to load session.</p>
       </div>
     )
   }

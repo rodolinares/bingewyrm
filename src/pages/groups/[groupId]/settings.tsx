@@ -32,7 +32,7 @@ export default function GroupSettings() {
   const deleteGroup = useDeleteGroup()
   const regenerateInvite = useRegenerateInvite()
   const transferLeader = useTransferLeader()
-  const { data: members } = useGroupMembers(group.id)
+  const { data: members, isLoading: membersLoading } = useGroupMembers(group.id)
   const { user } = useUser()
   const [copied, setCopied] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -82,17 +82,21 @@ export default function GroupSettings() {
       {/* Members */}
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-foreground">Members</h2>
-        <div className="space-y-2">
-          {members?.map(m => (
-            <div
-              key={m.user_id}
-              className="flex items-center justify-between rounded-md border border-border px-3 py-2"
-            >
-              <span className="text-sm text-foreground">{m.users.display_name ?? 'Unnamed'}</span>
-              {m.user_id === group.leader_id && <span className="text-xs font-medium text-primary">Leader</span>}
-            </div>
-          ))}
-        </div>
+        {membersLoading ? (
+          <p className="text-sm text-muted-foreground">Loading members...</p>
+        ) : (
+          <div className="space-y-2">
+            {members?.map(m => (
+              <div
+                key={m.user_id}
+                className="flex items-center justify-between rounded-md border border-border px-3 py-2"
+              >
+                <span className="text-sm text-foreground">{m.users.display_name ?? 'Unnamed'}</span>
+                {m.user_id === group.leader_id && <span className="text-xs font-medium text-primary">Leader</span>}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Rename (leader only) */}
