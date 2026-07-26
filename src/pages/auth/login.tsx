@@ -27,13 +27,13 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <div className="flex h-full items-center justify-center bg-background">
       <div className="w-full max-w-sm space-y-6 text-center">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-foreground">BingeWyrm</h1>
           <p className="text-muted-foreground">Group watchlists, ranked by vote.</p>
         </div>
-        <Button onClick={handleSignIn} className="w-full" size="lg">
+        <Button onClick={handleSignIn} className="mx-auto w-fit px-8" size="lg">
           Sign in with Google
         </Button>
       </div>
