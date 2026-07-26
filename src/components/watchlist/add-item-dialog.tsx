@@ -160,11 +160,14 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
     <>
       <Button onClick={() => setOpen(true)}>Add Item</Button>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="flex h-[80vh] w-full max-w-lg flex-col rounded-lg border border-border bg-card shadow-lg">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
+          <div className="flex h-[90dvh] w-full max-w-lg flex-col rounded-t-lg border border-border bg-card shadow-lg sm:rounded-lg sm:h-[80vh]">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <h2 className="text-lg font-bold text-foreground">Add to {TYPE_LABELS[mediaType]}</h2>
-              <button onClick={handleClose} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={handleClose}
+                className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+              >
                 &times;
               </button>
             </div>
@@ -172,7 +175,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
             <div className="flex border-b border-border">
               <button
                 onClick={() => setTab('search')}
-                className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                   tab === 'search' ? 'border-b-2 border-primary text-foreground' : 'text-muted-foreground'
                 }`}
               >
@@ -180,7 +183,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
               </button>
               <button
                 onClick={() => setTab('manual')}
-                className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
                   tab === 'manual' ? 'border-b-2 border-primary text-foreground' : 'text-muted-foreground'
                 }`}
               >
@@ -205,7 +208,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                       <button
                         key={r.source_id}
                         onClick={() => handleAdd(r)}
-                        className="flex w-full items-center gap-3 rounded-md border border-border p-2 text-left transition-colors hover:border-primary/50 hover:bg-accent"
+                        className="flex w-full items-center gap-3 rounded-md border border-border p-3 text-left transition-colors hover:border-primary/50 hover:bg-accent"
                       >
                         {r.poster_path ? (
                           <img
@@ -250,7 +253,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                   <Button
                     onClick={handleManualAdd}
                     disabled={!manualTitle.trim() || !manualYear || addItem.isPending}
-                    className="w-full"
+                    className="h-11 w-full"
                   >
                     {addItem.isPending ? 'Adding...' : 'Add Item'}
                   </Button>

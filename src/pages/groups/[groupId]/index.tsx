@@ -36,8 +36,9 @@ export default function GroupLayout() {
   }
 
   return (
-    <div className="flex h-screen">
-      <aside className="flex w-60 flex-col border-r border-border bg-card">
+    <div className="flex h-[calc(100dvh-40px)] flex-col sm:h-screen sm:flex-row">
+      {/* Desktop sidebar */}
+      <aside className="hidden w-60 flex-col border-r border-border bg-card sm:flex">
         <div className="border-b border-border p-4">
           <Link to="/groups" className="text-sm text-muted-foreground hover:text-foreground">
             &larr; All groups
@@ -50,9 +51,27 @@ export default function GroupLayout() {
           <NavLink to={`/groups/${groupId}/settings`}>Settings</NavLink>
         </nav>
       </aside>
-      <main className="flex-1 overflow-auto">
+
+      {/* Mobile group header */}
+      <div className="flex items-center border-b border-border px-4 py-3 sm:hidden">
+        <Link to="/groups" className="mr-3 text-sm text-muted-foreground hover:text-foreground">
+          &larr;
+        </Link>
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-lg font-bold text-foreground">{group.name}</h2>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <main className="flex-1 overflow-auto pb-14 sm:pb-0">
         <Outlet context={{ group, isLeader }} />
       </main>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex border-t border-border bg-card sm:hidden">
+        <BottomNavLink to={`/groups/${groupId}`} label="Watchlists" />
+        <BottomNavLink to={`/groups/${groupId}/settings`} label="Settings" />
+      </nav>
     </div>
   )
 }
@@ -64,6 +83,17 @@ function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
       className="block rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
     >
       {children}
+    </Link>
+  )
+}
+
+function BottomNavLink({ to, label }: { to: string; label: string }) {
+  return (
+    <Link
+      to={to}
+      className="flex flex-1 items-center justify-center py-3 text-sm font-medium text-muted-foreground hover:text-foreground"
+    >
+      {label}
     </Link>
   )
 }

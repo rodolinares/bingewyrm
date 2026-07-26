@@ -171,7 +171,7 @@ export default function VotingPage() {
 
       {/* Card */}
       <div
-        className={`flex w-full max-w-sm flex-col items-center rounded-xl border border-border bg-card p-6 shadow-lg transition-transform ${
+        className={`flex w-full max-w-sm flex-col items-center rounded-xl border border-border bg-card p-4 shadow-lg transition-transform sm:p-6 ${
           animating === 'yes' ? 'translate-x-8 opacity-0' : animating === 'no' ? '-translate-x-8 opacity-0' : ''
         }`}
         style={{
@@ -183,9 +183,9 @@ export default function VotingPage() {
         onTouchEnd={handleTouchEnd}
       >
         {posterUrl ? (
-          <img src={posterUrl} alt="" className="mb-4 h-64 w-44 rounded-lg object-cover" />
+          <img src={posterUrl} alt="" className="mb-4 h-48 w-32 rounded-lg object-cover sm:h-64 sm:w-44" />
         ) : (
-          <div className="mb-4 flex h-64 w-44 items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">
+          <div className="mb-4 flex h-48 w-32 items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground sm:h-64 sm:w-44">
             No poster
           </div>
         )}
@@ -194,18 +194,18 @@ export default function VotingPage() {
       </div>
 
       {/* Vote buttons */}
-      <div className="mt-6 flex gap-6">
+      <div className="mt-4 flex gap-6 sm:mt-6">
         <button
           onClick={() => handleVote(false)}
           disabled={!!animating}
-          className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-border bg-background text-2xl transition-colors hover:border-destructive/50 hover:text-destructive disabled:opacity-50"
+          className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-border bg-background text-2xl transition-colors hover:border-destructive/50 hover:text-destructive disabled:opacity-50 sm:h-16 sm:w-16"
         >
           ✕
         </button>
         <button
           onClick={() => handleVote(true)}
           disabled={!!animating}
-          className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-border bg-background text-2xl transition-colors hover:border-green-500/50 hover:text-green-500 disabled:opacity-50"
+          className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-border bg-background text-2xl transition-colors hover:border-green-500/50 hover:text-green-500 disabled:opacity-50 sm:h-16 sm:w-16"
         >
           ♥
         </button>
@@ -216,7 +216,7 @@ export default function VotingPage() {
         <button
           onClick={handleEndEarly}
           disabled={endSession.isPending}
-          className="mt-6 text-xs text-muted-foreground hover:text-foreground"
+          className="mt-4 px-4 py-2 text-sm text-muted-foreground hover:text-foreground sm:mt-6"
         >
           End session early
         </button>

@@ -27,10 +27,13 @@ function AppLayout() {
     <div className="flex h-screen flex-col">
       {user && (
         <header className="flex items-center justify-between border-b border-border px-4 py-2">
-          <Link to="/groups" className="text-sm font-bold text-foreground">
+          <Link to="/groups" className="flex h-10 items-center text-sm font-bold text-foreground">
             BingeWyrm
           </Link>
-          <button onClick={handleSignOut} className="text-sm text-muted-foreground hover:text-foreground">
+          <button
+            onClick={handleSignOut}
+            className="flex h-10 items-center px-2 text-sm text-muted-foreground hover:text-foreground"
+          >
             Sign out
           </button>
         </header>
@@ -38,7 +41,7 @@ function AppLayout() {
       <main className="flex-1 overflow-auto">
         <Outlet />
       </main>
-      <footer className="border-t border-border px-4 py-2 text-center text-[10px] text-muted-foreground">
+      <footer className="border-t border-border px-4 py-2 text-center text-xs text-muted-foreground">
         This product uses the TMDb API but is not endorsed or certified by TMDb.
       </footer>
     </div>

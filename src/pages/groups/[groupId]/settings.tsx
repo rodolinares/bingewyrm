@@ -121,20 +121,27 @@ export default function GroupSettings() {
       {/* Invite link */}
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-foreground">Invite Link</h2>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <input
             readOnly
             value={inviteUrl}
             className="flex h-10 flex-1 rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground"
           />
-          <Button variant="outline" onClick={handleCopy}>
-            {copied ? 'Copied' : 'Copy'}
-          </Button>
-          {isLeader && (
-            <Button variant="outline" onClick={handleRegenerate} disabled={regenerateInvite.isPending}>
-              Regenerate
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleCopy} className="flex-1 sm:flex-none">
+              {copied ? 'Copied' : 'Copy'}
             </Button>
-          )}
+            {isLeader && (
+              <Button
+                variant="outline"
+                onClick={handleRegenerate}
+                disabled={regenerateInvite.isPending}
+                className="flex-1 sm:flex-none"
+              >
+                Regenerate
+              </Button>
+            )}
+          </div>
         </div>
         <p className="text-xs text-muted-foreground">Anyone with this link can join the group automatically.</p>
       </section>

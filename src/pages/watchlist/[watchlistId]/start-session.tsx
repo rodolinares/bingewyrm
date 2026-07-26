@@ -114,7 +114,7 @@ export default function SessionStart() {
         <p className="text-muted-foreground">An active session already exists for this watchlist.</p>
         <Link
           to={`/session/${activeSession.id}/vote`}
-          className="mt-4 inline-flex h-8 items-center justify-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
+          className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
         >
           Go to active session
         </Link>
