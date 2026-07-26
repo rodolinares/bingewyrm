@@ -79,7 +79,7 @@ export function useUpdateGroup() {
 
   return useMutation({
     mutationFn: async ({ id, name }: { id: string; name: string }) => {
-      const { error } = await supabase.from('groups').update({ name }).eq('id', id)
+      const { error } = await supabase.rpc('update_group_name', { p_group_id: id, p_name: name })
       if (error) throw error
     },
     onSuccess: () => {
@@ -93,7 +93,7 @@ export function useDeleteGroup() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('groups').delete().eq('id', id)
+      const { error } = await supabase.rpc('delete_group', { p_group_id: id })
       if (error) throw error
     },
     onSuccess: () => {

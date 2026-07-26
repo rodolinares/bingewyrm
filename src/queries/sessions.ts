@@ -60,7 +60,6 @@ export function useCastVote() {
     mutationFn: async ({
       sessionId,
       itemId,
-      userId,
       value
     }: {
       sessionId: string
@@ -68,12 +67,10 @@ export function useCastVote() {
       userId: string
       value: boolean
     }) => {
-      const { error } = await supabase.from('votes').insert({
-        session_id: sessionId,
-        item_id: itemId,
-        user_id: userId,
-        value,
-        is_auto: false
+      const { error } = await supabase.rpc('cast_vote', {
+        p_session_id: sessionId,
+        p_item_id: itemId,
+        p_value: value
       })
       if (error) throw error
     },
@@ -88,10 +85,7 @@ export function useEndSession() {
 
   return useMutation({
     mutationFn: async (sessionId: string) => {
-      const { error } = await supabase
-        .from('sessions')
-        .update({ status: 'ended', end_reason: 'manual' })
-        .eq('id', sessionId)
+      const { error } = await supabase.rpc('end_session', { p_session_id: sessionId })
       if (error) throw error
     },
     onSuccess: (_data, variables) => {
@@ -194,14 +188,12 @@ export function useResolveOutcome() {
       outcome: 'saved' | 'recycled' | 'discarded'
       discardItemIds?: string[]
     }) => {
-      const { error } = await supabase.from('sessions').update({ outcome }).eq('id', sessionId)
+      const { error } = await supabase.rpc('resolve_outcome', {
+        p_session_id: sessionId,
+        p_outcome: outcome,
+        p_discard_item_ids: discardItemIds ?? null
+      })
       if (error) throw error
-
-      if (outcome === 'discarded' && discardItemIds && discardItemIds.length > 0) {
-        const now = new Date().toISOString()
-        const { error: delError } = await supabase.from('items').update({ removed_at: now }).in('id', discardItemIds)
-        if (delError) throw delError
-      }
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['session', variables.sessionId] })

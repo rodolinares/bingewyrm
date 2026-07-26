@@ -31,10 +31,9 @@ export default function Onboarding() {
     if (!user) return
     setError(null)
 
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ display_name: values.display_name })
-      .eq('id', user.id)
+    const { error: updateError } = await supabase.rpc('update_user_profile', {
+      p_display_name: values.display_name
+    })
 
     if (updateError) {
       setError(updateError.message)

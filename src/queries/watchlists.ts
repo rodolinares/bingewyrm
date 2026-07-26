@@ -89,7 +89,14 @@ export function useAddItem() {
 
   return useMutation({
     mutationFn: async (item: Omit<Item, 'id' | 'added_at' | 'watched' | 'removed_at'>) => {
-      const { data, error } = await supabase.from('items').insert(item).select().single()
+      const { data, error } = await supabase.rpc('add_item', {
+        p_watchlist_id: item.watchlist_id,
+        p_title: item.title,
+        p_source: item.source,
+        p_source_id: item.source_id,
+        p_year: item.year,
+        p_poster_path: item.poster_path
+      })
       if (error) {
         if (error.code === '23505') throw new Error('This item is already in the watchlist')
         throw error
@@ -107,7 +114,7 @@ export function useToggleWatched() {
 
   return useMutation({
     mutationFn: async ({ id, watched }: { id: string; watched: boolean; watchlistId: string }) => {
-      const { error } = await supabase.from('items').update({ watched }).eq('id', id)
+      const { error } = await supabase.rpc('toggle_item_watched', { p_item_id: id, p_watched: watched })
       if (error) throw error
     },
     onSuccess: (_data, variables) => {
@@ -121,7 +128,7 @@ export function useRemoveItem() {
 
   return useMutation({
     mutationFn: async ({ id }: { id: string; watchlistId: string }) => {
-      const { error } = await supabase.from('items').update({ removed_at: new Date().toISOString() }).eq('id', id)
+      const { error } = await supabase.rpc('remove_item', { p_item_id: id })
       if (error) throw error
     },
     onSuccess: (_data, variables) => {
