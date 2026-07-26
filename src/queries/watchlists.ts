@@ -28,10 +28,17 @@ export function useWatchlists(groupId: string) {
   return useQuery({
     queryKey: ['watchlists', groupId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('watchlists').select('*').eq('group_id', groupId).order('created_at')
+      const { data, error } = await supabase
+        .from('watchlists')
+        .select('*, items(count)')
+        .eq('group_id', groupId)
+        .order('created_at')
 
       if (error) throw error
-      return data as Watchlist[]
+      return data.map(w => ({
+        ...w,
+        item_count: (w.items as unknown as { count: number }[])?.[0]?.count ?? 0
+      })) as Watchlist[]
     }
   })
 }

@@ -96,16 +96,13 @@ export default function WatchlistDetail() {
                   Active Session
                 </Link>
               ) : (
-                <Link
-                  to={`/watchlist/${watchlistId}/start-session`}
-                  className={`inline-flex h-10 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${
-                    eligibleCount < 2
-                      ? 'pointer-events-none cursor-not-allowed opacity-50'
-                      : 'bg-primary text-primary-foreground hover:bg-primary/80'
-                  }`}
+                <Button
+                  render={<Link to={`/watchlist/${watchlistId}/start-session`} />}
+                  className="bg-emerald-600 text-white hover:bg-emerald-700"
+                  disabled={eligibleCount < 2}
                 >
                   Start Session
-                </Link>
+                </Button>
               )}
             </>
           )}
