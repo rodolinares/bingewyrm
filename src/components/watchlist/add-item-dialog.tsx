@@ -468,18 +468,18 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                       return (
                         <div
                           key={r.source_id}
-                          className={`flex items-center gap-3 rounded-md border p-3 transition-colors ${
+                          onClick={() => !isAdded && toggleSelect(r)}
+                          className={`flex cursor-pointer items-center gap-3 rounded-md border p-3 transition-colors ${
                             isAdded
                               ? 'cursor-default border-border opacity-50'
                               : isSelected
                                 ? 'border-primary bg-primary/5'
-                                : 'border-border hover:border-primary/50 hover:bg-accent'
+                                : 'border-border hover:border-primary/50 hover:bg-muted'
                           } ${isPinned ? 'border-l-2 border-l-primary' : ''}`}
                         >
                           <button
-                            onClick={() => !isAdded && toggleSelect(r)}
                             disabled={isAdded}
-                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2"
+                            className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full border-2"
                           >
                             {isAdded ? (
                               <span className="text-[10px] text-muted-foreground">✓</span>
@@ -521,8 +521,8 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                           </div>
                           {!isAdded && (
                             <button
-                              onClick={() => fetchDetail(r)}
-                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                              onClick={e => { e.stopPropagation(); fetchDetail(r) }}
+                              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                               title="View details"
                             >
                               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
