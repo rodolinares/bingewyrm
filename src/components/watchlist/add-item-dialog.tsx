@@ -321,7 +321,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
         <Button onClick={() => setOpen(true)}>Add Item</Button>
         {open && (
           <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
-            <div className="flex h-[90dvh] w-full max-w-lg flex-col rounded-t-lg border border-border bg-card shadow-lg sm:rounded-lg sm:h-[80vh]">
+            <div className="flex h-[90dvh] w-full max-w-lg flex-col rounded-t-lg border border-border bg-card shadow-lg sm:rounded-lg sm:h-[80dvh]">
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
                 <button
                   onClick={() => { setDetailItem(null); setDetail(null); setError(null); setSuccess(null) }}
@@ -416,7 +416,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
       <Button onClick={() => setOpen(true)}>Add Item</Button>
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
-          <div className="flex h-[90dvh] w-full max-w-lg flex-col rounded-t-lg border border-border bg-card shadow-lg sm:rounded-lg sm:h-[80vh]">
+          <div className="flex h-[90dvh] w-full max-w-lg flex-col rounded-t-lg border border-border bg-card shadow-lg sm:rounded-lg sm:h-[80dvh]">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <h2 className="text-lg font-bold text-foreground">Add to {TYPE_LABELS[mediaType]}</h2>
               <button

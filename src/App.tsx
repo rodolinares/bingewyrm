@@ -24,7 +24,7 @@ function AppLayout() {
   }
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-dvh flex-col">
       {user && (
         <header className="flex items-center justify-between border-b border-border px-4 py-2">
           <Link to="/groups" className="flex h-10 items-center text-sm font-bold text-foreground">

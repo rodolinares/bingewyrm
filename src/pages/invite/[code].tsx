@@ -25,7 +25,7 @@ export default function InviteJoin() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="space-y-4 text-center">
           <p className="text-destructive">{error}</p>
           <Link to="/groups" className="text-sm text-primary hover:underline">
@@ -37,7 +37,7 @@ export default function InviteJoin() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <div className="flex min-h-dvh items-center justify-center bg-background">
       <p className="text-muted-foreground">Joining group...</p>
     </div>
   )
