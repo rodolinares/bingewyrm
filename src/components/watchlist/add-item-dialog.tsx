@@ -159,7 +159,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
   const handleBatchAdd = async () => {
     setError(null)
     setSuccess(null)
-    const toAdd = results.filter(r => selected.has(r.source_id))
+    const toAdd = [...selectedItems.values()].filter(r => selected.has(r.source_id))
     let added = 0
     let failed = 0
 
