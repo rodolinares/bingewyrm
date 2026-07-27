@@ -8,7 +8,11 @@ import {
   useDeleteGroup,
   useRegenerateInvite,
   useGroupMembers,
-  useTransferLeader
+  useTransferLeader,
+  useGroupGenres,
+  useGroupGenreBlacklist,
+  useAddGenreBlacklist,
+  useRemoveGenreBlacklist
 } from '@/queries/groups'
 import type { Group } from '@/queries/groups'
 import { useState } from 'react'
@@ -146,6 +150,11 @@ export default function GroupSettings() {
         <p className="text-xs text-muted-foreground">Anyone with this link can join the group automatically.</p>
       </section>
 
+      {/* Genre blacklist (leader only) */}
+      {isLeader && (
+        <GenreBlacklistSection groupId={group.id} />
+      )}
+
       {/* Transfer leadership (leader only, requires other members) */}
       {isLeader && otherMembers.length > 0 && (
         <section className="space-y-3 border-t border-border pt-6">
@@ -217,5 +226,54 @@ export default function GroupSettings() {
         </section>
       )}
     </div>
+  )
+}
+
+function GenreBlacklistSection({ groupId }: { groupId: string }) {
+  const { data: allGenres = [], isLoading: genresLoading } = useGroupGenres(groupId)
+  const { data: blacklist = [] } = useGroupGenreBlacklist(groupId)
+  const addBlacklist = useAddGenreBlacklist()
+  const removeBlacklist = useRemoveGenreBlacklist()
+
+  const blacklistSet = new Set(blacklist)
+
+  const toggle = (genre: string) => {
+    if (blacklistSet.has(genre)) {
+      removeBlacklist.mutate({ groupId, genres: [genre] })
+    } else {
+      addBlacklist.mutate({ groupId, genres: [genre] })
+    }
+  }
+
+  if (genresLoading) return null
+  if (allGenres.length === 0) return null
+
+  return (
+    <section className="space-y-3 border-t border-border pt-6">
+      <h2 className="text-lg font-semibold text-foreground">Genre Blacklist</h2>
+      <p className="text-sm text-muted-foreground">
+        Blacklisted genres are excluded from session-eligible items.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {allGenres.map(genre => {
+          const isBlacklisted = blacklistSet.has(genre)
+          return (
+            <button
+              key={genre}
+              onClick={() => toggle(genre)}
+              disabled={addBlacklist.isPending || removeBlacklist.isPending}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                isBlacklisted
+                  ? 'bg-destructive/20 text-destructive hover:bg-destructive/30'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              {genre}
+              <span className="ml-1">{isBlacklisted ? '⊘' : '+'}</span>
+            </button>
+          )
+        })}
+      </div>
+    </section>
   )
 }

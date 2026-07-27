@@ -232,6 +232,8 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
         source_id: item.source_id,
         year: item.year ?? new Date().getFullYear(),
         poster_path: item.poster_path,
+        vote_average: item.vote_average ?? null,
+        genres: item.genres ?? [],
         added_by: userId
       })
       setSuccess(`Added "${item.title}"`)
@@ -263,6 +265,8 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
           source_id: result.source_id,
           year: result.year ?? new Date().getFullYear(),
           poster_path: result.poster_path,
+          vote_average: result.vote_average ?? null,
+          genres: result.genres ?? [],
           added_by: userId
         })
         added++
@@ -303,6 +307,8 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
         source_id: null,
         year,
         poster_path: null,
+        vote_average: null,
+        genres: [],
         added_by: userId
       })
       setSuccess('Added item')

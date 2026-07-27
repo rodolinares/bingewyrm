@@ -48,3 +48,37 @@ export async function searchAniList(query: string, format: 'TV' | 'MOVIE'): Prom
   const data: AniListResponse = await res.json()
   return data.data.Page.media
 }
+
+const SINGLE_QUERY = `query ($id: Int) {
+  Media(id: $id) {
+    id
+    title { romaji english }
+    coverImage { medium }
+    startDate { year }
+    format
+    description(asHtml: false)
+    averageScore
+    genres
+  }
+}`
+
+interface SingleResponse {
+  data: {
+    Media: AniListMedia
+  }
+}
+
+export async function fetchAniListItem(id: string): Promise<AniListMedia> {
+  const res = await fetch(ANILIST_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: SINGLE_QUERY,
+      variables: { id: Number(id) }
+    })
+  })
+
+  if (!res.ok) throw new Error('AniList fetch failed')
+  const data: SingleResponse = await res.json()
+  return data.data.Media
+}

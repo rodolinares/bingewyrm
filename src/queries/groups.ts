@@ -1,5 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+
+export interface Group {
+  id: string
+  name: string
+  leader_id: string
+  invite_code: string
+  created_at: string
+}
 import { useUser } from '@/hooks/use-user'
 
 export interface Group {
@@ -155,6 +163,66 @@ export function useTransferLeader() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups'] })
+    }
+  })
+}
+
+export function useGroupGenres(groupId: string | undefined) {
+  return useQuery({
+    queryKey: ['group-genres', groupId],
+    queryFn: async () => {
+      if (!groupId) return []
+      const { data, error } = await supabase.rpc('get_group_genres', { p_group_id: groupId })
+      if (error) throw error
+      return (data ?? []) as string[]
+    },
+    enabled: !!groupId
+  })
+}
+
+export function useGroupGenreBlacklist(groupId: string | undefined) {
+  return useQuery({
+    queryKey: ['genre-blacklist', groupId],
+    queryFn: async () => {
+      if (!groupId) return []
+      const { data, error } = await supabase.rpc('get_genre_blacklist', { p_group_id: groupId })
+      if (error) throw error
+      return (data ?? []) as string[]
+    },
+    enabled: !!groupId
+  })
+}
+
+export function useAddGenreBlacklist() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ groupId, genres }: { groupId: string; genres: string[] }) => {
+      const { error } = await supabase.rpc('add_genre_blacklist', {
+        p_group_id: groupId,
+        p_genres: genres
+      })
+      if (error) throw error
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['genre-blacklist', variables.groupId] })
+    }
+  })
+}
+
+export function useRemoveGenreBlacklist() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ groupId, genres }: { groupId: string; genres: string[] }) => {
+      const { error } = await supabase.rpc('remove_genre_blacklist', {
+        p_group_id: groupId,
+        p_genres: genres
+      })
+      if (error) throw error
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['genre-blacklist', variables.groupId] })
     }
   })
 }

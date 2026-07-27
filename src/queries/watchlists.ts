@@ -18,6 +18,8 @@ export interface Item {
   source_id: string | null
   year: number
   poster_path: string | null
+  vote_average: number | null
+  genres: string[]
   added_by: string
   added_at: string
   watched: boolean
@@ -115,7 +117,9 @@ export function useAddItem() {
         p_source: item.source,
         p_source_id: item.source_id,
         p_year: item.year,
-        p_poster_path: item.poster_path
+        p_poster_path: item.poster_path,
+        p_vote_average: item.vote_average,
+        p_genres: item.genres
       })
       if (error) {
         if (error.code === '23505') throw new Error('This item is already in the watchlist')
@@ -149,6 +153,20 @@ export function useRemoveItem() {
   return useMutation({
     mutationFn: async ({ id }: { id: string; watchlistId: string }) => {
       const { error } = await supabase.rpc('remove_item', { p_item_id: id })
+      if (error) throw error
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['items', variables.watchlistId] })
+    }
+  })
+}
+
+export function useRemoveItems() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ ids }: { ids: string[]; watchlistId: string }) => {
+      const { error } = await supabase.rpc('remove_items', { p_item_ids: ids })
       if (error) throw error
     },
     onSuccess: (_data, variables) => {

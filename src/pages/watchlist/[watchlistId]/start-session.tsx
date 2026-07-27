@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router'
 import { useItems, useWatchlist, useStartSession, useActiveSession } from '@/queries/watchlists'
-import { useGroupMembers } from '@/queries/groups'
+import { useGroupMembers, useGroupGenreBlacklist } from '@/queries/groups'
 import { Button } from '@/components/ui/button'
 
 const TMDB_IMG = 'https://image.tmdb.org/t/p/w200'
@@ -35,6 +35,7 @@ export default function SessionStart() {
   const { data: watchlist } = useWatchlist(watchlistId!)
   const { data: items, isLoading: itemsLoading } = useItems(watchlistId!)
   const { data: members } = useGroupMembers(watchlist?.group_id)
+  const { data: blacklist } = useGroupGenreBlacklist(watchlist?.group_id)
   const { data: activeSession } = useActiveSession(watchlistId!)
   const startSession = useStartSession()
 
@@ -43,7 +44,12 @@ export default function SessionStart() {
   const [customMinutes, setCustomMinutes] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  const eligibleItems = items?.filter(i => !i.watched) ?? []
+  const blacklistSet = new Set(blacklist ?? [])
+  const eligibleItems = items?.filter(i => {
+    if (i.watched) return false
+    if (blacklistSet.size > 0 && i.genres?.some(g => blacklistSet.has(g))) return false
+    return true
+  }) ?? []
 
   const toggleItem = (id: string) => {
     setSelected(prev => {
