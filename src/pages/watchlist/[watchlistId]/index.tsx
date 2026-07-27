@@ -13,15 +13,7 @@ import { AddItemDialog } from '@/components/watchlist/add-item-dialog'
 import { ItemDetailPanel } from '@/components/watchlist/item-detail-panel'
 import { Button } from '@/components/ui/button'
 import { useGroups } from '@/queries/groups'
-
-const MEDIA_LABELS: Record<string, string> = {
-  movie: 'Movies',
-  series: 'Series',
-  anime: 'Anime',
-  anime_movie: 'Anime Movies'
-}
-
-const TMDB_IMG = 'https://image.tmdb.org/t/p/w200'
+import { MEDIA_LABELS, posterUrl } from '@/lib/media'
 
 type SortBy = 'title' | 'year' | 'vote_average' | 'added_at'
 type SortDir = 'asc' | 'desc'
@@ -129,12 +121,6 @@ export default function WatchlistDetail() {
         <p className="text-muted-foreground">Watchlist not found.</p>
       </div>
     )
-  }
-
-  const posterUrl = (item: { source: string; poster_path: string | null }) => {
-    if (!item.poster_path) return null
-    if (item.source === 'anilist') return item.poster_path
-    return `${TMDB_IMG}${item.poster_path}`
   }
 
   const isLeader = groups?.some(g => g.id === watchlist?.group_id && g.leader_id === user?.id)
@@ -280,8 +266,8 @@ export default function WatchlistDetail() {
                   )}
                 </button>
               )}
-              {posterUrl(item) ? (
-                <img src={posterUrl(item)!} alt="" className="h-16 w-12 rounded object-cover" />
+              {posterUrl(item, 'w200') ? (
+                <img src={posterUrl(item, 'w200')!} alt="" className="h-16 w-12 rounded object-cover" />
               ) : (
                 <div className="flex h-16 w-12 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
                   No img

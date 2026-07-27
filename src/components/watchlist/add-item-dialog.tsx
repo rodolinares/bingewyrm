@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { useAddItem } from '@/queries/watchlists'
 import { supabase, supabaseUrl$ } from '@/lib/supabase'
 import { searchAniList, type AniListMedia } from '@/lib/anilist'
+import { tmdbImg, MEDIA_LABELS as TYPE_LABELS } from '@/lib/media'
 
 interface SearchResult {
   source_id: string
@@ -32,13 +33,6 @@ interface Props {
   onAdded: () => void
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  movie: 'Movies',
-  series: 'Series',
-  anime: 'Anime',
-  anime_movie: 'Anime Movies'
-}
-
 function tmdbType(mediaType: MediaType): 'movie' | 'tv' {
   return mediaType === 'movie' ? 'movie' : 'tv'
 }
@@ -58,8 +52,6 @@ function mapAniListResults(results: AniListMedia[]): SearchResult[] {
     genres: m.genres ?? []
   }))
 }
-
-const TMDB_IMG = 'https://image.tmdb.org/t/p'
 
 export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props) {
   const [open, setOpen] = useState(false)
@@ -355,7 +347,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                       src={
                         detailItem.poster_path.startsWith('http')
                           ? detailItem.poster_path
-                          : `${TMDB_IMG}/w300${detailItem.poster_path}`
+                          :             tmdbImg(detailItem.poster_path, 'w300')
                       }
                       alt=""
                       className="h-40 w-28 shrink-0 rounded object-cover"
@@ -501,7 +493,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                           </button>
                           {r.poster_path ? (
                             <img
-                              src={r.poster_path.startsWith('http') ? r.poster_path : `${TMDB_IMG}/w200${r.poster_path}`}
+                              src={r.poster_path.startsWith('http') ? r.poster_path : tmdbImg(r.poster_path, 'w200')}
                               alt=""
                               className="h-16 w-12 rounded object-cover"
                             />

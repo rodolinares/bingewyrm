@@ -3,13 +3,7 @@ import { useGroups } from '@/queries/groups'
 import { useUser } from '@/hooks/use-user'
 import { useWatchlists } from '@/queries/watchlists'
 import { CreateWatchlistDialog } from '@/components/group/create-watchlist-dialog'
-
-const MEDIA_LABELS: Record<string, string> = {
-  movie: 'Movies',
-  series: 'Series',
-  anime: 'Anime',
-  anime_movie: 'Anime Movies'
-}
+import { MEDIA_LABELS } from '@/lib/media'
 
 export default function GroupLayout() {
   const { groupId } = useParams()

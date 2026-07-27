@@ -11,8 +11,7 @@ import {
   useResolveOutcome
 } from '@/queries/sessions'
 import { Button } from '@/components/ui/button'
-
-const TMDB_IMG = 'https://image.tmdb.org/t/p/w200'
+import { posterUrl } from '@/lib/media'
 
 interface RankedItem {
   id: string
@@ -89,12 +88,6 @@ export default function ResultsPage() {
     )
   }
 
-  const posterUrl = (item: { source: string; poster_path: string | null }) => {
-    if (!item.poster_path) return null
-    if (item.source === 'anilist') return item.poster_path
-    return `${TMDB_IMG}${item.poster_path}`
-  }
-
   return (
     <div className="mx-auto max-w-2xl p-6">
       <Link to={`/watchlist/${session.watchlist_id}`} className="text-sm text-muted-foreground hover:text-foreground">
@@ -121,8 +114,8 @@ export default function ResultsPage() {
         {ranked.map((item, i) => (
           <div key={item.id} className="flex items-center gap-3 rounded-md border border-border p-3">
             <span className="w-6 text-center text-sm font-bold text-muted-foreground">{i + 1}</span>
-            {posterUrl(item) ? (
-              <img src={posterUrl(item)!} alt="" className="h-12 w-9 rounded object-cover" />
+            {posterUrl(item, 'w200') ? (
+              <img src={posterUrl(item, 'w200')!} alt="" className="h-12 w-9 rounded object-cover" />
             ) : (
               <div className="flex h-12 w-9 items-center justify-center rounded bg-muted text-[10px] text-muted-foreground">
                 No img

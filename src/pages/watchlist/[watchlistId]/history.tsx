@@ -1,13 +1,7 @@
 import { useParams, Link } from 'react-router'
 import { useWatchlist } from '@/queries/watchlists'
 import { usePastSessions } from '@/queries/sessions'
-
-const MEDIA_LABELS: Record<string, string> = {
-  movie: 'Movies',
-  series: 'Series',
-  anime: 'Anime',
-  anime_movie: 'Anime Movies'
-}
+import { MEDIA_LABELS } from '@/lib/media'
 
 const OUTCOME_LABELS: Record<string, string> = {
   saved: 'Saved',

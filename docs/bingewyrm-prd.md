@@ -7,7 +7,7 @@
 > - **Rating/genre storage**: `vote_average` and `genres` columns on `items` table, populated at add-time from source API. Used for sort and blacklist filtering.
 
 > **PRD corrections:**
-> - `docs/bingewyrm-theme.css` is a reference copy; actual tokens live in `src/index.css` under `@theme inline`.
+> - Tokens live in `src/index.css` under `@theme inline` (reference copy `docs/bingewyrm-theme.css` removed).
 
 ## 1. Summary
 
@@ -146,7 +146,7 @@ Two sources are needed to cover all four media types: one for movies/series, one
 - Theme: cinema/theater marquee, evoking the feel of a movie premiere or theater lobby rather than a generic productivity app.
 - Palette: warm amber, rust-orange, and deep maroon as the active/primary colors, set against a near-black base, with a cooler slate-teal/sage neutral as the resting/secondary tone so the UI isn't uniformly warm.
 - Dark mode is the default theme; light mode is supported as a secondary option.
-- Tokens are defined as shadcn/ui-compatible CSS variables in `bingewyrm-theme.css`, covering both light and dark mode plus two app-specific tokens: `vote-yes` / `vote-no` for the swipe-vote UI, and `marquee-highlight` for calling out the top-ranked result.
+- Tokens are defined as shadcn/ui-compatible CSS variables in `src/index.css` (`@theme inline`), covering both light and dark mode plus two app-specific tokens: `vote-yes` / `vote-no` for the swipe-vote UI, and `marquee-highlight` for calling out the top-ranked result.
 - Implementation must use these tokens as-is rather than a substitute or default shadcn palette.
 
 ## 10. Authentication and Onboarding

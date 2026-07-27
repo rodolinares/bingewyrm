@@ -86,7 +86,7 @@ derived state.
 
 - `Button` does NOT support `asChild` — use `Link` with button styling instead
 - Dialog components live in `src/components/ui/dialog.tsx` (shadcn/base-ui)
-- Theme tokens in `src/index.css` (`@theme inline`), reference copy in `docs/bingewyrm-theme.css`
+- Theme tokens in `src/index.css` (`@theme inline`), reference copy was `docs/bingewyrm-theme.css`
 
 ## File Map
 
@@ -106,7 +106,7 @@ derived state.
 | `src/components/watchlist/item-detail-panel.tsx` | Item detail panel (overlay with description, rating, genres) |
 | `supabase/migrations/` | SQL migrations 00001–00011 |
 | `supabase/functions/tmdb-search/` | TMDb proxy Edge Function (search + detail endpoints) |
-| `docs/bingewyrm-theme.css` | HSL design tokens (reference — actual tokens in `src/index.css` `@theme inline`) |
+| `src/index.css` | Design tokens (`@theme inline`), reference copy was `docs/bingewyrm-theme.css` |
 | `docs/bingewyrm-skipped.md` | Deferred features tracker |
 | `netlify.toml` | SPA redirect rule |
 

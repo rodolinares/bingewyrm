@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase, supabaseUrl$ } from '@/lib/supabase'
 import { fetchAniListItem, type AniListMedia } from '@/lib/anilist'
 import type { Item } from '@/queries/watchlists'
-
-const TMDB_IMG = 'https://image.tmdb.org/t/p'
+import { tmdbImg } from '@/lib/media'
 
 interface DetailData {
   overview: string | null
@@ -96,7 +95,7 @@ export function ItemDetailPanel({ item, mediaType, open, onClose }: Props) {
   const posterSrc = item.poster_path
     ? item.source === 'anilist' || item.poster_path.startsWith('http')
       ? item.poster_path
-      : `${TMDB_IMG}/w300${item.poster_path}`
+      : tmdbImg(item.poster_path, 'w300')
     : null
 
   return (

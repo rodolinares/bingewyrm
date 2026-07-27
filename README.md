@@ -142,7 +142,7 @@ supabase/
   functions/          tmdb-search Edge Function (search + detail)
   migrations/         00001–00011 SQL migrations
 docs/
-  bingewyrm-theme.css      HSL design tokens (reference)
+  (design tokens live in src/index.css @theme inline)
   bingewyrm-skipped.md     Deferred features tracker
 ```
 

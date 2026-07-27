@@ -7,8 +7,7 @@ import { useSession, useSessionItems, useMyVotes, useCastVote, useEndSession } f
 import { useRealtimeSession } from '@/hooks/use-realtime'
 import { seededShuffle } from '@/lib/shuffle'
 import { Button } from '@/components/ui/button'
-
-const TMDB_IMG = 'https://image.tmdb.org/t/p/w500'
+import { posterUrl } from '@/lib/media'
 
 export default function VotingPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
@@ -155,12 +154,6 @@ export default function VotingPage() {
     )
   }
 
-  const posterUrl = current.poster_path
-    ? current.source === 'anilist'
-      ? current.poster_path
-      : `${TMDB_IMG}${current.poster_path}`
-    : null
-
   return (
     <div className="flex h-full flex-col items-center justify-center p-6">
       {/* Progress */}
@@ -181,8 +174,8 @@ export default function VotingPage() {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {posterUrl ? (
-          <img src={posterUrl} alt="" className="mb-4 h-48 w-32 rounded-lg object-cover sm:h-64 sm:w-44" />
+        {posterUrl(current, 'w500') ? (
+          <img src={posterUrl(current, 'w500')!} alt="" className="mb-4 h-48 w-32 rounded-lg object-cover sm:h-64 sm:w-44" />
         ) : (
           <div className="mb-4 flex h-48 w-32 items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground sm:h-64 sm:w-44">
             No poster
