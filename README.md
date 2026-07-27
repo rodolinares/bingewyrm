@@ -8,11 +8,15 @@ watchlists, then run timed voting sessions where members swipe to keep or discar
 - **Google OAuth** — sign in with Google, display name onboarding
 - **Groups** — create groups, invite via UUID link, leader manages members
 - **Watchlists** — per-group, per-media-type (Movies, Series, Anime, Anime Movies)
-- **Search** — TMDb for movies/series (proxied via Supabase Edge Function), AniList for anime (direct GraphQL)
-- **Voting sessions** — leader starts a session, members vote yes/no on each item, timed or manual end
+- **Search & batch add** — search TMDb/AniList, select multiple items, add in batch
+- **Item details** — info panel with overview, rating, genres, runtime before adding
+- **Already-added badges** — items already in watchlist shown dimmed with "Added" badge
+- **Voting sessions** — leader starts, members vote yes/no, timed or manual end
+- **All members see sessions** — active session / results links visible to everyone
 - **Results** — save, recycle, or discard based on votes
 - **Realtime** — live item additions + session-ended notifications via Supabase Realtime
 - **Touch-first** — swipe gestures on mobile, responsive layout, bottom tab nav
+- **Invite flow** — new users join group → onboarding → redirected to invited group
 
 ## Tech Stack
 
@@ -21,7 +25,7 @@ watchlists, then run timed voting sessions where members swipe to keep or discar
 - **Routing:** React Router v8
 - **State:** TanStack Query
 - **Forms:** React Hook Form + Zod v4
-- **Deploy:** Netlify
+- **Deploy:** Netlify (SPA redirect in `netlify.toml`)
 
 ## Getting Started
 
@@ -64,11 +68,15 @@ Run all migrations in `supabase/migrations/` against your Supabase project
 
 ### Edge Functions
 
-Deploy the TMDb search proxy:
+Deploy the TMDb search proxy (search + detail endpoints):
 
 ```bash
 supabase functions deploy tmdb-search
 ```
+
+The Edge Function provides:
+- `GET /tmdb-search?q=...&type=movie|tv` — search with rating + overview
+- `GET /tmdb-search/detail/{id}?type=movie|tv` — full details (genres, runtime, backdrop)
 
 ### Auth
 
@@ -79,11 +87,19 @@ In Supabase Dashboard → Authentication → URL Configuration:
 
 Enable Google provider in Authentication → Providers.
 
-### Development
+### Deployment
 
-```bash
-pnpm dev
+Netlify — push to deploy. `netlify.toml` handles SPA routing:
+```toml
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 ```
+
+Set env vars in Netlify dashboard:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
 
 ### Commands
 
@@ -94,6 +110,12 @@ pnpm dev
 | `pnpm lint` | ESLint |
 | `pnpm format` | Prettier (src only) |
 
+### Git Workflow
+
+- `main` — stable, deployed to production
+- `develop` — active development, all work happens here
+- Merge `develop` → `main` when ready to release (ask user before merging)
+
 ## Project Structure
 
 ```
@@ -101,20 +123,23 @@ src/
   components/
     group/          create-group-dialog, create-watchlist-dialog
     ui/             button, dialog (shadcn/base-ui)
-    watchlist/      add-item-dialog
+    watchlist/      add-item-dialog (batch add, detail panel)
   hooks/            use-user, use-realtime
   lib/              supabase client, anilist GraphQL, shuffle, utils
   pages/
     auth/           login, callback
-    groups/         group list, group layout, settings
+    groups/         group list, group layout (sidebar + bottom nav), settings
     watchlist/      detail, start-session, history
-    session/        voting, results
+    session/        voting (swipe), results
     invite/         auto-join
     onboarding/     display name form
   queries/          groups, watchlists, sessions (TanStack Query hooks)
 supabase/
-  functions/        tmdb-search Edge Function
+  functions/        tmdb-search Edge Function (search + detail)
   migrations/       00001–00010 SQL migrations
+docs/
+  bingewyrm-theme.css    HSL design tokens
+  bingewyrm-skipped.md   Deferred features tracker
 ```
 
 ## Architecture Notes
@@ -125,6 +150,8 @@ supabase/
 - **Session expiry** is handled by pg_cron (every minute). Client-side also checks lazily on page load.
 - **Realtime** is scoped to item additions + session status changes only. Vote counts are not realtime.
 - **TMDb requests are proxied** through a Supabase Edge Function to keep the API key server-side. AniList GraphQL is called directly from the client (no API key required).
+- **Batch item add** uses multi-select with pinned selections across searches. Existing items show "Added" badge. Detail panel fetched lazily on info tap.
+- **Invite flow** preserves redirect: `requireOnboarding` passes `?next=` param so new users land on the invited group after onboarding.
 
 ## License
 

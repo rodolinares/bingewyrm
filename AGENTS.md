@@ -90,18 +90,20 @@ derived state.
 
 | Path | Purpose |
 |------|---------|
-| `src/App.tsx` | Routes, AppLayout, auth loaders |
+| `src/App.tsx` | Routes, AppLayout, auth loaders (`requireAuth`, `requireOnboarding`) |
 | `src/lib/supabase.ts` | Supabase client, `supabaseUrl$` |
-| `src/lib/anilist.ts` | AniList GraphQL search |
+| `src/lib/anilist.ts` | AniList GraphQL search (enriched: description, averageScore, genres) |
 | `src/lib/shuffle.ts` | Deterministic mulberry32 PRNG shuffle |
 | `src/hooks/use-user.ts` | Session + profile (TanStack Query) |
-| `src/hooks/use-realtime.ts` | `useRealtimeSession`, `useRealtimeItems` |
+| `src/hooks/use-realtime.ts` | `useRealtimeSession`, `useRealtimeItems` (shared `useRealtime` helper) |
 | `src/queries/groups.ts` | Group CRUD hooks (all RPCs) |
 | `src/queries/watchlists.ts` | Watchlist/item hooks (all RPCs) |
-| `src/queries/sessions.ts` | Session/vote hooks (all RPCs) |
+| `src/queries/sessions.ts` | Session/vote hooks (all RPCs), `useLastSessionByOutcome` |
+| `src/components/watchlist/add-item-dialog.tsx` | Batch add, multi-select, detail panel, existing badges |
 | `supabase/migrations/` | SQL migrations 00001–00010 |
-| `supabase/functions/tmdb-search/` | TMDb proxy Edge Function |
+| `supabase/functions/tmdb-search/` | TMDb proxy Edge Function (search + detail endpoints) |
 | `docs/bingewyrm-theme.css` | HSL design tokens |
+| `docs/bingewyrm-skipped.md` | Deferred features tracker |
 | `netlify.toml` | SPA redirect rule |
 
 ## Gotchas
@@ -111,3 +113,6 @@ derived state.
 - Invite links are UUID-based, auto-join, no approval
 - Leader transfer removes the outgoing leader from members atomically
 - `pnpm-lock.yaml` must stay in sync — run `pnpm install` after dep changes
+- Edge Function must be redeployed after changes: `supabase functions deploy tmdb-search`
+- Git: `develop` branch for all work, merge to `main` for releases
+- Item count on watchlist cards excludes removed items (`removed_at IS NOT NULL`)
