@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod/v4'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,6 +19,7 @@ type FormData = z.infer<typeof schema>
 
 export default function Onboarding() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { user } = useUser()
   const [error, setError] = useState<string | null>(null)
 
@@ -40,7 +41,7 @@ export default function Onboarding() {
       return
     }
 
-    navigate('/groups', { replace: true })
+    navigate(searchParams.get('next') || '/groups', { replace: true })
   }
 
   return (

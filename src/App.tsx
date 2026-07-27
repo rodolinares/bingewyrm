@@ -54,10 +54,13 @@ async function requireAuth() {
   return data.session
 }
 
-async function requireOnboarding() {
+async function requireOnboarding({ request }: { request: Request }) {
   const session = await requireAuth()
   const { data: profile } = await supabase.from('users').select('display_name').eq('id', session.user.id).single()
-  if (!profile?.display_name) throw redirect('/onboarding')
+  if (!profile?.display_name) {
+    const url = new URL(request.url)
+    throw redirect(`/onboarding?next=${encodeURIComponent(url.pathname)}`)
+  }
 }
 
 const protectedChildren: RouteObject[] = [
