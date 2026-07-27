@@ -112,7 +112,7 @@ export default function GroupSettings() {
               {...form.register('name')}
               className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
-            <Button type="submit" disabled={updateGroup.isPending}>
+            <Button type="submit" disabled={updateGroup.isPending} className="h-10">
               Save
             </Button>
           </form>
@@ -132,7 +132,7 @@ export default function GroupSettings() {
             className="flex h-10 flex-1 rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground"
           />
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleCopy} className="flex-1 sm:flex-none">
+            <Button variant="outline" onClick={handleCopy} className="h-10 flex-1 sm:flex-none">
               {copied ? 'Copied' : 'Copy'}
             </Button>
             {isLeader && (
@@ -140,7 +140,7 @@ export default function GroupSettings() {
                 variant="outline"
                 onClick={handleRegenerate}
                 disabled={regenerateInvite.isPending}
-                className="flex-1 sm:flex-none"
+                className="h-10 flex-1 sm:flex-none"
               >
                 Regenerate
               </Button>
@@ -163,11 +163,11 @@ export default function GroupSettings() {
             Transferring leadership will remove you from the group. This cannot be undone.
           </p>
           {!confirmTransfer ? (
-            <div className="space-y-2">
+            <div className="flex items-center gap-2">
               <select
                 value={newLeaderId}
                 onChange={e => setNewLeaderId(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option value="">Select a member...</option>
                 {otherMembers.map(m => (
@@ -176,7 +176,7 @@ export default function GroupSettings() {
                   </option>
                 ))}
               </select>
-              <Button variant="destructive" disabled={!newLeaderId} onClick={() => setConfirmTransfer(true)}>
+              <Button variant="destructive" disabled={!newLeaderId} onClick={() => setConfirmTransfer(true)} className="h-10 shrink-0">
                 Transfer & Leave
               </Button>
             </div>
