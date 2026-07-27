@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { useAddItem } from '@/queries/watchlists'
 import { supabase, supabaseUrl$ } from '@/lib/supabase'
@@ -53,13 +53,30 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
   const [results, setResults] = useState<SearchResult[]>([])
   const [searching, setSearching] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [selectedItems, setSelectedItems] = useState<Map<string, SearchResult>>(new Map())
+  const [existingIds, setExistingIds] = useState<Set<string>>(new Set())
   const addItem = useAddItem()
   const debounceRef = useRef<number | undefined>(undefined)
+  const closeTimerRef = useRef<number | undefined>(undefined)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [manualTitle, setManualTitle] = useState('')
   const [manualYear, setManualYear] = useState('')
+
+  const fetchExistingIds = async () => {
+    const { data } = await supabase
+      .from('items')
+      .select('source_id')
+      .eq('watchlist_id', watchlistId)
+      .is('removed_at', null)
+    if (data) setExistingIds(new Set(data.map(i => i.source_id).filter(Boolean) as string[]))
+  }
+
+  useEffect(() => {
+    if (open) fetchExistingIds()
+  }, [open, watchlistId])
 
   useEffect(() => {
     if (open && tab === 'search') {
@@ -73,10 +90,13 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
     setQuery('')
     setResults([])
     setError(null)
+    setSuccess(null)
     setSelected(new Set())
+    setSelectedItems(new Map())
     setManualTitle('')
     setManualYear('')
     setTab('search')
+    clearTimeout(closeTimerRef.current)
   }
 
   const searchQuery = tab === 'search' ? query.trim() : ''
@@ -114,17 +134,31 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
     return () => clearTimeout(debounceRef.current)
   }, [searchQuery, mediaType])
 
-  const toggleSelect = (sourceId: string) => {
+  const displayedResults = useMemo(() => {
+    const resultIds = new Set(results.map(r => r.source_id))
+    const pinned = [...selectedItems.values()].filter(r => !resultIds.has(r.source_id))
+    return [...results, ...pinned]
+  }, [results, selectedItems])
+
+  const toggleSelect = (result: SearchResult) => {
+    const { source_id } = result
     setSelected(prev => {
       const next = new Set(prev)
-      if (next.has(sourceId)) next.delete(sourceId)
-      else next.add(sourceId)
+      if (next.has(source_id)) next.delete(source_id)
+      else next.add(source_id)
+      return next
+    })
+    setSelectedItems(prev => {
+      const next = new Map(prev)
+      if (next.has(source_id)) next.delete(source_id)
+      else next.set(source_id, result)
       return next
     })
   }
 
   const handleBatchAdd = async () => {
     setError(null)
+    setSuccess(null)
     const toAdd = results.filter(r => selected.has(r.source_id))
     let added = 0
     let failed = 0
@@ -150,15 +184,21 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
       setError(`${added} added, ${failed} failed`)
     } else if (failed > 0) {
       setError('Failed to add items')
+    } else {
+      setSuccess(`Added ${added} item${added > 1 ? 's' : ''}`)
+      closeTimerRef.current = setTimeout(() => handleClose(), 1500)
     }
 
     setSelected(new Set())
+    setSelectedItems(new Map())
+    fetchExistingIds()
     onAdded()
   }
 
   const handleManualAdd = async () => {
     if (!manualTitle.trim() || !manualYear) return
     setError(null)
+    setSuccess(null)
     const year = parseInt(manualYear, 10)
     if (isNaN(year) || year < 1800 || year > 2100) {
       setError('Enter a valid year')
@@ -174,8 +214,8 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
         poster_path: null,
         added_by: userId
       })
-      setManualTitle('')
-      setManualYear('')
+      setSuccess('Added item')
+      closeTimerRef.current = setTimeout(() => handleClose(), 1500)
       onAdded()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to add item')
@@ -217,7 +257,11 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
               </button>
             </div>
 
-            <div className="flex-1 overflow-auto p-4 pb-20">
+            {success && (
+              <div className="mx-4 mt-3 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">{success}</div>
+            )}
+
+            <div className="flex-1 overflow-auto p-4">
               {tab === 'search' ? (
                 <>
                   <input
@@ -230,28 +274,39 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                   {searching && <p className="text-sm text-muted-foreground">Searching...</p>}
                   {error && <p className="text-sm text-destructive">{error}</p>}
                   <div className="space-y-2">
-                    {results.map(r => {
+                    {displayedResults.map(r => {
                       const isSelected = selected.has(r.source_id)
+                      const isAdded = existingIds.has(r.source_id)
+                      const isPinned = !results.some(res => res.source_id === r.source_id)
                       return (
                         <button
                           key={r.source_id}
-                          onClick={() => toggleSelect(r.source_id)}
+                          onClick={() => !isAdded && toggleSelect(r)}
+                          disabled={isAdded}
                           className={`flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors ${
-                            isSelected
-                              ? 'border-primary bg-primary/5'
-                              : 'border-border hover:border-primary/50 hover:bg-accent'
-                          }`}
+                            isAdded
+                              ? 'cursor-default border-border opacity-50'
+                              : isSelected
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-primary/50 hover:bg-accent'
+                          } ${isPinned ? 'border-l-2 border-l-primary' : ''}`}
                         >
                           <div
                             className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
-                              isSelected ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground'
+                              isAdded
+                                ? 'border-muted-foreground bg-muted'
+                                : isSelected
+                                  ? 'border-primary bg-primary text-primary-foreground'
+                                  : 'border-muted-foreground'
                             }`}
                           >
-                            {isSelected && (
+                            {isAdded ? (
+                              <span className="text-[10px] text-muted-foreground">✓</span>
+                            ) : isSelected ? (
                               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                               </svg>
-                            )}
+                            ) : null}
                           </div>
                           {r.poster_path ? (
                             <img
@@ -267,6 +322,11 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-medium text-foreground">{r.title}</p>
                             <p className="text-xs text-muted-foreground">{r.year ?? 'Unknown year'}</p>
+                            {isAdded && (
+                              <span className="mt-1 inline-block rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400">
+                                Added
+                              </span>
+                            )}
                           </div>
                         </button>
                       )
@@ -306,7 +366,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
             </div>
 
             {tab === 'search' && selected.size > 0 && (
-              <div className="absolute bottom-0 left-0 right-0 border-t border-border bg-card p-4 sm:rounded-b-lg">
+              <div className="shrink-0 border-t border-border p-4">
                 <Button
                   onClick={handleBatchAdd}
                   disabled={addItem.isPending}
