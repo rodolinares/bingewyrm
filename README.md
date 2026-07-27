@@ -8,9 +8,11 @@ watchlists, then run timed voting sessions where members swipe to keep or discar
 - **Google OAuth** — sign in with Google, display name onboarding
 - **Groups** — create groups, invite via UUID link, leader manages members
 - **Watchlists** — per-group, per-media-type (Movies, Series, Anime, Anime Movies)
-- **Search & batch add** — search TMDb/AniList, select multiple items, add in batch
+- **Search, batch add & manual entry** — search TMDb/AniList, select multiple items, add in batch, or enter title+year manually
 - **Item details** — info panel with overview, rating, genres, runtime before adding
 - **Already-added badges** — items already in watchlist shown dimmed with "Added" badge
+- **Client-side sort** — sort by title, year, rating, or date added (persisted in localStorage)
+- **Genre blacklist** — leader can blacklist genres to exclude items from session pools
 - **Voting sessions** — leader starts, members vote yes/no, timed or manual end
 - **All members see sessions** — active session / results links visible to everyone
 - **Results** — save, recycle, or discard based on votes
@@ -109,6 +111,7 @@ Set env vars in Netlify dashboard:
 | `pnpm build` | Type-check + build |
 | `pnpm lint` | ESLint |
 | `pnpm format` | Prettier (src only) |
+| `pnpm format:check` | Prettier check without writing |
 
 ### Git Workflow
 
@@ -121,25 +124,26 @@ Set env vars in Netlify dashboard:
 ```
 src/
   components/
-    group/          create-group-dialog, create-watchlist-dialog
-    ui/             button, dialog (shadcn/base-ui)
-    watchlist/      add-item-dialog (batch add, detail panel)
-  hooks/            use-user, use-realtime
-  lib/              supabase client, anilist GraphQL, shuffle, utils
+    group/            create-group-dialog, create-watchlist-dialog
+    ui/               button, dialog (shadcn/base-ui)
+    watchlist/        add-item-dialog (search + manual entry, batch add, detail panel),
+                      item-detail-panel (overlay with description, rating, genres)
+  hooks/              use-user, use-realtime
+  lib/                supabase client, anilist GraphQL, shuffle, utils (cn helper)
   pages/
-    auth/           login, callback
-    groups/         group list, group layout (sidebar + bottom nav), settings
-    watchlist/      detail, start-session, history
-    session/        voting (swipe), results
-    invite/         auto-join
-    onboarding/     display name form
-  queries/          groups, watchlists, sessions (TanStack Query hooks)
+    auth/             login, callback
+    groups/           group list, group layout (sidebar + bottom nav), settings
+    watchlist/        detail (with client-side sort), start-session, history
+    session/          voting (swipe), results
+    invite/           auto-join
+    onboarding/       display name form
+  queries/            groups, watchlists, sessions (TanStack Query hooks)
 supabase/
-  functions/        tmdb-search Edge Function (search + detail)
-  migrations/       00001–00010 SQL migrations
+  functions/          tmdb-search Edge Function (search + detail)
+  migrations/         00001–00011 SQL migrations
 docs/
-  bingewyrm-theme.css    HSL design tokens
-  bingewyrm-skipped.md   Deferred features tracker
+  bingewyrm-theme.css      HSL design tokens (reference)
+  bingewyrm-skipped.md     Deferred features tracker
 ```
 
 ## Architecture Notes
@@ -150,7 +154,9 @@ docs/
 - **Session expiry** is handled by pg_cron (every minute). Client-side also checks lazily on page load.
 - **Realtime** is scoped to item additions + session status changes only. Vote counts are not realtime.
 - **TMDb requests are proxied** through a Supabase Edge Function to keep the API key server-side. AniList GraphQL is called directly from the client (no API key required).
-- **Batch item add** uses multi-select with pinned selections across searches. Existing items show "Added" badge. Detail panel fetched lazily on info tap.
+- **Batch item add** uses multi-select with pinned selections across searches. Existing items show "Added" badge. Detail panel fetched lazily on info tap. Manual entry (title + year) available for items not found via API.
+- **Client-side sort** on watchlist detail (title, year, rating, date added) persisted in localStorage — no server-side sort state.
+- **Genre blacklist** per-group, leader-managed. Items with blacklisted genres are excluded from session-eligible items. Genre data stored at add-time from source API.
 - **Invite flow** preserves redirect: `requireOnboarding` passes `?next=` param so new users land on the invited group after onboarding.
 
 ## License

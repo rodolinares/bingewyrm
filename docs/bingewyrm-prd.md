@@ -1,5 +1,14 @@
 # Product Requirements Document: BingeWyrm (Group Watchlist)
 
+> **Post-PRD additions (implemented beyond this spec):**
+> - **Genre blacklist**: Per-group leader-managed blacklist (`group_genre_blacklist` table, RPCs in migration 00011). Items matching blacklisted genres excluded from session-eligible pools. UI in group settings.
+> - **Client-side sort**: Watchlist detail items sortable by title, year, rating, added_at. Persisted in localStorage, not server-side.
+> - **Batch remove**: `remove_items` RPC for multi-select delete in watchlist edit mode.
+> - **Rating/genre storage**: `vote_average` and `genres` columns on `items` table, populated at add-time from source API. Used for sort and blacklist filtering.
+
+> **PRD corrections:**
+> - `docs/bingewyrm-theme.css` is a reference copy; actual tokens live in `src/index.css` under `@theme inline`.
+
 ## 1. Summary
 
 BingeWyrm is a web app that lets a group of users maintain shared watchlists of movies, series, anime, and anime movies, then narrow a given watchlist down through a swipe-based voting session, producing a ranked result the group can commit to or discard. Each watchlist holds exactly one media type; a group may maintain several watchlists, one per type.

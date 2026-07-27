@@ -30,6 +30,8 @@ Available RPCs:
 - `start_session`, `cast_vote`, `end_session`, `resolve_outcome`
 - `update_user_profile`
 - `get_member_count`
+- `remove_items`
+- `get_group_genres`, `get_genre_blacklist`, `add_genre_blacklist`, `remove_genre_blacklist`
 
 ### SECURITY DEFINER stays
 
@@ -84,7 +86,7 @@ derived state.
 
 - `Button` does NOT support `asChild` — use `Link` with button styling instead
 - Dialog components live in `src/components/ui/dialog.tsx` (shadcn/base-ui)
-- Theme tokens in `docs/bingewyrm-theme.css`, wired via `@theme inline` in `src/index.css`
+- Theme tokens in `src/index.css` (`@theme inline`), reference copy in `docs/bingewyrm-theme.css`
 
 ## File Map
 
@@ -94,15 +96,17 @@ derived state.
 | `src/lib/supabase.ts` | Supabase client, `supabaseUrl$` |
 | `src/lib/anilist.ts` | AniList GraphQL search (enriched: description, averageScore, genres) |
 | `src/lib/shuffle.ts` | Deterministic mulberry32 PRNG shuffle |
+| `src/lib/utils.ts` | `cn()` helper (clsx + tailwind-merge) |
 | `src/hooks/use-user.ts` | Session + profile (TanStack Query) |
 | `src/hooks/use-realtime.ts` | `useRealtimeSession`, `useRealtimeItems` (shared `useRealtime` helper) |
 | `src/queries/groups.ts` | Group CRUD hooks (all RPCs) |
 | `src/queries/watchlists.ts` | Watchlist/item hooks (all RPCs) |
 | `src/queries/sessions.ts` | Session/vote hooks (all RPCs), `useLastSessionByOutcome` |
-| `src/components/watchlist/add-item-dialog.tsx` | Batch add, multi-select, detail panel, existing badges |
-| `supabase/migrations/` | SQL migrations 00001–00010 |
+| `src/components/watchlist/add-item-dialog.tsx` | Batch add, multi-select, detail panel, existing badges, manual entry |
+| `src/components/watchlist/item-detail-panel.tsx` | Item detail panel (overlay with description, rating, genres) |
+| `supabase/migrations/` | SQL migrations 00001–00011 |
 | `supabase/functions/tmdb-search/` | TMDb proxy Edge Function (search + detail endpoints) |
-| `docs/bingewyrm-theme.css` | HSL design tokens |
+| `docs/bingewyrm-theme.css` | HSL design tokens (reference — actual tokens in `src/index.css` `@theme inline`) |
 | `docs/bingewyrm-skipped.md` | Deferred features tracker |
 | `netlify.toml` | SPA redirect rule |
 
@@ -116,3 +120,4 @@ derived state.
 - Edge Function must be redeployed after changes: `supabase functions deploy tmdb-search`
 - Git: `develop` branch for all work, merge to `main` for releases
 - Item count on watchlist cards excludes removed items (`removed_at IS NOT NULL`)
+- Genre blacklist: leader-only, set per-group, excludes items from session pools
