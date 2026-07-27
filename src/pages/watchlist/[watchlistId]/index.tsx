@@ -43,9 +43,9 @@ const SORT_OPTIONS: SortOption[] = [
   { label: 'Rating (lowest)', by: 'vote_average', dir: 'asc' }
 ]
 
-function loadSort(watchlistId: string): SortOption {
+function loadSort(): SortOption {
   try {
-    const raw = localStorage.getItem(`watchlist-sort-${watchlistId}`)
+    const raw = localStorage.getItem('watchlist-sort')
     if (raw) {
       const parsed = JSON.parse(raw)
       if (parsed && typeof parsed.by === 'string' && (parsed.dir === 'asc' || parsed.dir === 'desc')) {
@@ -72,7 +72,7 @@ export default function WatchlistDetail() {
   const { data: resolvedParticipants } = useSessionParticipants(resolvedSession?.id ?? '')
   useRealtimeItems(watchlistId!)
 
-  const [sort, setSort] = useState<SortOption>(() => loadSort(watchlistId!))
+  const [sort, setSort] = useState<SortOption>(loadSort)
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const [detailItemId, setDetailItemId] = useState<string | null>(null)
   const [editMode, setEditMode] = useState(false)
@@ -104,7 +104,7 @@ export default function WatchlistDetail() {
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const opt = SORT_OPTIONS[Number(e.target.value)]!
     setSort(opt)
-    localStorage.setItem(`watchlist-sort-${watchlistId!}`, JSON.stringify(opt))
+    localStorage.setItem('watchlist-sort', JSON.stringify(opt))
   }
 
   if (isLoading) {
@@ -187,7 +187,7 @@ export default function WatchlistDetail() {
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <select
-            value={SORT_OPTIONS.indexOf(sort)}
+            value={SORT_OPTIONS.findIndex(o => o.by === sort.by && o.dir === sort.dir)}
             onChange={handleSortChange}
             className="flex h-8 rounded-md border border-input bg-background px-2 text-xs text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
