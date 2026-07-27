@@ -20,7 +20,6 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  // Require authenticated user
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) {
     return new Response(JSON.stringify({ error: "Missing authorization" }), {
@@ -31,8 +30,46 @@ Deno.serve(async (req: Request) => {
 
   try {
     const url = new URL(req.url);
+    const pathParts = url.pathname.split("/").filter(Boolean);
+
+    // Detail endpoint: /tmdb-search/detail/{id}?type=movie|tv
+    if (pathParts.includes("detail")) {
+      const id = pathParts[pathParts.indexOf("detail") + 1];
+      const type = url.searchParams.get("type");
+
+      if (!id || !type || (type !== "movie" && type !== "tv")) {
+        return new Response(JSON.stringify({ error: "Missing or invalid id/type" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const tmdbUrl = `${TMDB_BASE}/${type}/${id}?api_key=${TMDB_KEY}&language=en-US`;
+      const res = await fetch(tmdbUrl);
+      const data = await res.json();
+
+      if (!res.ok) {
+        return new Response(JSON.stringify({ error: data.status_message || "Not found" }), {
+          status: res.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({
+        overview: data.overview,
+        vote_average: data.vote_average,
+        genres: (data.genres || []).map((g: Record<string, string>) => g.name),
+        runtime: data.runtime || data.episode_run_time?.[0] || null,
+        poster_path: data.poster_path,
+        backdrop_path: data.backdrop_path,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Search endpoint: /tmdb-search?q=...&type=movie|tv
     const query = url.searchParams.get("q");
-    const type = url.searchParams.get("type"); // "movie" or "tv"
+    const type = url.searchParams.get("type");
 
     if (!query || !type) {
       return new Response(JSON.stringify({ error: "Missing q or type param" }), {
@@ -53,13 +90,13 @@ Deno.serve(async (req: Request) => {
     const res = await fetch(tmdbUrl);
     const data = await res.json();
 
-    // Map to a lean shape the client needs
     const results = (data.results || []).slice(0, 10).map((item: Record<string, unknown>) => ({
       source_id: String(item.id),
       title: type === "movie" ? item.title : item.name,
       year: (type === "movie" ? item.release_date : item.first_air_date as string || "").slice(0, 4) || null,
       poster_path: item.poster_path,
       overview: item.overview,
+      vote_average: item.vote_average,
     }));
 
     return new Response(JSON.stringify({ results }), {

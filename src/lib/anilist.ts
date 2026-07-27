@@ -4,6 +4,9 @@ export interface AniListMedia {
   coverImage: { medium: string }
   startDate: { year: number | null }
   format: string
+  description: string | null
+  averageScore: number | null
+  genres: string[]
 }
 
 interface AniListResponse {
@@ -24,6 +27,9 @@ const SEARCH_QUERY = `query ($search: String, $format: [MediaFormat]) {
       coverImage { medium }
       startDate { year }
       format
+      description(asHtml: false)
+      averageScore
+      genres
     }
   }
 }`

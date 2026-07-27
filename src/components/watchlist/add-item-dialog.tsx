@@ -9,6 +9,18 @@ interface SearchResult {
   title: string
   year: number | null
   poster_path: string | null
+  overview?: string | null
+  vote_average?: number | null
+  genres?: string[]
+}
+
+interface DetailResult {
+  overview: string | null
+  vote_average: number | null
+  genres: string[]
+  runtime: number | null
+  poster_path: string | null
+  backdrop_path: string | null
 }
 
 type MediaType = 'movie' | 'series' | 'anime' | 'anime_movie'
@@ -40,11 +52,14 @@ function mapAniListResults(results: AniListMedia[]): SearchResult[] {
     source_id: String(m.id),
     title: m.title.english ?? m.title.romaji,
     year: m.startDate.year,
-    poster_path: m.coverImage.medium
+    poster_path: m.coverImage.medium,
+    overview: m.description ? m.description.replace(/<[^>]*>/g, '').trim() : null,
+    vote_average: m.averageScore != null ? m.averageScore / 10 : null,
+    genres: m.genres ?? []
   }))
 }
 
-const TMDB_IMG = 'https://image.tmdb.org/t/p/w200'
+const TMDB_IMG = 'https://image.tmdb.org/t/p'
 
 export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props) {
   const [open, setOpen] = useState(false)
@@ -57,6 +72,9 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [selectedItems, setSelectedItems] = useState<Map<string, SearchResult>>(new Map())
   const [existingIds, setExistingIds] = useState<Set<string>>(new Set())
+  const [detailItem, setDetailItem] = useState<SearchResult | null>(null)
+  const [detail, setDetail] = useState<DetailResult | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
   const addItem = useAddItem()
   const debounceRef = useRef<number | undefined>(undefined)
   const closeTimerRef = useRef<number | undefined>(undefined)
@@ -79,11 +97,11 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
   }, [open, watchlistId])
 
   useEffect(() => {
-    if (open && tab === 'search') {
+    if (open && tab === 'search' && !detailItem) {
       const timer = setTimeout(() => inputRef.current?.focus(), 50)
       return () => clearTimeout(timer)
     }
-  }, [open, tab])
+  }, [open, tab, detailItem])
 
   const handleClose = () => {
     setOpen(false)
@@ -93,6 +111,8 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
     setSuccess(null)
     setSelected(new Set())
     setSelectedItems(new Map())
+    setDetailItem(null)
+    setDetail(null)
     setManualTitle('')
     setManualYear('')
     setTab('search')
@@ -154,6 +174,77 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
       else next.set(source_id, result)
       return next
     })
+  }
+
+  const fetchDetail = async (item: SearchResult) => {
+    setDetailItem(item)
+    setDetailLoading(true)
+    setDetail(null)
+
+    if (mediaType === 'anime' || mediaType === 'anime_movie') {
+      // AniList: data already in search result
+      setDetail({
+        overview: item.overview ?? null,
+        vote_average: item.vote_average ?? null,
+        genres: item.genres ?? [],
+        runtime: null,
+        poster_path: item.poster_path,
+        backdrop_path: null
+      })
+      setDetailLoading(false)
+      return
+    }
+
+    // TMDb: fetch from detail endpoint
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const token = sessionData.session?.access_token
+      const res = await fetch(
+        `${supabaseUrl$}/functions/v1/tmdb-search/detail/${item.source_id}?type=${tmdbType(mediaType)}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      if (!res.ok) throw new Error('Failed to load details')
+      const data = await res.json()
+      setDetail(data)
+    } catch {
+      // Fall back to search data
+      setDetail({
+        overview: item.overview ?? null,
+        vote_average: item.vote_average ?? null,
+        genres: item.genres ?? [],
+        runtime: null,
+        poster_path: item.poster_path,
+        backdrop_path: null
+      })
+    } finally {
+      setDetailLoading(false)
+    }
+  }
+
+  const handleDetailAdd = async (item: SearchResult) => {
+    setError(null)
+    setSuccess(null)
+    try {
+      await addItem.mutateAsync({
+        watchlist_id: watchlistId,
+        title: item.title,
+        source: mediaType === 'movie' || mediaType === 'series' ? 'tmdb' : 'anilist',
+        source_id: item.source_id,
+        year: item.year ?? new Date().getFullYear(),
+        poster_path: item.poster_path,
+        added_by: userId
+      })
+      setSuccess(`Added "${item.title}"`)
+      closeTimerRef.current = setTimeout(() => {
+        setDetailItem(null)
+        setDetail(null)
+        setSuccess(null)
+        fetchExistingIds()
+        onAdded()
+      }, 1200)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to add item')
+    }
   }
 
   const handleBatchAdd = async () => {
@@ -222,6 +313,104 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
     }
   }
 
+  // Detail panel
+  if (detailItem) {
+    const isAdded = existingIds.has(detailItem.source_id)
+    return (
+      <>
+        <Button onClick={() => setOpen(true)}>Add Item</Button>
+        {open && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
+            <div className="flex h-[90dvh] w-full max-w-lg flex-col rounded-t-lg border border-border bg-card shadow-lg sm:rounded-lg sm:h-[80vh]">
+              <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                <button
+                  onClick={() => { setDetailItem(null); setDetail(null); setError(null); setSuccess(null) }}
+                  className="flex h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                >
+                  &larr; Back
+                </button>
+                <button
+                  onClick={handleClose}
+                  className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+                >
+                  &times;
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-auto p-4">
+                {success && (
+                  <div className="mb-3 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">{success}</div>
+                )}
+                {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
+
+                <div className="flex gap-4">
+                  {detailItem.poster_path ? (
+                    <img
+                      src={
+                        detailItem.poster_path.startsWith('http')
+                          ? detailItem.poster_path
+                          : `${TMDB_IMG}/w300${detailItem.poster_path}`
+                      }
+                      alt=""
+                      className="h-40 w-28 shrink-0 rounded object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-40 w-28 shrink-0 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
+                      No img
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-lg font-bold text-foreground">{detailItem.title}</h2>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                      {detailItem.year && <span>{detailItem.year}</span>}
+                      {detail?.vote_average != null && detail.vote_average > 0 && (
+                        <span className="flex items-center gap-1">
+                          <span className="text-yellow-400">★</span>
+                          {detail.vote_average.toFixed(1)}
+                        </span>
+                      )}
+                      {detail?.runtime != null && <span>{detail.runtime} min</span>}
+                    </div>
+                    {detail?.genres && detail.genres.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {detail.genres.map(g => (
+                          <span key={g} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                            {g}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {detailLoading ? (
+                  <p className="mt-4 text-sm text-muted-foreground">Loading details...</p>
+                ) : detail?.overview ? (
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{detail.overview}</p>
+                ) : null}
+              </div>
+
+              <div className="shrink-0 border-t border-border p-4">
+                {isAdded ? (
+                  <div className="text-center text-sm text-emerald-400">Already in watchlist</div>
+                ) : (
+                  <Button
+                    onClick={() => handleDetailAdd(detailItem)}
+                    disabled={addItem.isPending || !!success}
+                    className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+                  >
+                    {addItem.isPending ? 'Adding...' : `Add to ${TYPE_LABELS[mediaType]}`}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    )
+  }
+
+  // Search / list view
   return (
     <>
       <Button onClick={() => setOpen(true)}>Add Item</Button>
@@ -279,11 +468,9 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                       const isAdded = existingIds.has(r.source_id)
                       const isPinned = !results.some(res => res.source_id === r.source_id)
                       return (
-                        <button
+                        <div
                           key={r.source_id}
-                          onClick={() => !isAdded && toggleSelect(r)}
-                          disabled={isAdded}
-                          className={`flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors ${
+                          className={`flex items-center gap-3 rounded-md border p-3 transition-colors ${
                             isAdded
                               ? 'cursor-default border-border opacity-50'
                               : isSelected
@@ -291,26 +478,24 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                                 : 'border-border hover:border-primary/50 hover:bg-accent'
                           } ${isPinned ? 'border-l-2 border-l-primary' : ''}`}
                         >
-                          <div
-                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
-                              isAdded
-                                ? 'border-muted-foreground bg-muted'
-                                : isSelected
-                                  ? 'border-primary bg-primary text-primary-foreground'
-                                  : 'border-muted-foreground'
-                            }`}
+                          <button
+                            onClick={() => !isAdded && toggleSelect(r)}
+                            disabled={isAdded}
+                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2"
                           >
                             {isAdded ? (
                               <span className="text-[10px] text-muted-foreground">✓</span>
                             ) : isSelected ? (
-                              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                              </svg>
+                              <div className="flex h-full w-full items-center justify-center rounded-full border-primary bg-primary text-primary-foreground">
+                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
                             ) : null}
-                          </div>
+                          </button>
                           {r.poster_path ? (
                             <img
-                              src={r.poster_path.startsWith('http') ? r.poster_path : `${TMDB_IMG}${r.poster_path}`}
+                              src={r.poster_path.startsWith('http') ? r.poster_path : `${TMDB_IMG}/w200${r.poster_path}`}
                               alt=""
                               className="h-16 w-12 rounded object-cover"
                             />
@@ -321,14 +506,33 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                           )}
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-medium text-foreground">{r.title}</p>
-                            <p className="text-xs text-muted-foreground">{r.year ?? 'Unknown year'}</p>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>{r.year ?? 'Unknown year'}</span>
+                              {r.vote_average != null && r.vote_average > 0 && (
+                                <span className="flex items-center gap-0.5">
+                                  <span className="text-yellow-400">★</span>
+                                  {r.vote_average.toFixed(1)}
+                                </span>
+                              )}
+                            </div>
                             {isAdded && (
                               <span className="mt-1 inline-block rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400">
                                 Added
                               </span>
                             )}
                           </div>
-                        </button>
+                          {!isAdded && (
+                            <button
+                              onClick={() => fetchDetail(r)}
+                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                              title="View details"
+                            >
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                       )
                     })}
                   </div>
