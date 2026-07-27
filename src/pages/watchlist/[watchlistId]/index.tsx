@@ -79,33 +79,29 @@ export default function WatchlistDetail() {
           <h1 className="mt-2 text-2xl font-bold text-foreground">{MEDIA_LABELS[watchlist.media_type]}</h1>
         </div>
         <div className="flex gap-2">
-          {isLeader && (
-            <>
-              {unresolvedSession ? (
-                <Link
-                  to={`/session/${unresolvedSession.id}/results`}
-                  className="inline-flex h-10 items-center justify-center rounded-lg bg-accent px-3 text-sm font-medium text-accent-foreground transition-all hover:bg-accent/80"
-                >
-                  View Results
-                </Link>
-              ) : activeSession ? (
-                <Link
-                  to={`/session/${activeSession.id}/vote`}
-                  className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
-                >
-                  Active Session
-                </Link>
-              ) : (
-                <Button
-                  render={<Link to={`/watchlist/${watchlistId}/start-session`} />}
-                  className="bg-emerald-600 text-white hover:bg-emerald-700"
-                  disabled={eligibleCount < 2}
-                >
-                  Start Session
-                </Button>
-              )}
-            </>
-          )}
+          {unresolvedSession ? (
+            <Link
+              to={`/session/${unresolvedSession.id}/results`}
+              className="inline-flex h-10 items-center justify-center rounded-lg bg-accent px-3 text-sm font-medium text-accent-foreground transition-all hover:bg-accent/80"
+            >
+              View Results
+            </Link>
+          ) : activeSession ? (
+            <Link
+              to={`/session/${activeSession.id}/vote`}
+              className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
+            >
+              Active Session
+            </Link>
+          ) : isLeader ? (
+            <Button
+              render={<Link to={`/watchlist/${watchlistId}/start-session`} />}
+              className="bg-emerald-600 text-white hover:bg-emerald-700"
+              disabled={eligibleCount < 2}
+            >
+              Start Session
+            </Button>
+          ) : null}
           {user && (
             <AddItemDialog
               watchlistId={watchlistId!}
