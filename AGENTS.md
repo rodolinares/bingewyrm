@@ -110,6 +110,66 @@ derived state.
 | `docs/bingewyrm-skipped.md` | Deferred features tracker |
 | `netlify.toml` | SPA redirect rule |
 
+## Tests
+
+### Stack
+
+- **Framework**: Vitest (vite-native, shares config)
+- **Component tests**: `@testing-library/react` + `@testing-library/jest-dom` + `@testing-library/user-event`
+- **Coverage**: `@vitest/coverage-v8`
+
+### Running
+
+```bash
+pnpm test          # single run
+pnpm test:watch    # watch mode
+pnpm test:coverage # with coverage report
+```
+
+Coverage threshold starts at 10% — ratchet up as coverage grows. Never lower.
+
+### File naming
+
+- Unit tests co-located: `src/lib/shuffle.test.ts` next to `src/lib/shuffle.ts`
+- Query/component tests: `src/queries/__tests__/groups.test.tsx` (separate dir for complex setup)
+- Test infrastructure: `src/__tests__/` (setup, mocks, test-utils)
+
+### Conventions
+
+1. **Pure functions first**: test input → output mapping. No mocking needed.
+2. **Query hooks**: mock `@/lib/supabase` module with `vi.mock()`. Use mutable ref pattern to control return values per test:
+   ```ts
+   const queryRef = vi.hoisted(() => ({ current: [] }))
+   vi.mock('@/lib/supabase', () => ({
+     supabase: {
+       from: () => chain(queryRef),
+       rpc: () => chain(rpcRef),
+       auth: { getSession: () => Promise.resolve(...) }
+     }
+   }))
+   ```
+3. **`useUser` dependency**: mock `@/hooks/use-user` when testing hooks that call it.
+4. **QueryClient**: create fresh per test with `retry: false` and `gcTime: 0` to avoid flakiness.
+5. **Error paths**: test that RPC errors propagate as thrown exceptions.
+6. **Mutation invalidation**: test that `onSuccess` invalidates the expected query keys.
+7. **No MSW**: mock supabase module directly; mock `fetch` for anilist tests via `vi.spyOn(globalThis, 'fetch')`.
+
+### What to test by layer
+
+| Layer | What | Example |
+|-------|------|---------|
+| Pure functions | Edge cases, determinism, type correctness | `shuffle.ts`, `media.ts` |
+| Query hooks | RPC called with right args, error handling, cache invalidation | `queries/groups.ts` |
+| Components | Form validation, conditional rendering, user interaction | dialogs, pages |
+| Edge Functions | Request parsing, response format, error codes | `tmdb-search` |
+
+### Coverage target
+
+- **Baseline**: 10% (statements, branches, functions, lines)
+- **New queries**: must have test for success + error path
+- **New pure functions**: must have unit tests
+- **New components**: must have render + interaction tests for non-trivial logic
+
 ## Gotchas
 
 - `@supabase/ssr` is NOT used — this is a Vite SPA, not SSR
