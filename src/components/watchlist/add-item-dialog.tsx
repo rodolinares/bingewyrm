@@ -4,6 +4,7 @@ import { useAddItem } from '@/queries/watchlists'
 import { supabase, supabaseUrl$ } from '@/lib/supabase'
 import { searchAniList, type AniListMedia } from '@/lib/anilist'
 import { tmdbImg, MEDIA_LABELS as TYPE_LABELS } from '@/lib/media'
+import { Skeleton } from '@/components/ui/skeleton'
 
 interface SearchResult {
   source_id: string
@@ -382,7 +383,11 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                 </div>
 
                 {detailLoading ? (
-                  <p className="mt-4 text-sm text-muted-foreground">Loading details...</p>
+                  <div className="mt-4 space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-4 w-4/6" />
+                  </div>
                 ) : detail?.overview ? (
                   <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{detail.overview}</p>
                 ) : null}
