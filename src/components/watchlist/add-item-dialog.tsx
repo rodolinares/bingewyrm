@@ -44,6 +44,8 @@ function mapAniListResults(results: AniListMedia[]): SearchResult[] {
   }))
 }
 
+const TMDB_IMG = 'https://image.tmdb.org/t/p/w200'
+
 export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props) {
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'search' | 'manual'>('search')
@@ -51,6 +53,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
   const [results, setResults] = useState<SearchResult[]>([])
   const [searching, setSearching] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
   const addItem = useAddItem()
   const debounceRef = useRef<number | undefined>(undefined)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -70,6 +73,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
     setQuery('')
     setResults([])
     setError(null)
+    setSelected(new Set())
     setManualTitle('')
     setManualYear('')
     setTab('search')
@@ -110,22 +114,46 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
     return () => clearTimeout(debounceRef.current)
   }, [searchQuery, mediaType])
 
-  const handleAdd = async (result: SearchResult) => {
+  const toggleSelect = (sourceId: string) => {
+    setSelected(prev => {
+      const next = new Set(prev)
+      if (next.has(sourceId)) next.delete(sourceId)
+      else next.add(sourceId)
+      return next
+    })
+  }
+
+  const handleBatchAdd = async () => {
     setError(null)
-    try {
-      await addItem.mutateAsync({
-        watchlist_id: watchlistId,
-        title: result.title,
-        source: mediaType === 'movie' || mediaType === 'series' ? 'tmdb' : 'anilist',
-        source_id: result.source_id,
-        year: result.year ?? new Date().getFullYear(),
-        poster_path: result.poster_path,
-        added_by: userId
-      })
-      onAdded()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to add item')
+    const toAdd = results.filter(r => selected.has(r.source_id))
+    let added = 0
+    let failed = 0
+
+    for (const result of toAdd) {
+      try {
+        await addItem.mutateAsync({
+          watchlist_id: watchlistId,
+          title: result.title,
+          source: mediaType === 'movie' || mediaType === 'series' ? 'tmdb' : 'anilist',
+          source_id: result.source_id,
+          year: result.year ?? new Date().getFullYear(),
+          poster_path: result.poster_path,
+          added_by: userId
+        })
+        added++
+      } catch {
+        failed++
+      }
     }
+
+    if (failed > 0 && added > 0) {
+      setError(`${added} added, ${failed} failed`)
+    } else if (failed > 0) {
+      setError('Failed to add items')
+    }
+
+    setSelected(new Set())
+    onAdded()
   }
 
   const handleManualAdd = async () => {
@@ -153,8 +181,6 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
       setError(e instanceof Error ? e.message : 'Failed to add item')
     }
   }
-
-  const TMDB_IMG = 'https://image.tmdb.org/t/p/w200'
 
   return (
     <>
@@ -191,7 +217,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
               </button>
             </div>
 
-            <div className="flex-1 overflow-auto p-4">
+            <div className="flex-1 overflow-auto p-4 pb-20">
               {tab === 'search' ? (
                 <>
                   <input
@@ -204,29 +230,47 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                   {searching && <p className="text-sm text-muted-foreground">Searching...</p>}
                   {error && <p className="text-sm text-destructive">{error}</p>}
                   <div className="space-y-2">
-                    {results.map(r => (
-                      <button
-                        key={r.source_id}
-                        onClick={() => handleAdd(r)}
-                        className="flex w-full items-center gap-3 rounded-md border border-border p-3 text-left transition-colors hover:border-primary/50 hover:bg-accent"
-                      >
-                        {r.poster_path ? (
-                          <img
-                            src={r.poster_path.startsWith('http') ? r.poster_path : `${TMDB_IMG}${r.poster_path}`}
-                            alt=""
-                            className="h-16 w-12 rounded object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-16 w-12 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
-                            No img
+                    {results.map(r => {
+                      const isSelected = selected.has(r.source_id)
+                      return (
+                        <button
+                          key={r.source_id}
+                          onClick={() => toggleSelect(r.source_id)}
+                          className={`flex w-full items-center gap-3 rounded-md border p-3 text-left transition-colors ${
+                            isSelected
+                              ? 'border-primary bg-primary/5'
+                              : 'border-border hover:border-primary/50 hover:bg-accent'
+                          }`}
+                        >
+                          <div
+                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
+                              isSelected ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground'
+                            }`}
+                          >
+                            {isSelected && (
+                              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
                           </div>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-foreground">{r.title}</p>
-                          <p className="text-xs text-muted-foreground">{r.year ?? 'Unknown year'}</p>
-                        </div>
-                      </button>
-                    ))}
+                          {r.poster_path ? (
+                            <img
+                              src={r.poster_path.startsWith('http') ? r.poster_path : `${TMDB_IMG}${r.poster_path}`}
+                              alt=""
+                              className="h-16 w-12 rounded object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-16 w-12 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
+                              No img
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-foreground">{r.title}</p>
+                            <p className="text-xs text-muted-foreground">{r.year ?? 'Unknown year'}</p>
+                          </div>
+                        </button>
+                      )
+                    })}
                   </div>
                 </>
               ) : (
@@ -260,6 +304,18 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                 </div>
               )}
             </div>
+
+            {tab === 'search' && selected.size > 0 && (
+              <div className="absolute bottom-0 left-0 right-0 border-t border-border bg-card p-4 sm:rounded-b-lg">
+                <Button
+                  onClick={handleBatchAdd}
+                  disabled={addItem.isPending}
+                  className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+                >
+                  {addItem.isPending ? 'Adding...' : `Add ${selected.size} item${selected.size > 1 ? 's' : ''}`}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
