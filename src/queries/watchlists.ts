@@ -28,16 +28,29 @@ export function useWatchlists(groupId: string) {
   return useQuery({
     queryKey: ['watchlists', groupId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: watchlists, error } = await supabase
         .from('watchlists')
-        .select('*, items(count)')
+        .select('*')
         .eq('group_id', groupId)
         .order('created_at')
 
       if (error) throw error
-      return data.map(w => ({
+      if (!watchlists || watchlists.length === 0) return []
+
+      const { data: items } = await supabase
+        .from('items')
+        .select('watchlist_id')
+        .in('watchlist_id', watchlists.map(w => w.id))
+        .is('removed_at', null)
+
+      const countMap = new Map<string, number>()
+      for (const item of items ?? []) {
+        countMap.set(item.watchlist_id, (countMap.get(item.watchlist_id) ?? 0) + 1)
+      }
+
+      return watchlists.map(w => ({
         ...w,
-        item_count: (w.items as unknown as { count: number }[])?.[0]?.count ?? 0
+        item_count: countMap.get(w.id) ?? 0
       })) as Watchlist[]
     }
   })
