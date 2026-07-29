@@ -146,7 +146,7 @@ export default function WatchlistDetail() {
           {unresolvedSession ? (
             <Link
               to={`/session/${unresolvedSession.id}/results`}
-              className="inline-flex h-10 items-center justify-center rounded-lg bg-accent px-3 text-sm font-medium text-accent-foreground transition-all hover:bg-accent/80"
+              className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
             >
               View Results
             </Link>
