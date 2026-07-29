@@ -59,8 +59,8 @@ function AppLayout() {
           </div>
         </header>
       )}
-      <main className="flex-1 overflow-auto">
-        <div key={location.pathname} className="animate-[fade-in_150ms_ease-out]">
+      <main className="flex flex-1 flex-col overflow-auto">
+        <div key={location.pathname} className="animate-[fade-in_150ms_ease-out] flex flex-1 flex-col">
           <Outlet />
         </div>
       </main>

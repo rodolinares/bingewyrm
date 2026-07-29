@@ -17,7 +17,7 @@ export default function GroupLayout() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex flex-1 items-center justify-center">
         <Spinner />
       </div>
     )
@@ -25,14 +25,14 @@ export default function GroupLayout() {
 
   if (isError || !group) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex flex-1 items-center justify-center">
         <p className="text-destructive">Failed to load group.</p>
       </div>
     )
   }
 
   return (
-    <div className="flex h-full flex-col sm:flex-row">
+    <div className="flex flex-1 flex-col sm:flex-row">
       {/* Desktop sidebar */}
       <aside className="hidden w-60 flex-col border-r border-border bg-card sm:flex">
         <div className="border-b border-border p-4">
