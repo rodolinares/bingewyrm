@@ -28,7 +28,7 @@ export default function GroupList() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="w-full max-w-2xl mx-auto space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Groups</h1>
