@@ -16,6 +16,7 @@ import {
 } from '@/queries/groups'
 import type { Group } from '@/queries/groups'
 import { useState } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useUser } from '@/hooks/use-user'
 
 interface Context {
@@ -87,7 +88,14 @@ export default function GroupSettings() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-foreground">Members</h2>
         {membersLoading ? (
-          <p className="text-sm text-muted-foreground">Loading members...</p>
+          <div className="space-y-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="flex items-center justify-between rounded-md border border-border px-3 py-2">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-3 w-12" />
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="space-y-2">
             {members?.map(m => (

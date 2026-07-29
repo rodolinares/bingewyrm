@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router'
 import { useWatchlist } from '@/queries/watchlists'
 import { usePastSessions } from '@/queries/sessions'
+import { Spinner } from '@/components/ui/spinner'
 import { MEDIA_LABELS } from '@/lib/media'
 
 const OUTCOME_LABELS: Record<string, string> = {
@@ -23,7 +24,7 @@ export default function SessionHistory() {
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">Loading history...</p>
+        <Spinner />
       </div>
     )
   }

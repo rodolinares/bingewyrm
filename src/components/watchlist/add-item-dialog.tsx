@@ -4,6 +4,7 @@ import { useAddItem } from '@/queries/watchlists'
 import { supabase, supabaseUrl$ } from '@/lib/supabase'
 import { searchAniList, type AniListMedia } from '@/lib/anilist'
 import { tmdbImg, MEDIA_LABELS as TYPE_LABELS } from '@/lib/media'
+import { Spinner } from '@/components/ui/spinner'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface SearchResult {
@@ -468,7 +469,12 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                     placeholder={`Search ${(TYPE_LABELS[mediaType] ?? mediaType).toLowerCase()}...`}
                     className="mb-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   />
-                  {searching && <p className="text-sm text-muted-foreground">Searching...</p>}
+                  {searching && (
+                    <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
+                      <Spinner className="h-4 w-4" />
+                      <span>Searching...</span>
+                    </div>
+                  )}
                   {error && <p className="text-sm text-destructive">{error}</p>}
                   <div className="space-y-2">
                     {displayedResults.map(r => {

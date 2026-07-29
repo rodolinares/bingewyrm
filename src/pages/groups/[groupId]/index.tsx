@@ -2,6 +2,8 @@ import { Link, Outlet, useParams } from 'react-router'
 import { useGroups } from '@/queries/groups'
 import { useUser } from '@/hooks/use-user'
 import { useWatchlists } from '@/queries/watchlists'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from '@/components/ui/spinner'
 import { CreateWatchlistDialog } from '@/components/group/create-watchlist-dialog'
 import { MEDIA_LABELS } from '@/lib/media'
 
@@ -16,7 +18,7 @@ export default function GroupLayout() {
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">Loading group...</p>
+        <Spinner />
       </div>
     )
   }
@@ -109,7 +111,14 @@ export function GroupWatchlists() {
         )}
       </div>
       {isLoading ? (
-        <p className="text-muted-foreground">Loading watchlists...</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="rounded-lg border border-border bg-card p-4">
+              <Skeleton className="h-5 w-24" />
+              <Skeleton className="mt-2 h-3 w-16" />
+            </div>
+          ))}
+        </div>
       ) : isError ? (
         <p className="text-destructive">Failed to load watchlists.</p>
       ) : !watchlists || watchlists.length === 0 ? (

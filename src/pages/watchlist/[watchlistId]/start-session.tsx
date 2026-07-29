@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router'
 import { useItems, useWatchlist, useStartSession, useActiveSession } from '@/queries/watchlists'
 import { useGroupMembers, useGroupGenreBlacklist } from '@/queries/groups'
+import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
 import { posterUrl } from '@/lib/media'
 
@@ -101,7 +102,7 @@ export default function SessionStart() {
   if (itemsLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+        <Spinner />
       </div>
     )
   }

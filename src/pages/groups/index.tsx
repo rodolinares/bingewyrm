@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { useGroups } from '@/queries/groups'
 import { useUser } from '@/hooks/use-user'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { CreateGroupDialog } from '@/components/group/create-group-dialog'
 
 export default function GroupList() {
@@ -13,7 +14,7 @@ export default function GroupList() {
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">Loading groups...</p>
+        <Spinner />
       </div>
     )
   }

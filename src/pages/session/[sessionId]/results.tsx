@@ -10,6 +10,7 @@ import {
   useSessionParticipants,
   useResolveOutcome
 } from '@/queries/sessions'
+import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
 import { posterUrl } from '@/lib/media'
 
@@ -75,7 +76,7 @@ export default function ResultsPage() {
   if (sessionLoading || itemsLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">Loading results...</p>
+        <Spinner />
       </div>
     )
   }

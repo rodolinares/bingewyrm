@@ -20,6 +20,7 @@ import { AddItemDialog } from '@/components/watchlist/add-item-dialog'
 import { ItemDetailPanel } from '@/components/watchlist/item-detail-panel'
 import { Button } from '@/components/ui/button'
 import { InfoIcon, EyeIcon, EyeSlashIcon, TrashIcon, XIcon, CheckIcon } from '@/components/icons'
+import { Spinner } from '@/components/ui/spinner'
 import { useGroups } from '@/queries/groups'
 import { MEDIA_LABELS, posterUrl } from '@/lib/media'
 
@@ -110,7 +111,7 @@ export default function WatchlistDetail() {
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">Loading watchlist...</p>
+        <Spinner />
       </div>
     )
   }

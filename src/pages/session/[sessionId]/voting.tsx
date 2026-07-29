@@ -6,6 +6,7 @@ import { useWatchlist } from '@/queries/watchlists'
 import { useSession, useSessionItems, useMyVotes, useCastVote, useEndSession, useDeleteVote } from '@/queries/sessions'
 import { useRealtimeSession } from '@/hooks/use-realtime'
 import { seededShuffle } from '@/lib/shuffle'
+import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
 import { posterUrl } from '@/lib/media'
 
@@ -136,7 +137,7 @@ export default function VotingPage() {
   if (sessionLoading || itemsLoading || votes === undefined) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">Loading session...</p>
+        <Spinner />
       </div>
     )
   }
@@ -152,7 +153,10 @@ export default function VotingPage() {
   if (isEnded) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">Session ended. Loading results...</p>
+        <div className="flex flex-col items-center gap-2">
+          <Spinner />
+          <p className="text-sm text-muted-foreground">Loading results...</p>
+        </div>
       </div>
     )
   }

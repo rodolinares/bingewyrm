@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase, supabaseUrl$ } from '@/lib/supabase'
 import { fetchAniListItem, type AniListMedia } from '@/lib/anilist'
 import type { Item } from '@/queries/watchlists'
+import { Skeleton } from '@/components/ui/skeleton'
 import { tmdbImg } from '@/lib/media'
 
 interface DetailData {
@@ -149,7 +150,11 @@ export function ItemDetailPanel({ item, mediaType, open, onClose }: Props) {
           </div>
 
           {loading ? (
-            <p className="mt-4 text-sm text-muted-foreground">Loading details...</p>
+            <div className="mt-4 space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-4/6" />
+            </div>
           ) : detail?.overview ? (
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{detail.overview}</p>
           ) : null}
