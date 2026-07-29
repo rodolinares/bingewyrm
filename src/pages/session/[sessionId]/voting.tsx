@@ -36,9 +36,15 @@ export default function VotingPage() {
 
   const deck = useMemo(() => {
     if (!allItems || !user) return []
-    const eligible = allItems.filter(i => !myVotedIds.has(i.id))
-    return seededShuffle(eligible, user.id + sessionId)
-  }, [allItems, user, myVotedIds, sessionId])
+    return seededShuffle(allItems, user.id + sessionId)
+  }, [allItems, user, sessionId])
+
+  const current = useMemo(() => {
+    for (let i = index; i < deck.length; i++) {
+      if (!myVotedIds.has(deck[i]!.id)) return deck[i]
+    }
+    return undefined
+  }, [deck, index, myVotedIds])
 
   const isExpired = session ? new Date(session.end_time) <= new Date() : false
   const isEnded = session?.status === 'ended' || isExpired
@@ -50,20 +56,19 @@ export default function VotingPage() {
   }, [session, isEnded, navigate, sessionId])
 
   const handleVote = async (value: boolean) => {
-    if (!user || !session || index >= deck.length) return
-    const item = deck[index]!
+    if (!user || !session || !current) return
     setAnimating(value ? 'yes' : 'no')
     try {
       await castVote.mutateAsync({
         sessionId: session.id,
-        itemId: item.id,
+        itemId: current.id,
         value
       })
     } catch {
       setAnimating(null)
       return
     }
-    setLastVote({ itemId: item.id })
+    setLastVote({ itemId: current.id })
     setTimeout(() => {
       setAnimating(null)
       setIndex(i => i + 1)
@@ -152,7 +157,6 @@ export default function VotingPage() {
     )
   }
 
-  const current = deck[index]
   const isLeader = groups?.some(g => g.id === watchlist?.group_id && g.leader_id === user?.id) ?? false
 
   if (!current) {
@@ -176,7 +180,7 @@ export default function VotingPage() {
     <div className="flex h-full flex-col items-center justify-center p-6">
       {/* Progress */}
       <p className="mb-4 text-sm text-muted-foreground">
-        {allItems ? allItems.length - deck.length + 1 : 0} of {allItems?.length ?? 0}
+        {myVotedIds.size + 1} of {allItems?.length ?? 0}
       </p>
 
       {/* Card */}
