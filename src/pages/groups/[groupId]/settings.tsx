@@ -262,14 +262,14 @@ function GenreBlacklistSection({ groupId }: { groupId: string }) {
               key={genre}
               onClick={() => toggle(genre)}
               disabled={addBlacklist.isPending || removeBlacklist.isPending}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 isBlacklisted
                   ? 'bg-destructive/20 text-destructive hover:bg-destructive/30'
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
               }`}
             >
+              <span className="mr-1">{isBlacklisted ? '⊘' : '+'}</span>
               {genre}
-              <span className="ml-1">{isBlacklisted ? '⊘' : '+'}</span>
             </button>
           )
         })}
