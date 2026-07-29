@@ -212,7 +212,16 @@ export default function VotingPage() {
       </div>
 
       {/* Vote buttons */}
-      <div className="mt-4 flex gap-6 sm:mt-6">
+      <div className="mt-4 flex items-center gap-6 sm:mt-6">
+        {lastVote && (
+          <button
+            onClick={handleUndo}
+            disabled={deleteVote.isPending}
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background text-xl transition-colors hover:text-foreground disabled:opacity-50 sm:h-14 sm:w-14"
+          >
+            ↺
+          </button>
+        )}
         <button
           onClick={() => handleVote(false)}
           disabled={!!animating}
@@ -227,18 +236,15 @@ export default function VotingPage() {
         >
           ♥
         </button>
+        {lastVote && <div className="h-12 w-12 sm:h-14 sm:w-14" />}
       </div>
 
-      {/* Undo */}
-      {lastVote && (
-        <button
-          onClick={handleUndo}
-          disabled={deleteVote.isPending}
-          className="mt-4 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
-        >
-          Undo last vote
-        </button>
-      )}
+      <Link
+        to={`/watchlist/${session.watchlist_id}`}
+        className="mt-6 text-sm text-muted-foreground hover:text-foreground"
+      >
+        Back to watchlist
+      </Link>
 
       {/* End early (leader only) */}
       {isLeader && (
