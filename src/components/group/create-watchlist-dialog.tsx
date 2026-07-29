@@ -19,10 +19,9 @@ const MEDIA_TYPES = [
 interface Props {
   groupId: string
   existingTypes: string[]
-  onCreated: () => void
 }
 
-export function CreateWatchlistDialog({ groupId, existingTypes, onCreated }: Props) {
+export function CreateWatchlistDialog({ groupId, existingTypes }: Props) {
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<string>('')
   const createWatchlist = useCreateWatchlist()
@@ -34,7 +33,6 @@ export function CreateWatchlistDialog({ groupId, existingTypes, onCreated }: Pro
     await createWatchlist.mutateAsync({ groupId, mediaType: selected })
     setOpen(false)
     setSelected('')
-    onCreated()
   }
 
   if (available.length === 0) return null

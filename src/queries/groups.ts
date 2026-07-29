@@ -1,13 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-
-export interface Group {
-  id: string
-  name: string
-  leader_id: string
-  invite_code: string
-  created_at: string
-}
 import { useUser } from '@/hooks/use-user'
 
 export interface Group {

@@ -106,7 +106,6 @@ export function GroupWatchlists() {
           <CreateWatchlistDialog
             groupId={groupId}
             existingTypes={watchlists?.map(w => w.media_type) ?? []}
-            onCreated={() => {}}
           />
         )}
       </div>

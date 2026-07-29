@@ -16,10 +16,6 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true }
   }
 
-  handleRetry = () => {
-    this.setState({ hasError: false })
-  }
-
   render() {
     if (this.state.hasError) {
       return (
