@@ -29,11 +29,11 @@ export default function VotingPage() {
   const touchStartY = useRef(0)
   const isDragging = useRef(false)
 
-  const myVotedIds = useMemo(() => new Set((votes ?? []).filter(v => !v.is_auto).map(v => v.item_id)), [votes])
+  const myVotedIds = useMemo(() => new Set((votes ?? []).map(v => v.item_id)), [votes])
 
   const deck = useMemo(() => {
     if (!allItems || !user) return []
-    const eligible = allItems.filter(i => i.added_by !== user.id && !myVotedIds.has(i.id))
+    const eligible = allItems.filter(i => !myVotedIds.has(i.id))
     return seededShuffle(eligible, user.id + sessionId)
   }, [allItems, user, myVotedIds, sessionId])
 
@@ -110,7 +110,7 @@ export default function VotingPage() {
     navigate(`/session/${sessionId}/results`, { replace: true })
   }
 
-  if (sessionLoading || itemsLoading) {
+  if (sessionLoading || itemsLoading || votes === undefined) {
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-muted-foreground">Loading session...</p>
