@@ -28,6 +28,8 @@
 
   --color-vote-yes: hsl(var(--vote-yes));
   --color-vote-no: hsl(var(--vote-no));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
   --color-marquee-highlight: hsl(var(--marquee-highlight));
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -40,6 +42,16 @@
 
   --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-sans);
+  --font-display: var(--font-sans);
+
+  --text-display: 2rem;
+  --text-display--line-height: 1.15;
+  --text-heading: 1.5rem;
+  --text-heading--line-height: 1.3;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5;
+  --text-caption: 0.875rem;
+  --text-caption--line-height: 1.4;
 
   /* shadcn chart/sidebar tokens — not used yet, kept for component compat */
   --color-chart-1: hsl(var(--chart-1));
@@ -55,6 +67,11 @@
   --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-ring: hsl(var(--sidebar-ring));
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @layer base {
@@ -91,6 +108,8 @@
     --ring: 38 80% 40%;
 
     /* App-specific tokens */
+    --success: 158 58% 34%;
+    --success-foreground: 48 33% 96%;
     --vote-yes: 20 74% 45%;
     --vote-no: 108 8% 45%;
     --marquee-highlight: 40 100% 79%;
@@ -140,6 +159,8 @@
     --input: 195 15% 28%;
     --ring: 38 80% 45%;
 
+    --success: 158 58% 38%;
+    --success-foreground: 228 14% 11%;
     --vote-yes: 20 74% 47%;
     --vote-no: 108 8% 52%;
     --marquee-highlight: 40 100% 79%;

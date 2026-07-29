@@ -1,5 +1,12 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from '@/components/ui/dialog'
 import { useCreateWatchlist } from '@/queries/watchlists'
 
 const MEDIA_TYPES = [
@@ -35,37 +42,37 @@ export function CreateWatchlistDialog({ groupId, existingTypes, onCreated }: Pro
   return (
     <>
       <Button onClick={() => setOpen(true)}>New Watchlist</Button>
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-lg">
-            <h2 className="text-lg font-bold text-foreground">Create Watchlist</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Choose a media type for this watchlist.</p>
-            <div className="mt-4 space-y-2">
-              {available.map(m => (
-                <button
-                  key={m.value}
-                  onClick={() => setSelected(m.value)}
-                  className={`block w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
-                    selected === m.value
-                      ? 'border-primary bg-primary/10 text-foreground'
-                      : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
-                  }`}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-            <div className="mt-6 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Cancel
-              </Button>
-              <Button disabled={!selected || createWatchlist.isPending} onClick={handleCreate}>
-                {createWatchlist.isPending ? 'Creating...' : 'Create'}
-              </Button>
-            </div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Watchlist</DialogTitle>
+            <DialogDescription>Choose a media type for this watchlist.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            {available.map(m => (
+              <button
+                key={m.value}
+                onClick={() => setSelected(m.value)}
+                className={`block w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
+                  selected === m.value
+                    ? 'border-primary bg-primary/10 text-foreground'
+                    : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
           </div>
-        </div>
-      )}
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button disabled={!selected || createWatchlist.isPending} onClick={handleCreate}>
+              {createWatchlist.isPending ? 'Creating...' : 'Create'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

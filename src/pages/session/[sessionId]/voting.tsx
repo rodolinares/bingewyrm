@@ -183,9 +183,19 @@ export default function VotingPage() {
   return (
     <div className="flex h-full flex-col items-center justify-center p-6">
       {/* Progress */}
-      <p className="mb-4 text-sm text-muted-foreground">
-        {myVotedIds.size + 1} of {allItems?.length ?? 0}
-      </p>
+      <div className="mb-4 flex w-full max-w-sm items-center gap-3">
+        <div className="flex-1">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-300"
+              style={{ width: `${allItems ? ((myVotedIds.size + 1) / allItems.length) * 100 : 0}%` }}
+            />
+          </div>
+        </div>
+        <p className="shrink-0 text-xs text-muted-foreground">
+          {myVotedIds.size + 1}/{allItems?.length ?? 0}
+        </p>
+      </div>
 
       {/* Card */}
       <div
@@ -213,6 +223,15 @@ export default function VotingPage() {
         )}
         <h3 className="text-center text-lg font-bold text-foreground">{current.title}</h3>
         <p className="text-sm text-muted-foreground">{current.year}</p>
+        {current.genres.length > 0 && (
+          <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+            {current.genres.slice(0, 3).map(g => (
+              <span key={g} className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                {g}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Vote buttons */}

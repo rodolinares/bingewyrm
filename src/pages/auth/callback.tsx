@@ -1,3 +1,4 @@
+import { Spinner } from '@/components/ui/spinner'
 import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { supabase } from '@/lib/supabase'
@@ -34,7 +35,7 @@ export default function AuthCallback() {
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background">
-      <p className="text-muted-foreground">Signing in...</p>
+      <Spinner />
     </div>
   )
 }

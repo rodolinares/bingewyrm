@@ -406,7 +406,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                   <Button
                     onClick={() => handleDetailAdd(detailItem)}
                     disabled={addItem.isPending || !!success}
-                    className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+                    className="w-full bg-success text-success-foreground hover:bg-success/80"
                   >
                     {addItem.isPending ? 'Adding...' : `Add to ${TYPE_LABELS[mediaType]}`}
                   </Button>
@@ -607,7 +607,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                 <Button
                   onClick={handleBatchAdd}
                   disabled={addItem.isPending}
-                  className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
+                  className="w-full bg-success text-success-foreground hover:bg-success/80"
                 >
                   {addItem.isPending ? 'Adding...' : `Add ${selected.size} item${selected.size > 1 ? 's' : ''}`}
                 </Button>

@@ -256,7 +256,19 @@ function GenreBlacklistSection({ groupId }: { groupId: string }) {
     }
   }
 
-  if (genresLoading) return null
+  if (genresLoading) {
+    return (
+      <section className="space-y-3 border-t border-border pt-6">
+        <h2 className="text-lg font-semibold text-foreground">Genre Blacklist</h2>
+        <p className="text-sm text-muted-foreground">Blacklisted genres are excluded from session-eligible items.</p>
+        <div className="flex flex-wrap gap-2">
+          {[1, 2, 3, 4, 5].map(i => (
+            <Skeleton key={i} className="h-7 w-20 rounded-full" />
+          ))}
+        </div>
+      </section>
+    )
+  }
   if (allGenres.length === 0) return null
 
   return (

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router'
+import { Spinner } from '@/components/ui/spinner'
 import { useJoinGroup } from '@/queries/groups'
 
 export default function InviteJoin() {
@@ -38,7 +39,7 @@ export default function InviteJoin() {
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background">
-      <p className="text-muted-foreground">Joining group...</p>
+      <Spinner />
     </div>
   )
 }

@@ -155,14 +155,14 @@ export default function WatchlistDetail() {
           ) : activeSession ? (
             <Link
               to={`/session/${activeSession.id}/vote`}
-              className="inline-flex h-8 items-center justify-center rounded-lg bg-emerald-600 px-3 text-sm font-medium text-white transition-all hover:bg-emerald-700"
+              className="inline-flex h-8 items-center justify-center rounded-lg bg-success px-3 text-sm font-medium text-success-foreground transition-all hover:bg-success/80"
             >
               Active Session
             </Link>
           ) : isLeader ? (
             <Button
               render={<Link to={`/watchlist/${watchlistId}/start-session`} />}
-              className="bg-emerald-600 text-white hover:bg-emerald-700"
+              className="bg-success text-success-foreground hover:bg-success/80"
               disabled={eligibleCount < 2}
             >
               Start Session
