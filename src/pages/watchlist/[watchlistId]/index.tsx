@@ -153,7 +153,7 @@ export default function WatchlistDetail() {
           ) : activeSession ? (
             <Link
               to={`/session/${activeSession.id}/vote`}
-              className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
+              className="inline-flex h-8 items-center justify-center rounded-lg bg-emerald-600 px-3 text-sm font-medium text-white transition-all hover:bg-emerald-700"
             >
               Active Session
             </Link>
