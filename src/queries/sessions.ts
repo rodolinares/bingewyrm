@@ -71,6 +71,23 @@ export function useCastVote() {
   })
 }
 
+export function useDeleteVote() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ sessionId, itemId }: { sessionId: string; itemId: string }) => {
+      const { error } = await supabase.rpc('delete_vote', {
+        p_session_id: sessionId,
+        p_item_id: itemId
+      })
+      if (error) throw error
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['votes', variables.sessionId] })
+    }
+  })
+}
+
 export function useEndSession() {
   const queryClient = useQueryClient()
 

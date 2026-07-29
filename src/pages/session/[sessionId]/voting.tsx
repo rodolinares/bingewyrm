@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router'
 import { useUser } from '@/hooks/use-user'
 import { useGroups } from '@/queries/groups'
 import { useWatchlist } from '@/queries/watchlists'
-import { useSession, useSessionItems, useMyVotes, useCastVote, useEndSession } from '@/queries/sessions'
+import { useSession, useSessionItems, useMyVotes, useCastVote, useEndSession, useDeleteVote } from '@/queries/sessions'
 import { useRealtimeSession } from '@/hooks/use-realtime'
 import { seededShuffle } from '@/lib/shuffle'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,7 @@ export default function VotingPage() {
   const { data: votes } = useMyVotes(sessionId!, user?.id)
   const castVote = useCastVote()
   const endSession = useEndSession()
+  const deleteVote = useDeleteVote()
   const { data: watchlist } = useWatchlist(session?.watchlist_id ?? '')
   const { data: groups } = useGroups()
   useRealtimeSession(sessionId!)
@@ -25,9 +26,11 @@ export default function VotingPage() {
   const [index, setIndex] = useState(0)
   const [animating, setAnimating] = useState<'yes' | 'no' | null>(null)
   const [dragX, setDragX] = useState(0)
+  const [lastVote, setLastVote] = useState<{ itemId: string } | null>(null)
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
   const isDragging = useRef(false)
+
 
   const myVotedIds = useMemo(() => new Set((votes ?? []).map(v => v.item_id)), [votes])
 
@@ -60,10 +63,25 @@ export default function VotingPage() {
       setAnimating(null)
       return
     }
+    setLastVote({ itemId: item.id })
     setTimeout(() => {
       setAnimating(null)
       setIndex(i => i + 1)
     }, 200)
+  }
+
+  const handleUndo = async () => {
+    if (!lastVote || !session || animating) return
+    setLastVote(null)
+    try {
+      await deleteVote.mutateAsync({
+        sessionId: session.id,
+        itemId: lastVote.itemId
+      })
+    } catch {
+      return
+    }
+    setIndex(i => Math.max(0, i - 1))
   }
 
   const SWIPE_THRESHOLD = 80
@@ -147,8 +165,8 @@ export default function VotingPage() {
             End Session Early
           </Button>
         )}
-        <Link to="/groups" className="text-sm text-primary hover:underline">
-          Back to groups
+        <Link to={`/watchlist/${session?.watchlist_id}`} className="text-sm text-primary hover:underline">
+          Back to watchlist
         </Link>
       </div>
     )
@@ -158,7 +176,7 @@ export default function VotingPage() {
     <div className="flex h-full flex-col items-center justify-center p-6">
       {/* Progress */}
       <p className="mb-4 text-sm text-muted-foreground">
-        {index + 1} of {deck.length}
+        {allItems ? allItems.length - deck.length + 1 : 0} of {allItems?.length ?? 0}
       </p>
 
       {/* Card */}
@@ -206,6 +224,17 @@ export default function VotingPage() {
           ♥
         </button>
       </div>
+
+      {/* Undo */}
+      {lastVote && (
+        <button
+          onClick={handleUndo}
+          disabled={deleteVote.isPending}
+          className="mt-4 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
+        >
+          Undo last vote
+        </button>
+      )}
 
       {/* End early (leader only) */}
       {isLeader && (
