@@ -19,6 +19,7 @@ import { useRealtimeItems } from '@/hooks/use-realtime'
 import { AddItemDialog } from '@/components/watchlist/add-item-dialog'
 import { ItemDetailPanel } from '@/components/watchlist/item-detail-panel'
 import { Button } from '@/components/ui/button'
+import { InfoIcon, EyeIcon, EyeSlashIcon, TrashIcon, XIcon, CheckIcon } from '@/components/icons'
 import { useGroups } from '@/queries/groups'
 import { MEDIA_LABELS, posterUrl } from '@/lib/media'
 
@@ -277,9 +278,7 @@ export default function WatchlistDetail() {
                   }`}
                 >
                   {selectedIds.has(item.id) && (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
+                    <CheckIcon className="h-3 w-3" />
                   )}
                 </button>
               )}
@@ -305,17 +304,9 @@ export default function WatchlistDetail() {
                   className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                   title="View details"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <InfoIcon className="h-4 w-4" />
                 </button>
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={() =>
                     toggleWatched.mutate({
                       id: item.id,
@@ -323,31 +314,44 @@ export default function WatchlistDetail() {
                       watchlistId: watchlistId!
                     })
                   }
+                  className={`flex h-8 w-8 items-center justify-center rounded-md ${
+                    item.watched
+                      ? 'text-primary hover:bg-primary/10'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`}
+                  title={item.watched ? 'Mark unwatched' : 'Mark watched'}
                 >
-                  {item.watched ? 'Unwatch' : 'Watched'}
-                </Button>
+                  {item.watched ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                </button>
                 {(item.added_by === user?.id || isLeader) &&
                   (confirmingId === item.id ? (
                     <div className="flex items-center gap-1">
-                      <span className="text-xs text-destructive">Remove?</span>
-                      <Button
-                        variant="destructive"
-                        size="sm"
+                      <button
                         onClick={() => {
                           removeItem.mutate({ id: item.id, watchlistId: watchlistId! })
                           setConfirmingId(null)
                         }}
+                        className="flex h-8 w-8 items-center justify-center rounded-md text-destructive hover:bg-destructive/10"
+                        title="Confirm remove"
                       >
-                        Confirm
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setConfirmingId(null)}>
-                        Cancel
-                      </Button>
+                      <TrashIcon className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setConfirmingId(null)}
+                        className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                        title="Cancel"
+                      >
+                        <XIcon className="h-4 w-4" />
+                      </button>
                     </div>
                   ) : (
-                    <Button variant="ghost" size="sm" onClick={() => setConfirmingId(item.id)}>
-                      Remove
-                    </Button>
+                    <button
+                      onClick={() => setConfirmingId(item.id)}
+                      className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                      title="Remove"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
                   ))}
               </div>
             </div>
