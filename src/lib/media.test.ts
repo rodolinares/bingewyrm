@@ -17,9 +17,7 @@ describe('posterUrl', () => {
   })
 
   it('returns tmdb URL for tmdb source', () => {
-    expect(posterUrl({ source: 'tmdb', poster_path: '/x.jpg' }, 'w500')).toBe(
-      `${TMDB_IMG_BASE}/w500/x.jpg`
-    )
+    expect(posterUrl({ source: 'tmdb', poster_path: '/x.jpg' }, 'w500')).toBe(`${TMDB_IMG_BASE}/w500/x.jpg`)
   })
 
   it('returns raw URL for anilist source', () => {

@@ -44,11 +44,12 @@ export default function SessionStart() {
   const [error, setError] = useState<string | null>(null)
 
   const blacklistSet = new Set(blacklist ?? [])
-  const eligibleItems = items?.filter(i => {
-    if (i.watched) return false
-    if (blacklistSet.size > 0 && i.genres?.some(g => blacklistSet.has(g))) return false
-    return true
-  }) ?? []
+  const eligibleItems =
+    items?.filter(i => {
+      if (i.watched) return false
+      if (blacklistSet.size > 0 && i.genres?.some(g => blacklistSet.has(g))) return false
+      return true
+    }) ?? []
 
   const toggleItem = (id: string) => {
     setSelected(prev => {

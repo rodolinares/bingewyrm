@@ -53,8 +53,7 @@ vi.mock('@/lib/supabase', () => ({
     from: () => chain(queryRef),
     rpc: () => chain(rpcRef),
     auth: {
-      getSession: () =>
-        Promise.resolve({ data: { session: { user: mockUser } }, error: null })
+      getSession: () => Promise.resolve({ data: { session: { user: mockUser } }, error: null })
     }
   }
 }))
@@ -95,8 +94,14 @@ describe('useGroups', () => {
 
   it('returns groups with member counts', async () => {
     const groups = [
-      { group_id: 'g1', groups: { id: 'g1', name: 'Group 1', leader_id: 'u1', invite_code: 'abc', created_at: '2024-01-01' } },
-      { group_id: 'g2', groups: { id: 'g2', name: 'Group 2', leader_id: 'u2', invite_code: 'def', created_at: '2024-01-02' } }
+      {
+        group_id: 'g1',
+        groups: { id: 'g1', name: 'Group 1', leader_id: 'u1', invite_code: 'abc', created_at: '2024-01-01' }
+      },
+      {
+        group_id: 'g2',
+        groups: { id: 'g2', name: 'Group 2', leader_id: 'u2', invite_code: 'def', created_at: '2024-01-02' }
+      }
     ]
     queryRef.current = groups
     rpcRef.current = [
@@ -115,7 +120,10 @@ describe('useGroups', () => {
 
   it('sets member_count to 0 when rpc returns empty', async () => {
     queryRef.current = [
-      { group_id: 'g1', groups: { id: 'g1', name: 'Group 1', leader_id: 'u1', invite_code: 'abc', created_at: '2024-01-01' } }
+      {
+        group_id: 'g1',
+        groups: { id: 'g1', name: 'Group 1', leader_id: 'u1', invite_code: 'abc', created_at: '2024-01-01' }
+      }
     ]
     rpcRef.current = []
 

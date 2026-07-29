@@ -25,10 +25,7 @@ function Wrapper({ children, queryClient }: { children: React.ReactNode } & Wrap
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>
 }
 
-export function renderWithProviders(
-  ui: ReactElement,
-  options?: RenderOptions & WrapperOptions
-) {
+export function renderWithProviders(ui: ReactElement, options?: RenderOptions & WrapperOptions) {
   const { queryClient, ...renderOptions } = options ?? {}
   const qc = queryClient ?? createTestQueryClient()
 

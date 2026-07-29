@@ -323,7 +323,12 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
             <div className="flex h-[90dvh] w-full max-w-lg flex-col rounded-t-lg border border-border bg-card shadow-lg sm:rounded-lg sm:h-[80dvh]">
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
                 <button
-                  onClick={() => { setDetailItem(null); setDetail(null); setError(null); setSuccess(null) }}
+                  onClick={() => {
+                    setDetailItem(null)
+                    setDetail(null)
+                    setError(null)
+                    setSuccess(null)
+                  }}
                   className="flex h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
                 >
                   &larr; Back
@@ -348,7 +353,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                       src={
                         detailItem.poster_path.startsWith('http')
                           ? detailItem.poster_path
-                          :             tmdbImg(detailItem.poster_path, 'w300')
+                          : tmdbImg(detailItem.poster_path, 'w300')
                       }
                       alt=""
                       className="h-40 w-28 shrink-0 rounded object-cover"
@@ -490,7 +495,13 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                               <span className="text-[10px] text-muted-foreground">✓</span>
                             ) : isSelected ? (
                               <div className="flex h-full w-full items-center justify-center rounded-full border-primary bg-primary text-primary-foreground">
-                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                <svg
+                                  className="h-3.5 w-3.5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth={3}
+                                >
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
                               </div>
@@ -526,12 +537,25 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                           </div>
                           {!isAdded && (
                             <button
-                              onClick={e => { e.stopPropagation(); fetchDetail(r) }}
+                              onClick={e => {
+                                e.stopPropagation()
+                                fetchDetail(r)
+                              }}
                               className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                               title="View details"
                             >
-                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
                               </svg>
                             </button>
                           )}

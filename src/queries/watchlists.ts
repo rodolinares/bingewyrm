@@ -42,7 +42,10 @@ export function useWatchlists(groupId: string) {
       const { data: items } = await supabase
         .from('items')
         .select('watchlist_id')
-        .in('watchlist_id', watchlists.map(w => w.id))
+        .in(
+          'watchlist_id',
+          watchlists.map(w => w.id)
+        )
         .is('removed_at', null)
 
       const countMap = new Map<string, number>()

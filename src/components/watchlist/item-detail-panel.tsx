@@ -61,11 +61,10 @@ export function ItemDetailPanel({ item, mediaType, open, onClose }: Props) {
     } else if (item.source === 'tmdb') {
       supabase.auth.getSession().then(({ data: sessionData }) => {
         const token = sessionData.session?.access_token
-        fetch(
-          `${supabaseUrl$}/functions/v1/tmdb-search/detail/${item.source_id}?type=${tmdbType(mediaType)}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-          .then(r => r.ok ? r.json() : Promise.reject())
+        fetch(`${supabaseUrl$}/functions/v1/tmdb-search/detail/${item.source_id}?type=${tmdbType(mediaType)}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+          .then(r => (r.ok ? r.json() : Promise.reject()))
           .then(data => setDetail(data))
           .catch(() => {
             setDetail({
@@ -119,11 +118,7 @@ export function ItemDetailPanel({ item, mediaType, open, onClose }: Props) {
         <div className="flex-1 overflow-auto p-4">
           <div className="flex gap-4">
             {posterSrc ? (
-              <img
-                src={posterSrc}
-                alt=""
-                className="h-40 w-28 shrink-0 rounded object-cover"
-              />
+              <img src={posterSrc} alt="" className="h-40 w-28 shrink-0 rounded object-cover" />
             ) : (
               <div className="flex h-40 w-28 shrink-0 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
                 No img
@@ -155,7 +150,7 @@ export function ItemDetailPanel({ item, mediaType, open, onClose }: Props) {
 
           {loading ? (
             <p className="mt-4 text-sm text-muted-foreground">Loading details...</p>
-          ) : (detail?.overview) ? (
+          ) : detail?.overview ? (
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{detail.overview}</p>
           ) : null}
         </div>

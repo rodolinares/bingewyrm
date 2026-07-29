@@ -151,9 +151,7 @@ export default function GroupSettings() {
       </section>
 
       {/* Genre blacklist (leader only) */}
-      {isLeader && (
-        <GenreBlacklistSection groupId={group.id} />
-      )}
+      {isLeader && <GenreBlacklistSection groupId={group.id} />}
 
       {/* Transfer leadership (leader only, requires other members) */}
       {isLeader && otherMembers.length > 0 && (
@@ -176,7 +174,12 @@ export default function GroupSettings() {
                   </option>
                 ))}
               </select>
-              <Button variant="destructive" disabled={!newLeaderId} onClick={() => setConfirmTransfer(true)} className="h-10 shrink-0">
+              <Button
+                variant="destructive"
+                disabled={!newLeaderId}
+                onClick={() => setConfirmTransfer(true)}
+                className="h-10 shrink-0"
+              >
                 Transfer & Leave
               </Button>
             </div>
@@ -251,9 +254,7 @@ function GenreBlacklistSection({ groupId }: { groupId: string }) {
   return (
     <section className="space-y-3 border-t border-border pt-6">
       <h2 className="text-lg font-semibold text-foreground">Genre Blacklist</h2>
-      <p className="text-sm text-muted-foreground">
-        Blacklisted genres are excluded from session-eligible items.
-      </p>
+      <p className="text-sm text-muted-foreground">Blacklisted genres are excluded from session-eligible items.</p>
       <div className="flex flex-wrap gap-2">
         {allGenres.map(genre => {
           const isBlacklisted = blacklistSet.has(genre)

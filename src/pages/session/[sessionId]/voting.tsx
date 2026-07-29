@@ -175,7 +175,11 @@ export default function VotingPage() {
         onTouchEnd={handleTouchEnd}
       >
         {posterUrl(current, 'w500') ? (
-          <img src={posterUrl(current, 'w500')!} alt="" className="mb-4 h-48 w-32 rounded-lg object-cover sm:h-64 sm:w-44" />
+          <img
+            src={posterUrl(current, 'w500')!}
+            alt=""
+            className="mb-4 h-48 w-32 rounded-lg object-cover sm:h-64 sm:w-44"
+          />
         ) : (
           <div className="mb-4 flex h-48 w-32 items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground sm:h-64 sm:w-44">
             No poster

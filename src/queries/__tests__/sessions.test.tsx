@@ -68,8 +68,7 @@ vi.mock('@/lib/supabase', () => ({
     from: () => chain(queryRef),
     rpc: () => chain(rpcRef),
     auth: {
-      getSession: () =>
-        Promise.resolve({ data: { session: { user: { id: 'user-1' } } }, error: null })
+      getSession: () => Promise.resolve({ data: { session: { user: { id: 'user-1' } } }, error: null })
     }
   }
 }))

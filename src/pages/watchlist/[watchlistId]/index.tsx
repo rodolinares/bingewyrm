@@ -1,6 +1,13 @@
 import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router'
-import { useItems, useWatchlist, useRemoveItem, useRemoveItems, useToggleWatched, useActiveSession } from '@/queries/watchlists'
+import {
+  useItems,
+  useWatchlist,
+  useRemoveItem,
+  useRemoveItems,
+  useToggleWatched,
+  useActiveSession
+} from '@/queries/watchlists'
 import { useUser } from '@/hooks/use-user'
 import {
   useLastUnresolvedSession,
@@ -184,17 +191,24 @@ export default function WatchlistDetail() {
             ))}
           </select>
           <button
-            onClick={() => { setEditMode(!editMode); setSelectedIds(new Set()); setBatchConfirm(false) }}
+            onClick={() => {
+              setEditMode(!editMode)
+              setSelectedIds(new Set())
+              setBatchConfirm(false)
+            }}
             className={`flex h-8 items-center rounded-md border px-2 text-xs font-medium transition-colors ${
-              editMode ? 'border-primary bg-primary/10 text-primary' : 'border-input text-muted-foreground hover:text-foreground'
+              editMode
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-input text-muted-foreground hover:text-foreground'
             }`}
           >
             {editMode ? 'Done' : 'Select'}
           </button>
         </div>
         <div className="flex items-center gap-2">
-          {editMode && selectedIds.size > 0 && (
-            batchConfirm ? (
+          {editMode &&
+            selectedIds.size > 0 &&
+            (batchConfirm ? (
               <div className="flex items-center gap-1">
                 <span className="text-xs text-destructive">Remove {selectedIds.size}?</span>
                 <button
@@ -222,9 +236,12 @@ export default function WatchlistDetail() {
               >
                 Remove {selectedIds.size}
               </button>
-            )
+            ))}
+          {items && (
+            <span className="text-xs text-muted-foreground">
+              {items.length} item{items.length !== 1 ? 's' : ''}
+            </span>
           )}
-          {items && <span className="text-xs text-muted-foreground">{items.length} item{items.length !== 1 ? 's' : ''}</span>}
         </div>
       </div>
 
@@ -289,7 +306,11 @@ export default function WatchlistDetail() {
                   title="View details"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                 </button>
                 <Button
@@ -305,8 +326,8 @@ export default function WatchlistDetail() {
                 >
                   {item.watched ? 'Unwatch' : 'Watched'}
                 </Button>
-                {(item.added_by === user?.id || isLeader) && (
-                  confirmingId === item.id ? (
+                {(item.added_by === user?.id || isLeader) &&
+                  (confirmingId === item.id ? (
                     <div className="flex items-center gap-1">
                       <span className="text-xs text-destructive">Remove?</span>
                       <Button
@@ -327,8 +348,7 @@ export default function WatchlistDetail() {
                     <Button variant="ghost" size="sm" onClick={() => setConfirmingId(item.id)}>
                       Remove
                     </Button>
-                  )
-                )}
+                  ))}
               </div>
             </div>
           ))}

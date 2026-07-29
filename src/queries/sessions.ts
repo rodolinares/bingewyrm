@@ -57,15 +57,7 @@ export function useCastVote() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({
-      sessionId,
-      itemId,
-      value
-    }: {
-      sessionId: string
-      itemId: string
-      value: boolean
-    }) => {
+    mutationFn: async ({ sessionId, itemId, value }: { sessionId: string; itemId: string; value: boolean }) => {
       const { error } = await supabase.rpc('cast_vote', {
         p_session_id: sessionId,
         p_item_id: itemId,
@@ -129,7 +121,9 @@ function useLastSessionByOutcome(watchlistId: string, resolved: boolean) {
         .order('created_at', { ascending: false })
         .limit(1)
 
-      const { data, error } = await (resolved ? base.not('outcome', 'is', null) : base.is('outcome', null)).maybeSingle()
+      const { data, error } = await (
+        resolved ? base.not('outcome', 'is', null) : base.is('outcome', null)
+      ).maybeSingle()
       if (error) throw error
       return data as Session | null
     },
