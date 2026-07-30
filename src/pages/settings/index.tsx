@@ -77,7 +77,7 @@ export default function Settings() {
       {/* Theme */}
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-foreground">Theme</h2>
-        <label className="flex items-center gap-3">
+        <label className="flex cursor-pointer items-center gap-3" onClick={() => toggleTheme()}>
           <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
           <span className="text-sm text-foreground">Dark mode</span>
         </label>

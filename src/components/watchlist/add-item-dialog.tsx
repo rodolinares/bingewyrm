@@ -495,7 +495,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                         >
                           <button
                             disabled={isAdded}
-                            className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full border-2"
+                            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2"
                           >
                             {isAdded ? (
                               <span className="text-[10px] text-muted-foreground">✓</span>
@@ -547,7 +547,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                                 e.stopPropagation()
                                 fetchDetail(r)
                               }}
-                              className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                               title="View details"
                             >
                               <svg

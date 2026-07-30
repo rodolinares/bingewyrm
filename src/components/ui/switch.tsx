@@ -14,7 +14,7 @@ function Switch({
       checked={checked}
       onCheckedChange={onCheckedChange}
       className={cn(
-        'group/switch relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full px-0.5 transition-colors outline-none select-none',
+        'group/switch relative inline-flex h-7 w-12 shrink-0 items-center rounded-full px-0.5 transition-colors outline-none select-none',
         'focus-visible:ring-3 focus-visible:ring-ring/50',
         'data-checked:bg-primary data-unchecked:bg-input',
         'disabled:pointer-events-none disabled:opacity-50',
