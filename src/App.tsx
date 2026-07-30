@@ -2,7 +2,6 @@ import { createBrowserRouter, Link, Navigate, Outlet, redirect, useLocation } fr
 import type { RouteObject } from 'react-router'
 import { supabase } from '@/lib/supabase'
 import { useUser } from '@/hooks/use-user'
-import { useTheme } from '@/hooks/use-theme'
 import { ErrorBoundary } from '@/components/error-boundary'
 import Login from '@/pages/auth/login'
 import AuthCallback from '@/pages/auth/callback'
@@ -16,12 +15,12 @@ import SessionHistory from '@/pages/watchlist/[watchlistId]/history'
 import VotingPage from '@/pages/session/[sessionId]/voting'
 import ResultsPage from '@/pages/session/[sessionId]/results'
 import InviteJoin from '@/pages/invite/[code]'
-import { SunIcon, MoonIcon } from '@/components/icons'
+import Settings from '@/pages/settings/index'
+import { SettingsIcon } from '@/components/icons'
 
 function AppLayout() {
   const { user } = useUser()
   const location = useLocation()
-  const { theme, toggleTheme } = useTheme()
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -36,13 +35,14 @@ function AppLayout() {
             BingeWyrm
           </Link>
           <div className="flex items-center gap-1">
-            <button
-              onClick={toggleTheme}
+            <Link
+              to="/settings"
               className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              title="Settings"
             >
-              {theme === 'dark' ? <SunIcon className="h-4 w-4" /> : <MoonIcon className="h-4 w-4" />}
-            </button>
+              <SettingsIcon className="h-4 w-4" />
+            </Link>
+
             <button
               onClick={handleSignOut}
               className="flex h-10 items-center px-2 text-sm text-muted-foreground hover:text-foreground"
@@ -80,6 +80,7 @@ async function requireOnboarding({ request }: { request: Request }) {
 }
 
 const protectedChildren: RouteObject[] = [
+  { path: 'settings', element: <Settings /> },
   { path: 'groups', element: <GroupList /> },
   {
     path: 'groups/:groupId',

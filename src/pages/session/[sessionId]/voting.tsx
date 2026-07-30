@@ -3,14 +3,21 @@ import { useParams, Link, useNavigate } from 'react-router'
 import { useUser } from '@/hooks/use-user'
 import { useGroups } from '@/queries/groups'
 import { useWatchlist } from '@/queries/watchlists'
-import { useSession, useSessionItems, useMyVotes, useCastVote, useEndSession, useDeleteVote } from '@/queries/sessions'
+import { useSession, useSessionItems, useMyVotes, useCastVote, useEndSession, useDeleteVote, useSessionParticipants, useSessionVotes } from '@/queries/sessions'
 import { useRealtimeSession } from '@/hooks/use-realtime'
 import { seededShuffle } from '@/lib/shuffle'
 import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
 import { posterUrl } from '@/lib/media'
 import { ItemDetailPanel } from '@/components/watchlist/item-detail-panel'
-import { InfoIcon } from '@/components/icons'
+import { InfoIcon, EyeIcon } from '@/components/icons'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription
+} from '@/components/ui/dialog'
 
 export default function VotingPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
@@ -24,6 +31,8 @@ export default function VotingPage() {
   const deleteVote = useDeleteVote()
   const { data: watchlist } = useWatchlist(session?.watchlist_id ?? '')
   const { data: groups } = useGroups()
+  const { data: participants } = useSessionParticipants(sessionId!)
+  const { data: allVotes } = useSessionVotes(sessionId!)
   useRealtimeSession(sessionId!)
 
   const [index, setIndex] = useState(0)
@@ -31,6 +40,7 @@ export default function VotingPage() {
   const [dragX, setDragX] = useState(0)
   const [lastVote, setLastVote] = useState<{ itemId: string } | null>(null)
   const [detailItemId, setDetailItemId] = useState<string | null>(null)
+  const [progressOpen, setProgressOpen] = useState(false)
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
   const isDragging = useRef(false)
@@ -49,6 +59,18 @@ export default function VotingPage() {
     }
     return undefined
   }, [deck, index, myVotedIds])
+
+  const votingProgress = useMemo(() => {
+    if (!participants || !allVotes || !session) return []
+    const total = session.item_ids.length
+    return participants.map(p => ({
+      userId: p.user_id,
+      displayName: p.users.display_name ?? 'Unnamed',
+      votesCast: allVotes.filter(v => v.user_id === p.user_id).length,
+      total,
+      done: allVotes.filter(v => v.user_id === p.user_id).length === total
+    }))
+  }, [participants, allVotes, session])
 
   const isExpired = session ? new Date(session.end_time) <= new Date() : false
   const isEnded = session?.status === 'ended' || isExpired
@@ -168,17 +190,33 @@ export default function VotingPage() {
 
   if (!current) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4">
+      <div className="flex h-full flex-col items-center justify-center gap-4 p-6">
         <h2 className="text-xl font-bold text-foreground">You&apos;re done!</h2>
-        <p className="text-sm text-muted-foreground">Waiting for other members to finish voting.</p>
-        {isLeader && (
-          <Button onClick={handleEndEarly} disabled={endSession.isPending}>
-            End Session Early
-          </Button>
+        {isLeader ? (
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-sm text-muted-foreground">Waiting for other members.</p>
+            <Button variant="outline" onClick={() => setProgressOpen(true)}>
+              <EyeIcon className="mr-1.5 h-4 w-4" />
+              View voting progress
+            </Button>
+            <Button onClick={handleEndEarly} disabled={endSession.isPending}>
+              End Session Early
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Waiting for other members to finish voting.</p>
         )}
         <Link to={`/watchlist/${session?.watchlist_id}`} className="text-sm text-primary hover:underline">
           Back to watchlist
         </Link>
+
+        <VotingProgressDialog
+          open={progressOpen}
+          onClose={() => setProgressOpen(false)}
+          progress={votingProgress}
+          onEndEarly={handleEndEarly}
+          endEarlyPending={endSession.isPending}
+        />
       </div>
     )
   }
@@ -284,16 +322,80 @@ export default function VotingPage() {
         />
       )}
 
-      {/* End early (leader only) */}
+      {/* Leader progress button + end early */}
       {isLeader && (
-        <button
-          onClick={handleEndEarly}
-          disabled={endSession.isPending}
-          className="mt-4 px-4 py-2 text-sm text-muted-foreground hover:text-foreground sm:mt-6"
-        >
-          End session early
-        </button>
+        <div className="mt-6 flex gap-2">
+          <Button variant="outline" onClick={() => setProgressOpen(true)}>
+            <EyeIcon className="mr-1.5 h-4 w-4" />
+            Progress
+          </Button>
+          <Button variant="outline" onClick={handleEndEarly} disabled={endSession.isPending}>
+            End early
+          </Button>
+        </div>
       )}
+
+      <VotingProgressDialog
+        open={progressOpen}
+        onClose={() => setProgressOpen(false)}
+        progress={votingProgress}
+        onEndEarly={handleEndEarly}
+        endEarlyPending={endSession.isPending}
+      />
     </div>
+  )
+}
+
+interface ProgressItem {
+  userId: string
+  displayName: string
+  votesCast: number
+  total: number
+  done: boolean
+}
+
+function VotingProgressDialog({
+  open,
+  onClose,
+  progress,
+  onEndEarly,
+  endEarlyPending
+}: {
+  open: boolean
+  onClose: () => void
+  progress: ProgressItem[]
+  onEndEarly: () => void
+  endEarlyPending: boolean
+}) {
+  return (
+    <Dialog open={open} onOpenChange={(v: boolean) => { if (!v) onClose() }}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Voting progress</DialogTitle>
+          <DialogDescription>How many items each member has voted on.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 py-2">
+          {progress.map(p => (
+            <div key={p.userId} className="flex items-center gap-3">
+              <span className="w-24 truncate text-sm text-foreground">{p.displayName}</span>
+              <div className="flex-1">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${(p.votesCast / p.total) * 100}%` }}
+                  />
+                </div>
+              </div>
+              <span className="shrink-0 text-xs text-muted-foreground">
+                {p.votesCast}/{p.total}
+              </span>
+            </div>
+          ))}
+        </div>
+        <Button onClick={onEndEarly} disabled={endEarlyPending} className="w-full">
+          End session early
+        </Button>
+      </DialogContent>
+    </Dialog>
   )
 }

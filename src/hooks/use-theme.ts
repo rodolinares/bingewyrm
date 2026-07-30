@@ -14,8 +14,11 @@ export function useTheme() {
     localStorage.setItem('theme', theme)
   }, [theme])
 
-  const toggleTheme = useCallback(() => {
-    setThemeState(prev => (prev === 'dark' ? 'light' : 'dark'))
+  const toggleTheme = useCallback((checked?: boolean) => {
+    setThemeState(prev => {
+      if (checked !== undefined) return checked ? 'dark' : 'light'
+      return prev === 'dark' ? 'light' : 'dark'
+    })
   }, [])
 
   return { theme, toggleTheme }
