@@ -9,6 +9,8 @@ import { seededShuffle } from '@/lib/shuffle'
 import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
 import { posterUrl } from '@/lib/media'
+import { ItemDetailPanel } from '@/components/watchlist/item-detail-panel'
+import { InfoIcon } from '@/components/icons'
 
 export default function VotingPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
@@ -28,6 +30,7 @@ export default function VotingPage() {
   const [animating, setAnimating] = useState<'yes' | 'no' | null>(null)
   const [dragX, setDragX] = useState(0)
   const [lastVote, setLastVote] = useState<{ itemId: string } | null>(null)
+  const [detailItemId, setDetailItemId] = useState<string | null>(null)
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
   const isDragging = useRef(false)
@@ -236,15 +239,13 @@ export default function VotingPage() {
 
       {/* Vote buttons */}
       <div className="mt-4 flex items-center gap-6 sm:mt-6">
-        {lastVote && (
-          <button
-            onClick={handleUndo}
-            disabled={deleteVote.isPending}
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background text-xl transition-colors hover:text-foreground disabled:opacity-50 sm:h-14 sm:w-14"
-          >
-            ↺
-          </button>
-        )}
+        <button
+          onClick={handleUndo}
+          disabled={!lastVote || deleteVote.isPending}
+          className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background text-xl transition-colors hover:text-foreground disabled:opacity-50 sm:h-14 sm:w-14"
+        >
+          ↺
+        </button>
         <button
           onClick={() => handleVote(false)}
           disabled={!!animating}
@@ -259,7 +260,12 @@ export default function VotingPage() {
         >
           ♥
         </button>
-        {lastVote && <div className="h-12 w-12 sm:h-14 sm:w-14" />}
+        <button
+          onClick={() => setDetailItemId(current!.id)}
+          className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background transition-colors hover:text-foreground sm:h-14 sm:w-14"
+        >
+          <InfoIcon className="h-5 w-5" />
+        </button>
       </div>
 
       <Link
@@ -268,6 +274,15 @@ export default function VotingPage() {
       >
         Back to watchlist
       </Link>
+
+      {detailItemId && current && (
+        <ItemDetailPanel
+          item={current}
+          mediaType={watchlist?.media_type ?? 'movie'}
+          open
+          onClose={() => setDetailItemId(null)}
+        />
+      )}
 
       {/* End early (leader only) */}
       {isLeader && (
