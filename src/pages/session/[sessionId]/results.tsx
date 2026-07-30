@@ -90,7 +90,7 @@ export default function ResultsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
+    <div className="w-full max-w-2xl mx-auto p-6">
       <Link to={`/watchlist/${session.watchlist_id}`} className="text-sm text-muted-foreground hover:text-foreground">
         &larr; Back to watchlist
       </Link>
