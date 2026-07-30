@@ -164,6 +164,7 @@ export default function WatchlistDetail() {
               render={<Link to={`/watchlist/${watchlistId}/start-session`} />}
               className="bg-success text-success-foreground hover:bg-success/80"
               disabled={eligibleCount < 2}
+              nativeButton={false}
             >
               Start Session
             </Button>
