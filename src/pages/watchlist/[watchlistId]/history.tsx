@@ -6,7 +6,6 @@ import { MEDIA_LABELS } from '@/lib/media'
 
 const OUTCOME_LABELS: Record<string, string> = {
   saved: 'Saved',
-  recycled: 'Recycled',
   discarded: 'Discarded'
 }
 
@@ -74,11 +73,9 @@ export default function SessionHistory() {
                 className={`rounded px-1.5 py-0.5 text-xs font-medium ${
                   session.outcome === 'saved'
                     ? 'bg-green-500/20 text-green-400'
-                    : session.outcome === 'recycled'
-                      ? 'bg-blue-500/20 text-blue-400'
-                      : session.outcome === 'discarded'
-                        ? 'bg-destructive/20 text-destructive'
-                        : 'bg-muted text-muted-foreground'
+                    : session.outcome === 'discarded'
+                      ? 'bg-destructive/20 text-destructive'
+                      : 'bg-muted text-muted-foreground'
                 }`}
               >
                 {session.outcome ? OUTCOME_LABELS[session.outcome] : 'Pending'}

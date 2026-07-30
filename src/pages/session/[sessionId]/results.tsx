@@ -36,7 +36,7 @@ export default function ResultsPage() {
   const { data: groups } = useGroups()
   const resolveOutcome = useResolveOutcome()
 
-  const [confirmAction, setConfirmAction] = useState<'saved' | 'recycled' | 'discarded' | null>(null)
+  const [confirmAction, setConfirmAction] = useState<'saved' | 'discarded' | null>(null)
 
   const ranked = useMemo(() => {
     if (!items || !votes) return []
@@ -61,7 +61,7 @@ export default function ResultsPage() {
   const voterCount = participants?.length ?? 0
   const isResolved = !!session?.outcome
 
-  const handleResolve = async (outcome: 'saved' | 'recycled' | 'discarded') => {
+  const handleResolve = async (outcome: 'saved' | 'discarded') => {
     if (!session) return
     const discardIds = outcome === 'discarded' ? items?.map(i => i.id) : undefined
     await resolveOutcome.mutateAsync({
@@ -142,9 +142,6 @@ export default function ResultsPage() {
               <Button onClick={() => handleResolve('saved')} disabled={resolveOutcome.isPending}>
                 Save
               </Button>
-              <Button variant="outline" onClick={() => handleResolve('recycled')} disabled={resolveOutcome.isPending}>
-                Recycle
-              </Button>
               <Button
                 variant="destructive"
                 onClick={() => setConfirmAction('discarded')}
@@ -158,7 +155,7 @@ export default function ResultsPage() {
               <p className="text-sm text-destructive">
                 {confirmAction === 'discarded'
                   ? 'This will remove all items from the watchlist. The watchlist itself stays. This cannot be undone.'
-                  : `Are you sure you want to ${confirmAction === 'saved' ? 'save' : 'recycle'} these results?`}
+                  : 'Are you sure you want to save these results?'}
               </p>
               <div className="flex gap-2">
                 <Button

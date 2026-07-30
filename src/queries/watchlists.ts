@@ -186,7 +186,7 @@ export interface Session {
   start_time: string
   end_time: string
   end_reason: 'all_voted' | 'time_limit' | 'manual' | null
-  outcome: 'saved' | 'recycled' | 'discarded' | null
+  outcome: 'saved' | 'discarded' | null
   created_at: string
 }
 

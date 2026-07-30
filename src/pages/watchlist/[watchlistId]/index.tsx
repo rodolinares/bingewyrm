@@ -391,9 +391,7 @@ export default function WatchlistDetail() {
               className={`mt-2 inline-block rounded px-1.5 py-0.5 text-xs font-medium ${
                 resolvedSession.outcome === 'saved'
                   ? 'bg-green-500/20 text-green-400'
-                  : resolvedSession.outcome === 'recycled'
-                    ? 'bg-blue-500/20 text-blue-400'
-                    : 'bg-destructive/20 text-destructive'
+                  : 'bg-destructive/20 text-destructive'
               }`}
             >
               {resolvedSession.outcome}

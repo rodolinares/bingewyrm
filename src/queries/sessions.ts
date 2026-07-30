@@ -183,7 +183,7 @@ export function useResolveOutcome() {
       discardItemIds
     }: {
       sessionId: string
-      outcome: 'saved' | 'recycled' | 'discarded'
+      outcome: 'saved' | 'discarded'
       discardItemIds?: string[]
     }) => {
       const { error } = await supabase.rpc('resolve_outcome', {

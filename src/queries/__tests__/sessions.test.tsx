@@ -220,7 +220,7 @@ describe('usePastSessions', () => {
   it('fetches past ended sessions', async () => {
     queryRef.current = [
       { ...mockSession, id: 's1', status: 'ended', outcome: 'saved' },
-      { ...mockSession, id: 's2', status: 'ended', outcome: 'recycled' }
+      { ...mockSession, id: 's2', status: 'ended', outcome: 'saved' }
     ]
 
     const { result } = renderHook(() => usePastSessions('wl-1'), { wrapper: createWrapper() })
