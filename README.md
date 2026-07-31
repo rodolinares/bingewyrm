@@ -27,7 +27,7 @@ watchlists, then run timed voting sessions where members swipe to keep or discar
 - **Routing:** React Router v8
 - **State:** TanStack Query
 - **Forms:** React Hook Form + Zod v4
-- **Deploy:** Netlify (SPA redirect in `netlify.toml`)
+- **Deploy:** Cloudflare Pages (SPA redirect in `public/_redirects`)
 
 ## Getting Started
 
@@ -91,15 +91,12 @@ Enable Google provider in Authentication → Providers.
 
 ### Deployment
 
-Netlify — push to deploy. `netlify.toml` handles SPA routing:
-```toml
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+Cloudflare Pages — push to deploy. `public/_redirects` handles SPA routing:
+```
+/* /index.html 200
 ```
 
-Set env vars in Netlify dashboard:
+Set env vars in Cloudflare dashboard:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 
