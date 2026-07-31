@@ -108,7 +108,7 @@ derived state.
 | `supabase/functions/tmdb-search/` | TMDb proxy Edge Function (search + detail endpoints) |
 | `src/index.css` | Design tokens (`@theme inline`), reference copy was `docs/bingewyrm-theme.css` |
 | `docs/bingewyrm-skipped.md` | Deferred features tracker |
-| `public/_redirects` | SPA redirect rule (Cloudflare Pages) |
+| `wrangler.toml` | Cloudflare Workers config (static assets, SPA fallback) |
 
 ## Tests
 

@@ -27,7 +27,7 @@ watchlists, then run timed voting sessions where members swipe to keep or discar
 - **Routing:** React Router v8
 - **State:** TanStack Query
 - **Forms:** React Hook Form + Zod v4
-- **Deploy:** Cloudflare Pages (SPA redirect in `public/_redirects`)
+- **Deploy:** Cloudflare Workers (static assets in `wrangler.toml`)
 
 ## Getting Started
 
@@ -91,10 +91,7 @@ Enable Google provider in Authentication → Providers.
 
 ### Deployment
 
-Cloudflare Pages — push to deploy. `public/_redirects` handles SPA routing:
-```
-/* /index.html 200
-```
+Cloudflare Workers — push to deploy. `wrangler.toml` serves `dist/` as static assets with SPA fallback (`not_found_handling`).
 
 Set env vars in Cloudflare dashboard:
 - `VITE_SUPABASE_URL`
