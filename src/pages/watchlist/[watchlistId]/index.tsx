@@ -136,7 +136,7 @@ export default function WatchlistDetail() {
   const eligibleCount = items?.filter(i => !i.watched).length ?? 0
 
   return (
-    <div className="p-6">
+    <div className="w-full max-w-2xl mx-auto p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <Link to={`/groups/${watchlist.group_id}`} className="text-sm text-muted-foreground hover:text-foreground">
