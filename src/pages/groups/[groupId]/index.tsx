@@ -99,7 +99,7 @@ export function GroupWatchlists() {
   const { data: watchlists, isLoading, isError } = useWatchlists(groupId!)
 
   return (
-    <div className="p-6">
+    <div className="w-full max-w-2xl mx-auto p-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Watchlists</h1>
         {groupId && (
@@ -123,7 +123,7 @@ export function GroupWatchlists() {
       ) : !watchlists || watchlists.length === 0 ? (
         <p className="text-muted-foreground">No watchlists yet. Create one to get started.</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4">
           {watchlists.map(w => (
             <Link
               key={w.id}
