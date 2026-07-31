@@ -70,6 +70,12 @@ async function requireAuth() {
   return data.session
 }
 
+async function redirectIfOnboarded() {
+  const session = await requireAuth()
+  const { data: profile } = await supabase.from('users').select('display_name').eq('id', session.user.id).single()
+  if (profile?.display_name) throw redirect('/groups')
+}
+
 async function requireOnboarding({ request }: { request: Request }) {
   const session = await requireAuth()
   const { data: profile } = await supabase.from('users').select('display_name').eq('id', session.user.id).single()
@@ -124,7 +130,7 @@ export const router = createBrowserRouter([
 
       {
         path: 'onboarding',
-        loader: requireAuth,
+        loader: redirectIfOnboarded,
         element: <Onboarding />
       },
 
