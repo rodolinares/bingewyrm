@@ -9,7 +9,7 @@ export interface UserProfile {
   created_at: string
 }
 
-export function useUser() {
+export const useUser = () => {
   const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ['session'],
     queryFn: async () => {

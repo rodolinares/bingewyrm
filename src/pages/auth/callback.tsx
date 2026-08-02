@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { supabase } from '@/lib/supabase'
 
-export default function AuthCallback() {
+const AuthCallback = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
@@ -39,3 +39,4 @@ export default function AuthCallback() {
     </div>
   )
 }
+export default AuthCallback

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 
-export default function Login() {
+const Login = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -41,3 +41,4 @@ export default function Login() {
     </div>
   )
 }
+export default Login

@@ -17,7 +17,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-export default function Onboarding() {
+const Onboarding = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { user } = useUser()
@@ -73,3 +73,4 @@ export default function Onboarding() {
     </div>
   )
 }
+export default Onboarding

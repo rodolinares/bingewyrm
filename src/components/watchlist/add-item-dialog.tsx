@@ -23,11 +23,11 @@ interface Props {
   mediaType: MediaType
 }
 
-function anilistFormat(mediaType: MediaType): 'TV' | 'MOVIE' {
+const anilistFormat = (mediaType: MediaType): 'TV' | 'MOVIE' => {
   return mediaType === 'anime_movie' ? 'MOVIE' : 'TV'
 }
 
-function mapAniListResults(results: AniListMedia[]): SearchResult[] {
+const mapAniListResults = (results: AniListMedia[]): SearchResult[] => {
   return results.map(m => ({
     source: 'anilist',
     source_id: String(m.id),
@@ -40,7 +40,7 @@ function mapAniListResults(results: AniListMedia[]): SearchResult[] {
   }))
 }
 
-export function AddItemDialog({ watchlistId, mediaType }: Props) {
+export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'search' | 'manual'>('search')
   const [query, setQuery] = useState('')

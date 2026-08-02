@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-export function OutcomeBadge({ outcome, className }: { outcome: string | null; className?: string }) {
+export const OutcomeBadge = ({ outcome, className }: { outcome: string | null; className?: string }) => {
   const style =
     outcome === 'saved'
       ? 'bg-green-500/20 text-green-400'

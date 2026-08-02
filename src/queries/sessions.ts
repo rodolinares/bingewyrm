@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Session, Item } from './watchlists'
 
-export function useSession(sessionId: string) {
+export const useSession = (sessionId: string) => {
   return useQuery({
     queryKey: ['session', sessionId],
     queryFn: async () => {
@@ -14,7 +14,7 @@ export function useSession(sessionId: string) {
   })
 }
 
-export function useSessionItems(itemIds: string[]) {
+export const useSessionItems = (itemIds: string[]) => {
   return useQuery({
     queryKey: ['session-items', itemIds],
     queryFn: async () => {
@@ -37,7 +37,7 @@ export interface Vote {
   created_at: string
 }
 
-export function useMyVotes(sessionId: string, userId: string | undefined) {
+export const useMyVotes = (sessionId: string, userId: string | undefined) => {
   return useQuery({
     queryKey: ['votes', sessionId, userId],
     queryFn: async () => {
@@ -53,7 +53,7 @@ export function useMyVotes(sessionId: string, userId: string | undefined) {
   })
 }
 
-export function useCastVote() {
+export const useCastVote = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -72,7 +72,7 @@ export function useCastVote() {
   })
 }
 
-export function useDeleteVote() {
+export const useDeleteVote = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -90,7 +90,7 @@ export function useDeleteVote() {
   })
 }
 
-export function useEndSession() {
+export const useEndSession = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -104,7 +104,7 @@ export function useEndSession() {
   })
 }
 
-export function useSessionVotes(sessionId: string) {
+export const useSessionVotes = (sessionId: string) => {
   return useQuery({
     queryKey: ['session-votes', sessionId],
     queryFn: async () => {
@@ -116,7 +116,7 @@ export function useSessionVotes(sessionId: string) {
   })
 }
 
-export function useSessionParticipants(sessionId: string) {
+export const useSessionParticipants = (sessionId: string) => {
   return useQuery({
     queryKey: ['session-participants', sessionId],
     queryFn: async () => {
@@ -131,7 +131,7 @@ export function useSessionParticipants(sessionId: string) {
   })
 }
 
-function useLastSessionByOutcome(watchlistId: string, resolved: boolean) {
+const useLastSessionByOutcome = (watchlistId: string, resolved: boolean) => {
   return useQuery({
     queryKey: [resolved ? 'last-resolved-session' : 'last-unresolved-session', watchlistId],
     queryFn: async () => {
@@ -153,15 +153,15 @@ function useLastSessionByOutcome(watchlistId: string, resolved: boolean) {
   })
 }
 
-export function useLastUnresolvedSession(watchlistId: string) {
+export const useLastUnresolvedSession = (watchlistId: string) => {
   return useLastSessionByOutcome(watchlistId, false)
 }
 
-export function useLastResolvedSession(watchlistId: string) {
+export const useLastResolvedSession = (watchlistId: string) => {
   return useLastSessionByOutcome(watchlistId, true)
 }
 
-export function usePastSessions(watchlistId: string) {
+export const usePastSessions = (watchlistId: string) => {
   return useQuery({
     queryKey: ['past-sessions', watchlistId],
     queryFn: async () => {
@@ -178,7 +178,7 @@ export function usePastSessions(watchlistId: string) {
   })
 }
 
-export function useResolveOutcome() {
+export const useResolveOutcome = () => {
   const queryClient = useQueryClient()
 
   return useMutation({

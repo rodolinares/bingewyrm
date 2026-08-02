@@ -16,7 +16,8 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': 'warn'
+      'react-refresh/only-export-components': 'warn',
+      'func-style': ['error', 'expression', { allowArrowFunctions: true }]
     }
   },
   {

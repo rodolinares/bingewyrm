@@ -45,7 +45,7 @@ const SORT_OPTIONS: SortOption[] = [
   { label: 'Rating (lowest)', by: 'vote_average', dir: 'asc' }
 ]
 
-function loadSort(): SortOption {
+const loadSort = (): SortOption => {
   try {
     const raw = localStorage.getItem('watchlist-sort')
     if (raw) {
@@ -58,7 +58,7 @@ function loadSort(): SortOption {
   return SORT_OPTIONS[0]!
 }
 
-export default function WatchlistDetail() {
+const WatchlistDetail = () => {
   const { watchlistId } = useParams<{ watchlistId: string }>()
   const { user } = useUser()
   const { data: items, isLoading, isError } = useItems(watchlistId!)
@@ -396,3 +396,4 @@ export default function WatchlistDetail() {
     </div>
   )
 }
+export default WatchlistDetail

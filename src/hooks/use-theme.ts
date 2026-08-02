@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 
-function getInitialTheme(): 'dark' | 'light' {
+const getInitialTheme = (): 'dark' | 'light' => {
   const stored = localStorage.getItem('theme')
   if (stored === 'dark' || stored === 'light') return stored
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-export function useTheme() {
+export const useTheme = () => {
   const [theme, setThemeState] = useState<'dark' | 'light'>(getInitialTheme)
 
   useEffect(() => {

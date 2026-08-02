@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { CreateGroupDialog } from '@/components/group/create-group-dialog'
 
-export default function GroupList() {
+const GroupList = () => {
   const { profile } = useUser()
   const { data: groups, isLoading, isError } = useGroups()
   const [createOpen, setCreateOpen] = useState(false)
@@ -73,3 +73,4 @@ export default function GroupList() {
     </div>
   )
 }
+export default GroupList

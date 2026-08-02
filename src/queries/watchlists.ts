@@ -26,7 +26,7 @@ export interface Item {
   removed_at: string | null
 }
 
-export function useWatchlists(groupId: string) {
+export const useWatchlists = (groupId: string) => {
   return useQuery({
     queryKey: ['watchlists', groupId],
     queryFn: async () => {
@@ -61,7 +61,7 @@ export function useWatchlists(groupId: string) {
   })
 }
 
-export function useWatchlist(watchlistId: string) {
+export const useWatchlist = (watchlistId: string) => {
   return useQuery({
     queryKey: ['watchlist', watchlistId],
     queryFn: async () => {
@@ -74,7 +74,7 @@ export function useWatchlist(watchlistId: string) {
   })
 }
 
-export function useCreateWatchlist() {
+export const useCreateWatchlist = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -92,7 +92,7 @@ export function useCreateWatchlist() {
   })
 }
 
-export function useItems(watchlistId: string) {
+export const useItems = (watchlistId: string) => {
   return useQuery({
     queryKey: ['items', watchlistId],
     queryFn: async () => {
@@ -109,7 +109,7 @@ export function useItems(watchlistId: string) {
   })
 }
 
-export function useAddItem() {
+export const useAddItem = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -136,7 +136,7 @@ export function useAddItem() {
   })
 }
 
-export function useToggleWatched() {
+export const useToggleWatched = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -150,7 +150,7 @@ export function useToggleWatched() {
   })
 }
 
-export function useRemoveItem() {
+export const useRemoveItem = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -164,7 +164,7 @@ export function useRemoveItem() {
   })
 }
 
-export function useRemoveItems() {
+export const useRemoveItems = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -190,7 +190,7 @@ export interface Session {
   created_at: string
 }
 
-export function useActiveSession(watchlistId: string) {
+export const useActiveSession = (watchlistId: string) => {
   return useQuery({
     queryKey: ['active-session', watchlistId],
     queryFn: async () => {
@@ -208,7 +208,7 @@ export function useActiveSession(watchlistId: string) {
   })
 }
 
-export function useStartSession() {
+export const useStartSession = () => {
   const queryClient = useQueryClient()
 
   return useMutation({

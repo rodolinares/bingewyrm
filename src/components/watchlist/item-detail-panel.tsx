@@ -34,11 +34,11 @@ interface Props {
   footer?: ReactNode
 }
 
-export function tmdbType(mediaType: MediaType): 'movie' | 'tv' {
+export const tmdbType = (mediaType: MediaType): 'movie' | 'tv' => {
   return mediaType === 'movie' ? 'movie' : 'tv'
 }
 
-function mapAniListDetail(m: AniListMedia): DetailData {
+const mapAniListDetail = (m: AniListMedia): DetailData => {
   return {
     overview: m.description ? m.description.replace(/<[^>]*>/g, '').trim() : null,
     vote_average: m.averageScore != null ? m.averageScore / 10 : null,
@@ -48,7 +48,7 @@ function mapAniListDetail(m: AniListMedia): DetailData {
   }
 }
 
-export function ItemDetailPanel({ item, mediaType, open, onClose, onBack, status, footer }: Props) {
+export const ItemDetailPanel = ({ item, mediaType, open, onClose, onBack, status, footer }: Props) => {
   const [detail, setDetail] = useState<DetailData | null>(null)
   const [loading, setLoading] = useState(false)
 

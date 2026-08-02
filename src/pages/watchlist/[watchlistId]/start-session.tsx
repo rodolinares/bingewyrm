@@ -14,7 +14,7 @@ const PRESETS = [
   { label: '24h', ms: 86_400_000 }
 ] as const
 
-function formatDuration(ms: number): string {
+const formatDuration = (ms: number): string => {
   const s = Math.floor(ms / 1000)
   if (s < 60) return `${s}s`
   const m = Math.floor(s / 60)
@@ -24,12 +24,12 @@ function formatDuration(ms: number): string {
   return rm > 0 ? `${h}h ${rm}m` : `${h}h`
 }
 
-function toInterval(ms: number): string {
+const toInterval = (ms: number): string => {
   const s = Math.floor(ms / 1000)
   return `${s} seconds`
 }
 
-export default function SessionStart() {
+const SessionStart = () => {
   const { watchlistId } = useParams<{ watchlistId: string }>()
   const navigate = useNavigate()
   const { data: watchlist } = useWatchlist(watchlistId!)
@@ -234,3 +234,4 @@ export default function SessionStart() {
     </div>
   )
 }
+export default SessionStart

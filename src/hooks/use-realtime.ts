@@ -10,7 +10,7 @@ interface RealtimeOptions {
   queryKey: (string | null | undefined)[]
 }
 
-function useRealtime({ channel, table, event, filter, queryKey }: RealtimeOptions) {
+const useRealtime = ({ channel, table, event, filter, queryKey }: RealtimeOptions) => {
   const queryClient = useQueryClient()
 
   useEffect(() => {
@@ -27,7 +27,7 @@ function useRealtime({ channel, table, event, filter, queryKey }: RealtimeOption
   }, [channel, table, event, filter, queryKey, queryClient])
 }
 
-export function useRealtimeSession(sessionId: string | null | undefined) {
+export const useRealtimeSession = (sessionId: string | null | undefined) => {
   useRealtime({
     channel: `session:${sessionId}`,
     table: 'sessions',
@@ -37,7 +37,7 @@ export function useRealtimeSession(sessionId: string | null | undefined) {
   })
 }
 
-export function useRealtimeItems(watchlistId: string | null | undefined) {
+export const useRealtimeItems = (watchlistId: string | null | undefined) => {
   useRealtime({
     channel: `items:${watchlistId}`,
     table: 'items',

@@ -17,7 +17,7 @@ interface CreateGroupDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function CreateGroupDialog({ open, onOpenChange }: CreateGroupDialogProps) {
+export const CreateGroupDialog = ({ open, onOpenChange }: CreateGroupDialogProps) => {
   const navigate = useNavigate()
   const createGroup = useCreateGroup()
 

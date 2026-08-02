@@ -54,7 +54,7 @@ const mockSession = {
 const queryRef = vi.hoisted(() => ({ current: [] as unknown }))
 const rpcRef = vi.hoisted(() => ({ current: null as unknown }))
 
-function chain(ref: { current: unknown }) {
+const chain = (ref: { current: unknown }) => {
   const c: Record<string, unknown> = {
     select: () => c,
     eq: () => c,
@@ -81,11 +81,11 @@ vi.mock('@/lib/supabase', () => ({
   }
 }))
 
-function createWrapper() {
+const createWrapper = () => {
   const qc = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
   })
-  return function Wrapper({ children }: { children: ReactNode }) {
+  return ({ children }: { children: ReactNode }) => {
     return <QueryClientProvider client={qc}>{children}</QueryClientProvider>
   }
 }

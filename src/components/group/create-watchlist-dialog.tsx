@@ -1,12 +1,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useCreateWatchlist } from '@/queries/watchlists'
 
 const MEDIA_TYPES = [
@@ -21,7 +15,7 @@ interface Props {
   existingTypes: string[]
 }
 
-export function CreateWatchlistDialog({ groupId, existingTypes }: Props) {
+export const CreateWatchlistDialog = ({ groupId, existingTypes }: Props) => {
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<string>('')
   const createWatchlist = useCreateWatchlist()

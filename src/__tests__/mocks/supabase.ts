@@ -1,4 +1,4 @@
-export function chain(ref: { current: unknown }) {
+export const chain = (ref: { current: unknown }) => {
   const c = {
     select: () => c,
     eq: () => c,

@@ -2,12 +2,12 @@ import { Switch as SwitchPrimitive } from '@base-ui/react/switch'
 import { cn } from '@/lib/utils'
 import { SunIcon, MoonIcon } from '@/components/icons'
 
-function Switch({
+const Switch = ({
   className,
   checked,
   onCheckedChange,
   ...props
-}: SwitchPrimitive.Root.Props) {
+}: SwitchPrimitive.Root.Props) => {
   return (
     <SwitchPrimitive.Root
       data-slot="switch"

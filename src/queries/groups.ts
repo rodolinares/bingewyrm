@@ -21,7 +21,7 @@ interface MemberCountRow {
   count: number
 }
 
-export function useGroups() {
+export const useGroups = () => {
   const { user } = useUser()
 
   return useQuery({
@@ -59,7 +59,7 @@ export function useGroups() {
   })
 }
 
-export function useCreateGroup() {
+export const useCreateGroup = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -74,7 +74,7 @@ export function useCreateGroup() {
   })
 }
 
-export function useUpdateGroup() {
+export const useUpdateGroup = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -88,7 +88,7 @@ export function useUpdateGroup() {
   })
 }
 
-export function useDeleteGroup() {
+export const useDeleteGroup = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -102,7 +102,7 @@ export function useDeleteGroup() {
   })
 }
 
-export function useRegenerateInvite() {
+export const useRegenerateInvite = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -125,7 +125,7 @@ interface GroupMemberWithUser {
   users: { display_name: string | null }
 }
 
-export function useGroupMembers(groupId: string | undefined) {
+export const useGroupMembers = (groupId: string | undefined) => {
   return useQuery({
     queryKey: ['group-members', groupId],
     queryFn: async () => {
@@ -142,7 +142,7 @@ export function useGroupMembers(groupId: string | undefined) {
   })
 }
 
-export function useTransferLeader() {
+export const useTransferLeader = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -159,7 +159,7 @@ export function useTransferLeader() {
   })
 }
 
-export function useGroupGenres(groupId: string | undefined) {
+export const useGroupGenres = (groupId: string | undefined) => {
   return useQuery({
     queryKey: ['group-genres', groupId],
     queryFn: async () => {
@@ -172,7 +172,7 @@ export function useGroupGenres(groupId: string | undefined) {
   })
 }
 
-export function useGroupGenreBlacklist(groupId: string | undefined) {
+export const useGroupGenreBlacklist = (groupId: string | undefined) => {
   return useQuery({
     queryKey: ['genre-blacklist', groupId],
     queryFn: async () => {
@@ -185,7 +185,7 @@ export function useGroupGenreBlacklist(groupId: string | undefined) {
   })
 }
 
-export function useAddGenreBlacklist() {
+export const useAddGenreBlacklist = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -202,7 +202,7 @@ export function useAddGenreBlacklist() {
   })
 }
 
-export function useRemoveGenreBlacklist() {
+export const useRemoveGenreBlacklist = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -219,7 +219,7 @@ export function useRemoveGenreBlacklist() {
   })
 }
 
-export function useJoinGroup() {
+export const useJoinGroup = () => {
   const queryClient = useQueryClient()
 
   return useMutation({

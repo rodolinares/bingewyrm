@@ -22,7 +22,7 @@ const mockUser = { id: 'user-1' }
 const queryRef = vi.hoisted(() => ({ current: [] as unknown }))
 const rpcRef = vi.hoisted(() => ({ current: null as unknown }))
 
-function chain<T>(ref: { current: T }) {
+const chain = <T,>(ref: { current: T }) => {
   const c: {
     select: () => typeof c
     eq: () => typeof c
@@ -67,11 +67,11 @@ vi.mock('@/hooks/use-user', () => ({
   })
 }))
 
-function createWrapper() {
+const createWrapper = () => {
   const qc = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
   })
-  return function Wrapper({ children }: { children: ReactNode }) {
+  return ({ children }: { children: ReactNode }) => {
     return <QueryClientProvider client={qc}>{children}</QueryClientProvider>
   }
 }

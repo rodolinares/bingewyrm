@@ -1,6 +1,6 @@
 // Deterministic PRNG (mulberry32) seeded from userId + sessionId.
 // Same user + session always produces the same shuffle order.
-export function seededShuffle<T>(items: T[], seed: string): T[] {
+export const seededShuffle = <T>(items: T[], seed: string): T[] => {
   let h = 0
   for (let i = 0; i < seed.length; i++) {
     h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0

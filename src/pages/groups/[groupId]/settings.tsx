@@ -30,7 +30,7 @@ const renameSchema = z.object({
 
 type RenameForm = z.infer<typeof renameSchema>
 
-export default function GroupSettings() {
+const GroupSettings = () => {
   const { group, isLeader } = useOutletContext<Context>()
   const navigate = useNavigate()
   const updateGroup = useUpdateGroup()
@@ -239,8 +239,9 @@ export default function GroupSettings() {
     </div>
   )
 }
+export default GroupSettings
 
-function GenreBlacklistSection({ groupId }: { groupId: string }) {
+const GenreBlacklistSection = ({ groupId }: { groupId: string }) => {
   const { data: allGenres = [], isLoading: genresLoading } = useGroupGenres(groupId)
   const { data: blacklist = [] } = useGroupGenreBlacklist(groupId)
   const addBlacklist = useAddGenreBlacklist()

@@ -18,7 +18,7 @@ import InviteJoin from '@/pages/invite/[code]'
 import Settings from '@/pages/settings/index'
 import { SettingsIcon } from '@/components/icons'
 
-function AppLayout() {
+const AppLayout = () => {
   const { user } = useUser()
   const location = useLocation()
 
@@ -31,7 +31,10 @@ function AppLayout() {
     <div className="flex h-dvh flex-col">
       {user && (
         <header className="flex items-center justify-between border-b border-border px-4 py-2">
-          <Link to="/groups" className="flex h-10 items-center font-display text-lg font-black leading-none tracking-tight text-primary">
+          <Link
+            to="/groups"
+            className="flex h-10 items-center font-display text-lg font-black leading-none tracking-tight text-primary"
+          >
             BingeWyrm
           </Link>
           <div className="flex items-center gap-1">
@@ -64,19 +67,19 @@ function AppLayout() {
   )
 }
 
-async function requireAuth() {
+const requireAuth = async () => {
   const { data } = await supabase.auth.getSession()
   if (!data.session) throw redirect('/auth/login')
   return data.session
 }
 
-async function redirectIfOnboarded() {
+const redirectIfOnboarded = async () => {
   const session = await requireAuth()
   const { data: profile } = await supabase.from('users').select('display_name').eq('id', session.user.id).single()
   if (profile?.display_name) throw redirect('/groups')
 }
 
-async function requireOnboarding({ request }: { request: Request }) {
+const requireOnboarding = async ({ request }: { request: Request }) => {
   const session = await requireAuth()
   const { data: profile } = await supabase.from('users').select('display_name').eq('id', session.user.id).single()
   if (!profile?.display_name) {

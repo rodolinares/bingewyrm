@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router'
 import { Spinner } from '@/components/ui/spinner'
 import { useJoinGroup } from '@/queries/groups'
 
-export default function InviteJoin() {
+const InviteJoin = () => {
   const { code } = useParams<{ code: string }>()
   const navigate = useNavigate()
   const joinGroup = useJoinGroup()
@@ -43,3 +43,4 @@ export default function InviteJoin() {
     </div>
   )
 }
+export default InviteJoin

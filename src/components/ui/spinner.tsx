@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-export function Spinner({ className }: { className?: string }) {
+export const Spinner = ({ className }: { className?: string }) => {
   return (
     <svg
       className={cn('animate-spin h-5 w-5 text-primary', className)}

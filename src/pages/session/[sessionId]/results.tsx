@@ -24,7 +24,7 @@ interface RankedItem {
   voteCount: number
 }
 
-export default function ResultsPage() {
+const ResultsPage = () => {
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
   const { user } = useUser()
@@ -180,3 +180,4 @@ export default function ResultsPage() {
     </div>
   )
 }
+export default ResultsPage

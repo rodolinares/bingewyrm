@@ -1,4 +1,4 @@
-export function InfoIcon({ className }: { className?: string }) {
+export const InfoIcon = ({ className }: { className?: string }) => {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
@@ -10,7 +10,7 @@ export function InfoIcon({ className }: { className?: string }) {
   )
 }
 
-export function EyeIcon({ className }: { className?: string }) {
+export const EyeIcon = ({ className }: { className?: string }) => {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
@@ -18,16 +18,12 @@ export function EyeIcon({ className }: { className?: string }) {
         strokeLinejoin="round"
         d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
       />
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   )
 }
 
-export function EyeSlashIcon({ className }: { className?: string }) {
+export const EyeSlashIcon = ({ className }: { className?: string }) => {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
@@ -39,7 +35,7 @@ export function EyeSlashIcon({ className }: { className?: string }) {
   )
 }
 
-export function TrashIcon({ className }: { className?: string }) {
+export const TrashIcon = ({ className }: { className?: string }) => {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
@@ -51,35 +47,39 @@ export function TrashIcon({ className }: { className?: string }) {
   )
 }
 
-export function XIcon({ className }: { className?: string }) {
+export const XIcon = ({ className }: { className?: string }) => {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  )
+}
+
+export const SunIcon = ({ className }: { className?: string }) => {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M6 18L18 6M6 6l12 12"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
       />
     </svg>
   )
 }
 
-export function SunIcon({ className }: { className?: string }) {
+export const MoonIcon = ({ className }: { className?: string }) => {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+      />
     </svg>
   )
 }
 
-export function MoonIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-    </svg>
-  )
-}
-
-export function SettingsIcon({ className }: { className?: string }) {
+export const SettingsIcon = ({ className }: { className?: string }) => {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path
@@ -92,14 +92,10 @@ export function SettingsIcon({ className }: { className?: string }) {
   )
 }
 
-export function CheckIcon({ className, strokeWidth = 3 }: { className?: string; strokeWidth?: number }) {
+export const CheckIcon = ({ className, strokeWidth = 3 }: { className?: string; strokeWidth?: number }) => {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={strokeWidth}>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M5 13l4 4L19 7"
-      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
     </svg>
   )
 }

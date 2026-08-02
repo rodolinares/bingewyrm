@@ -7,7 +7,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { CreateWatchlistDialog } from '@/components/group/create-watchlist-dialog'
 import { MEDIA_LABELS } from '@/lib/media'
 
-export default function GroupLayout() {
+const GroupLayout = () => {
   const { groupId } = useParams()
   const { data: groups, isLoading, isError } = useGroups()
   const { profile } = useUser()
@@ -71,8 +71,9 @@ export default function GroupLayout() {
     </div>
   )
 }
+export default GroupLayout
 
-function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
+const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => {
   return (
     <Link
       to={to}
@@ -83,7 +84,7 @@ function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
   )
 }
 
-function BottomNavLink({ to, label }: { to: string; label: string }) {
+const BottomNavLink = ({ to, label }: { to: string; label: string }) => {
   return (
     <Link
       to={to}
@@ -94,7 +95,7 @@ function BottomNavLink({ to, label }: { to: string; label: string }) {
   )
 }
 
-export function GroupWatchlists() {
+export const GroupWatchlists = () => {
   const { groupId } = useParams()
   const { data: watchlists, isLoading, isError } = useWatchlists(groupId!)
 
@@ -103,10 +104,7 @@ export function GroupWatchlists() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Watchlists</h1>
         {groupId && (
-          <CreateWatchlistDialog
-            groupId={groupId}
-            existingTypes={watchlists?.map(w => w.media_type) ?? []}
-          />
+          <CreateWatchlistDialog groupId={groupId} existingTypes={watchlists?.map(w => w.media_type) ?? []} />
         )}
       </div>
       {isLoading ? (

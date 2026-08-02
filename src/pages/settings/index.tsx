@@ -18,7 +18,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-export default function Settings() {
+const Settings = () => {
   const { profile } = useUser()
   const { theme, toggleTheme } = useTheme()
   const updateProfile = useUpdateProfile()
@@ -62,7 +62,7 @@ export default function Settings() {
             </Button>
           </div>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{form.formState.errors.display_name?.message ?? saved ? 'Saved' : error ?? '\u00A0'}</span>
+            <span>{(form.formState.errors.display_name?.message ?? saved) ? 'Saved' : (error ?? '\u00A0')}</span>
             <span>{form.watch('display_name').length}/30</span>
           </div>
         </form>
@@ -85,3 +85,4 @@ export default function Settings() {
     </div>
   )
 }
+export default Settings

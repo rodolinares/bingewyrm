@@ -11,7 +11,7 @@ const END_REASON_LABELS: Record<string, string> = {
   all_voted: 'All voted'
 }
 
-export default function SessionHistory() {
+const SessionHistory = () => {
   const { watchlistId } = useParams<{ watchlistId: string }>()
   const { data: watchlist } = useWatchlist(watchlistId!)
   const { data: sessions, isLoading } = usePastSessions(watchlistId!)
@@ -73,3 +73,4 @@ export default function SessionHistory() {
     </div>
   )
 }
+export default SessionHistory

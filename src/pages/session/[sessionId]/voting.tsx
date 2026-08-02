@@ -3,7 +3,16 @@ import { useParams, Link, useNavigate } from 'react-router'
 import { useUser } from '@/hooks/use-user'
 import { useGroups } from '@/queries/groups'
 import { useWatchlist } from '@/queries/watchlists'
-import { useSession, useSessionItems, useMyVotes, useCastVote, useEndSession, useDeleteVote, useSessionParticipants, useSessionVotes } from '@/queries/sessions'
+import {
+  useSession,
+  useSessionItems,
+  useMyVotes,
+  useCastVote,
+  useEndSession,
+  useDeleteVote,
+  useSessionParticipants,
+  useSessionVotes
+} from '@/queries/sessions'
 import type { Item } from '@/queries/watchlists'
 import { useRealtimeSession } from '@/hooks/use-realtime'
 import { seededShuffle } from '@/lib/shuffle'
@@ -12,15 +21,9 @@ import { Button } from '@/components/ui/button'
 import { posterUrl } from '@/lib/media'
 import { ItemDetailPanel } from '@/components/watchlist/item-detail-panel'
 import { InfoIcon, EyeIcon } from '@/components/icons'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 
-export default function VotingPage() {
+const VotingPage = () => {
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
   const { user } = useUser()
@@ -47,7 +50,6 @@ export default function VotingPage() {
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
   const isDragging = useRef(false)
-
 
   const myVotedIds = useMemo(() => new Set((votes ?? []).map(v => v.item_id)), [votes])
 
@@ -369,6 +371,7 @@ export default function VotingPage() {
     </div>
   )
 }
+export default VotingPage
 
 interface ProgressItem {
   userId: string
@@ -378,7 +381,7 @@ interface ProgressItem {
   done: boolean
 }
 
-function Poster({ item }: { item: Item }) {
+const Poster = ({ item }: { item: Item }) => {
   const [loaded, setLoaded] = useState(false)
   const [failed, setFailed] = useState(false)
   const url = posterUrl(item, 'w500')
@@ -409,7 +412,7 @@ function Poster({ item }: { item: Item }) {
   )
 }
 
-function CardBody({ item }: { item: Item }) {
+const CardBody = ({ item }: { item: Item }) => {
   return (
     <>
       <Poster key={item.id} item={item} />
@@ -428,7 +431,7 @@ function CardBody({ item }: { item: Item }) {
   )
 }
 
-function UndoOverlay({ item, fromRight }: { item: Item; fromRight: boolean }) {
+const UndoOverlay = ({ item, fromRight }: { item: Item; fromRight: boolean }) => {
   const [settled, setSettled] = useState(false)
 
   useEffect(() => {
@@ -451,7 +454,7 @@ function UndoOverlay({ item, fromRight }: { item: Item; fromRight: boolean }) {
   )
 }
 
-function VotingProgressDialog({
+const VotingProgressDialog = ({
   open,
   onClose,
   progress,
@@ -463,9 +466,14 @@ function VotingProgressDialog({
   progress: ProgressItem[]
   onEndEarly: () => void
   endEarlyPending: boolean
-}) {
+}) => {
   return (
-    <Dialog open={open} onOpenChange={(v: boolean) => { if (!v) onClose() }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v: boolean) => {
+        if (!v) onClose()
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Voting progress</DialogTitle>

@@ -34,7 +34,7 @@ const SEARCH_QUERY = `query ($search: String, $format: [MediaFormat]) {
   }
 }`
 
-export async function searchAniList(query: string, format: 'TV' | 'MOVIE'): Promise<AniListMedia[]> {
+export const searchAniList = async (query: string, format: 'TV' | 'MOVIE'): Promise<AniListMedia[]> => {
   const res = await fetch(ANILIST_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -68,7 +68,7 @@ interface SingleResponse {
   }
 }
 
-export async function fetchAniListItem(id: string): Promise<AniListMedia> {
+export const fetchAniListItem = async (id: string): Promise<AniListMedia> => {
   const res = await fetch(ANILIST_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
