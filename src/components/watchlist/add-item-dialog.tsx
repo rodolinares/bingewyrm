@@ -322,7 +322,7 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
                     value={query}
                     onChange={e => setQuery(e.target.value)}
                     placeholder={`Search ${(TYPE_LABELS[mediaType] ?? mediaType).toLowerCase()}...`}
-                    className="mb-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="mb-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   />
                   {searching && (
                     <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
@@ -429,7 +429,7 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
                       value={manualTitle}
                       onChange={e => setManualTitle(e.target.value)}
                       placeholder="Enter title"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     />
                   </div>
                   <div>
@@ -438,7 +438,7 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
                       value={manualYear}
                       onChange={e => setManualYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
                       placeholder="e.g. 2024"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     />
                   </div>
                   {error && <p className="text-sm text-destructive">{error}</p>}

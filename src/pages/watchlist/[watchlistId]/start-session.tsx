@@ -174,7 +174,7 @@ const SessionStart = () => {
             value={customMinutes}
             onChange={e => handleCustomMinutes(e.target.value)}
             placeholder="min"
-            className="w-16 rounded-md border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-16 rounded-md border border-input bg-background px-2 py-1.5 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
         <p className="text-xs text-muted-foreground">
