@@ -4,6 +4,7 @@ import { useUser } from '@/hooks/use-user'
 import { useGroups } from '@/queries/groups'
 import { useWatchlist } from '@/queries/watchlists'
 import { useSession, useSessionItems, useMyVotes, useCastVote, useEndSession, useDeleteVote, useSessionParticipants, useSessionVotes } from '@/queries/sessions'
+import type { Item } from '@/queries/watchlists'
 import { useRealtimeSession } from '@/hooks/use-realtime'
 import { seededShuffle } from '@/lib/shuffle'
 import { Spinner } from '@/components/ui/spinner'
@@ -37,8 +38,10 @@ export default function VotingPage() {
 
   const [index, setIndex] = useState(0)
   const [animating, setAnimating] = useState<'yes' | 'no' | null>(null)
+  const [thrownItemId, setThrownItemId] = useState<string | null>(null)
+  const [undoing, setUndoing] = useState(false)
   const [dragX, setDragX] = useState(0)
-  const [lastVote, setLastVote] = useState<{ itemId: string } | null>(null)
+  const [lastVote, setLastVote] = useState<{ itemId: string; value: boolean } | null>(null)
   const [detailItemId, setDetailItemId] = useState<string | null>(null)
   const [progressOpen, setProgressOpen] = useState(false)
   const touchStartX = useRef(0)
@@ -53,12 +56,24 @@ export default function VotingPage() {
     return seededShuffle(allItems, user.id + sessionId)
   }, [allItems, user, sessionId])
 
-  const current = useMemo(() => {
-    for (let i = index; i < deck.length; i++) {
-      if (!myVotedIds.has(deck[i]!.id)) return deck[i]
+  const [current, ...backCards] = useMemo(() => {
+    const unvoted: Item[] = []
+    for (let i = index; i < deck.length && unvoted.length < 2; i++) {
+      const id = deck[i]!.id
+      if (id === thrownItemId || !myVotedIds.has(id)) unvoted.push(deck[i]!)
     }
-    return undefined
-  }, [deck, index, myVotedIds])
+    return unvoted
+  }, [deck, index, myVotedIds, thrownItemId])
+
+  useEffect(() => {
+    for (const item of deck.slice(index + 1 + backCards.length, index + 4)) {
+      const url = posterUrl(item, 'w500')
+      if (url) {
+        const img = new Image()
+        img.src = url
+      }
+    }
+  }, [deck, index, backCards.length])
 
   const votingProgress = useMemo(() => {
     if (!participants || !allVotes || !session) return []
@@ -81,9 +96,12 @@ export default function VotingPage() {
     }
   }, [session, isEnded, navigate, sessionId])
 
+  const prevCard = useMemo(() => (lastVote ? deck.find(d => d.id === lastVote.itemId) : undefined), [deck, lastVote])
+
   const handleVote = async (value: boolean) => {
-    if (!user || !session || !current) return
+    if (!user || !session || !current || undoing) return
     setAnimating(value ? 'yes' : 'no')
+    setThrownItemId(current.id)
     try {
       await castVote.mutateAsync({
         sessionId: session.id,
@@ -92,27 +110,34 @@ export default function VotingPage() {
       })
     } catch {
       setAnimating(null)
+      setThrownItemId(null)
       return
     }
-    setLastVote({ itemId: current.id })
+    setLastVote({ itemId: current.id, value })
     setTimeout(() => {
       setAnimating(null)
+      setThrownItemId(null)
       setIndex(i => i + 1)
     }, 200)
   }
 
   const handleUndo = async () => {
-    if (!lastVote || !session || animating) return
-    setLastVote(null)
+    if (!lastVote || !session || animating || undoing) return
+    setUndoing(true)
     try {
       await deleteVote.mutateAsync({
         sessionId: session.id,
         itemId: lastVote.itemId
       })
     } catch {
+      setUndoing(false)
       return
     }
-    setIndex(i => Math.max(0, i - 1))
+    setTimeout(() => {
+      setUndoing(false)
+      setLastVote(null)
+      setIndex(i => Math.max(0, i - 1))
+    }, 200)
   }
 
   const SWIPE_THRESHOLD = 80
@@ -238,62 +263,61 @@ export default function VotingPage() {
         </p>
       </div>
 
-      {/* Card */}
-      <div
-        className={`flex w-full max-w-sm flex-col items-center rounded-xl border border-border bg-card p-4 shadow-lg transition-transform sm:p-6 ${
-          animating === 'yes' ? 'translate-x-8 opacity-0' : animating === 'no' ? '-translate-x-8 opacity-0' : ''
-        }`}
-        style={{
-          transitionDuration: dragX === 0 ? '200ms' : '0ms',
-          transform: dragX !== 0 ? `translateX(${dragX}px) rotate(${dragX * 0.05}deg)` : undefined
-        }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        {posterUrl(current, 'w500') ? (
-          <img
-            src={posterUrl(current, 'w500')!}
-            alt=""
-            className="mb-4 h-48 w-32 rounded-lg object-cover sm:h-64 sm:w-44"
-          />
-        ) : (
-          <div className="mb-4 flex h-48 w-32 items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground sm:h-64 sm:w-44">
-            No poster
+      {/* Card stack */}
+      <div className="relative w-full max-w-sm">
+        {backCards.map(item => (
+          <div
+            key={item.id}
+            className={`pointer-events-none absolute inset-x-0 top-3 z-0 flex flex-col items-center rounded-xl border border-border bg-card p-4 shadow-lg transition-all duration-200 sm:p-6 ${
+              animating ? 'scale-100 translate-y-0 opacity-100' : 'scale-[0.95] translate-y-3 opacity-60'
+            }`}
+          >
+            <CardBody item={item} />
           </div>
-        )}
-        <h3 className="text-center text-lg font-bold text-foreground">{current.title}</h3>
-        <p className="text-sm text-muted-foreground">{current.year}</p>
-        {current.genres.length > 0 && (
-          <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-            {current.genres.slice(0, 3).map(g => (
-              <span key={g} className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                {g}
-              </span>
-            ))}
-          </div>
-        )}
+        ))}
+        <div
+          key={current.id}
+          className={`relative z-10 flex w-full flex-col items-center rounded-xl border border-border bg-card p-4 shadow-lg transition-all sm:p-6 ${
+            undoing
+              ? 'scale-[0.95] translate-y-3 opacity-60'
+              : animating === 'yes'
+                ? 'translate-x-64 rotate-12 opacity-0'
+                : animating === 'no'
+                  ? '-translate-x-64 -rotate-12 opacity-0'
+                  : ''
+          }`}
+          style={{
+            transitionDuration: dragX === 0 ? '200ms' : '0ms',
+            transform: dragX !== 0 ? `translateX(${dragX}px) rotate(${dragX * 0.05}deg)` : undefined
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <CardBody item={current} />
+        </div>
+        {undoing && prevCard && <UndoOverlay item={prevCard} fromRight={lastVote?.value ?? false} />}
       </div>
 
       {/* Vote buttons */}
-      <div className="mt-4 flex items-center gap-6 sm:mt-6">
+      <div className="mt-8 flex items-center gap-6 sm:mt-8">
         <button
           onClick={handleUndo}
-          disabled={!lastVote || deleteVote.isPending}
+          disabled={!lastVote || deleteVote.isPending || undoing}
           className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background text-xl transition-colors hover:text-foreground disabled:opacity-50 sm:h-14 sm:w-14"
         >
           ↺
         </button>
         <button
           onClick={() => handleVote(false)}
-          disabled={!!animating}
+          disabled={!!animating || undoing}
           className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-border bg-background text-2xl transition-colors hover:border-destructive/50 hover:text-destructive disabled:opacity-50 sm:h-16 sm:w-16"
         >
           ✕
         </button>
         <button
           onClick={() => handleVote(true)}
-          disabled={!!animating}
+          disabled={!!animating || undoing}
           className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-border bg-background text-2xl transition-colors hover:border-green-500/50 hover:text-green-500 disabled:opacity-50 sm:h-16 sm:w-16"
         >
           ♥
@@ -352,6 +376,79 @@ interface ProgressItem {
   votesCast: number
   total: number
   done: boolean
+}
+
+function Poster({ item }: { item: Item }) {
+  const [loaded, setLoaded] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const url = posterUrl(item, 'w500')
+
+  if (!url || failed) {
+    return (
+      <div className="mb-4 flex h-48 w-32 items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground sm:h-64 sm:w-44">
+        No poster
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative mb-4 h-48 w-32 overflow-hidden rounded-lg sm:h-64 sm:w-44">
+      <img
+        src={url}
+        alt=""
+        onLoad={() => setLoaded(true)}
+        onError={() => setFailed(true)}
+        className={`h-full w-full object-cover transition-opacity duration-200 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+      />
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted">
+          <Spinner />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CardBody({ item }: { item: Item }) {
+  return (
+    <>
+      <Poster key={item.id} item={item} />
+      <h3 className="text-center text-lg font-bold text-foreground">{item.title}</h3>
+      <p className="text-sm text-muted-foreground">{item.year}</p>
+      {item.genres.length > 0 && (
+        <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+          {item.genres.slice(0, 3).map(g => (
+            <span key={g} className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+              {g}
+            </span>
+          ))}
+        </div>
+      )}
+    </>
+  )
+}
+
+function UndoOverlay({ item, fromRight }: { item: Item; fromRight: boolean }) {
+  const [settled, setSettled] = useState(false)
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setSettled(true))
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  return (
+    <div
+      className={`absolute inset-x-0 top-0 z-20 flex flex-col items-center rounded-xl border border-border bg-card p-4 shadow-lg transition-all duration-200 sm:p-6 ${
+        settled
+          ? 'translate-x-0 rotate-0 opacity-100'
+          : fromRight
+            ? 'translate-x-64 rotate-12 opacity-0'
+            : '-translate-x-64 -rotate-12 opacity-0'
+      }`}
+    >
+      <CardBody item={item} />
+    </div>
+  )
 }
 
 function VotingProgressDialog({
