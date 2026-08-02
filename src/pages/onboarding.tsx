@@ -66,7 +66,9 @@ const Onboarding = () => {
               <span>{displayName.length}/30</span>
             </div>
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && (
+            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">{error}</p>
+          )}
           <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? 'Saving...' : 'Continue'}
           </Button>

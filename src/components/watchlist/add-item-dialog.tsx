@@ -251,7 +251,11 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
               {success && (
                 <div className="mb-3 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">{success}</div>
               )}
-              {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
+              {error && (
+                <p className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+                  {error}
+                </p>
+              )}
             </>
           }
           footer={
@@ -330,7 +334,11 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
                       <span>Searching...</span>
                     </div>
                   )}
-                  {error && <p className="text-sm text-destructive">{error}</p>}
+                  {error && (
+                    <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+                      {error}
+                    </p>
+                  )}
                   <div className="space-y-2">
                     {displayedResults.map(r => {
                       const isSelected = selected.has(r.source_id)
@@ -441,7 +449,11 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     />
                   </div>
-                  {error && <p className="text-sm text-destructive">{error}</p>}
+                  {error && (
+                    <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
+                      {error}
+                    </p>
+                  )}
                   <Button
                     onClick={handleManualAdd}
                     disabled={!manualTitle.trim() || !manualYear || addItem.isPending}

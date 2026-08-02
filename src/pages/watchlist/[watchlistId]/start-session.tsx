@@ -222,7 +222,9 @@ const SessionStart = () => {
         </div>
       </section>
 
-      {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
+      {error && (
+        <p className="mt-3 rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">{error}</p>
+      )}
 
       <div className="mt-6">
         <Button onClick={handleStart} disabled={selected.size < 2 || startSession.isPending} className="w-full">

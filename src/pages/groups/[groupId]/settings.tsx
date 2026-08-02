@@ -193,7 +193,7 @@ const GroupSettings = () => {
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-sm text-destructive">
+              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
                 You will be removed from the group and{' '}
                 {otherMembers.find(m => m.user_id === newLeaderId)?.users.display_name ?? 'the selected member'} will
                 become the new leader. This cannot be undone.
@@ -221,7 +221,7 @@ const GroupSettings = () => {
             </Button>
           ) : (
             <div className="space-y-2">
-              <p className="text-sm text-destructive">
+              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
                 This cannot be undone. All watchlists, sessions, and votes will be permanently deleted.
               </p>
               <div className="flex gap-2">

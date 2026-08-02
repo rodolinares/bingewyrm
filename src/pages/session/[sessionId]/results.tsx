@@ -152,7 +152,7 @@ const ResultsPage = () => {
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-sm text-destructive">
+              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
                 {confirmAction === 'discarded'
                   ? 'This will remove all items from the watchlist. The watchlist itself stays. This cannot be undone.'
                   : 'Are you sure you want to save these results?'}
