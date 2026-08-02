@@ -54,7 +54,9 @@ const loadSort = (): SortOption => {
         return parsed as SortOption
       }
     }
-  } catch {}
+  } catch {
+    return SORT_OPTIONS[0]!
+  }
   return SORT_OPTIONS[0]!
 }
 
@@ -85,7 +87,7 @@ const WatchlistDetail = () => {
     if (!items) return []
     const sorted = [...items]
     sorted.sort((a, b) => {
-      let cmp = 0
+      let cmp: number
       if (sort.by === 'vote_average') {
         if (a.vote_average == null && b.vote_average == null) cmp = 0
         else if (a.vote_average == null) cmp = 1

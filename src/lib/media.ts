@@ -11,6 +11,10 @@ export const tmdbImg = (path: string, size: string): string => {
   return `${TMDB_IMG_BASE}/${size}${path}`
 }
 
+export const tmdbType = (mediaType: 'movie' | 'series' | 'anime' | 'anime_movie'): 'movie' | 'tv' => {
+  return mediaType === 'movie' ? 'movie' : 'tv'
+}
+
 export interface MediaItem {
   source: string
   poster_path: string | null

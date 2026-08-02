@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod/v4'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -29,6 +29,8 @@ const Settings = () => {
     resolver: zodResolver(schema),
     defaultValues: { display_name: profile?.display_name ?? '' }
   })
+
+  const displayName = useWatch({ control: form.control, name: 'display_name', defaultValue: '' })
 
   const onSubmit = async (values: FormData) => {
     setError(null)
@@ -63,7 +65,7 @@ const Settings = () => {
           </div>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>{(form.formState.errors.display_name?.message ?? saved) ? 'Saved' : (error ?? '\u00A0')}</span>
-            <span>{form.watch('display_name').length}/30</span>
+            <span>{displayName.length}/30</span>
           </div>
         </form>
       </section>

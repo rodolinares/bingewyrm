@@ -92,7 +92,8 @@ derived state.
 
 | Path | Purpose |
 |------|---------|
-| `src/App.tsx` | Routes, AppLayout, auth loaders (`requireAuth`, `requireOnboarding`) |
+| `src/App.tsx` | `AppLayout` (shell: header, footer, Outlet) |
+| `src/router.tsx` | Route tree, auth loaders (`requireAuth`, `requireOnboarding`) |
 | `src/lib/supabase.ts` | Supabase client, `supabaseUrl$` |
 | `src/lib/anilist.ts` | AniList GraphQL search (enriched: description, averageScore, genres) |
 | `src/lib/shuffle.ts` | Deterministic mulberry32 PRNG shuffle |

@@ -100,28 +100,31 @@ const VotingPage = () => {
 
   const prevCard = useMemo(() => (lastVote ? deck.find(d => d.id === lastVote.itemId) : undefined), [deck, lastVote])
 
-  const handleVote = async (value: boolean) => {
-    if (!user || !session || !current || undoing) return
-    setAnimating(value ? 'yes' : 'no')
-    setThrownItemId(current.id)
-    try {
-      await castVote.mutateAsync({
-        sessionId: session.id,
-        itemId: current.id,
-        value
-      })
-    } catch {
-      setAnimating(null)
-      setThrownItemId(null)
-      return
-    }
-    setLastVote({ itemId: current.id, value })
-    setTimeout(() => {
-      setAnimating(null)
-      setThrownItemId(null)
-      setIndex(i => i + 1)
-    }, 200)
-  }
+  const handleVote = useCallback(
+    async (value: boolean) => {
+      if (!user || !session || !current || undoing) return
+      setAnimating(value ? 'yes' : 'no')
+      setThrownItemId(current.id)
+      try {
+        await castVote.mutateAsync({
+          sessionId: session.id,
+          itemId: current.id,
+          value
+        })
+      } catch {
+        setAnimating(null)
+        setThrownItemId(null)
+        return
+      }
+      setLastVote({ itemId: current.id, value })
+      setTimeout(() => {
+        setAnimating(null)
+        setThrownItemId(null)
+        setIndex(i => i + 1)
+      }, 200)
+    },
+    [user, session, current, undoing, castVote]
+  )
 
   const handleUndo = async () => {
     if (!lastVote || !session || animating || undoing) return

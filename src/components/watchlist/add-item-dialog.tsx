@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
-import { useAddItem } from '@/queries/watchlists'
+import { useAddItem, useItems } from '@/queries/watchlists'
 import { supabase, supabaseUrl$ } from '@/lib/supabase'
 import { searchAniList, type AniListMedia } from '@/lib/anilist'
-import { posterUrl, MEDIA_LABELS as TYPE_LABELS } from '@/lib/media'
+import { posterUrl, tmdbType, MEDIA_LABELS as TYPE_LABELS } from '@/lib/media'
 import { Spinner } from '@/components/ui/spinner'
-import { ItemDetailPanel, tmdbType, type MediaType } from '@/components/watchlist/item-detail-panel'
+import { ItemDetailPanel, type MediaType } from '@/components/watchlist/item-detail-panel'
 
 interface SearchResult {
   source: 'tmdb' | 'anilist'
@@ -50,7 +50,6 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
   const [success, setSuccess] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [selectedItems, setSelectedItems] = useState<Map<string, SearchResult>>(new Map())
-  const [existingIds, setExistingIds] = useState<Set<string>>(new Set())
   const [detailItem, setDetailItem] = useState<SearchResult | null>(null)
   const addItem = useAddItem()
   const debounceRef = useRef<number | undefined>(undefined)
@@ -60,18 +59,8 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
   const [manualTitle, setManualTitle] = useState('')
   const [manualYear, setManualYear] = useState('')
 
-  const fetchExistingIds = async () => {
-    const { data } = await supabase
-      .from('items')
-      .select('source_id')
-      .eq('watchlist_id', watchlistId)
-      .is('removed_at', null)
-    if (data) setExistingIds(new Set(data.map(i => i.source_id).filter(Boolean) as string[]))
-  }
-
-  useEffect(() => {
-    if (open) fetchExistingIds()
-  }, [open, watchlistId])
+  const { data: items } = useItems(watchlistId)
+  const existingIds = useMemo(() => new Set((items ?? []).map(i => i.source_id).filter(Boolean) as string[]), [items])
 
   useEffect(() => {
     if (open && tab === 'search' && !detailItem) {
@@ -170,7 +159,6 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
       closeTimerRef.current = setTimeout(() => {
         setDetailItem(null)
         setSuccess(null)
-        fetchExistingIds()
       }, 1200)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to add item')
@@ -213,7 +201,6 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
 
     setSelected(new Set())
     setSelectedItems(new Map())
-    fetchExistingIds()
   }
 
   const handleManualAdd = async () => {

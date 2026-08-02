@@ -1,8 +1,9 @@
-import { useState, useEffect, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { supabase, supabaseUrl$ } from '@/lib/supabase'
 import { fetchAniListItem, type AniListMedia } from '@/lib/anilist'
 import { Skeleton } from '@/components/ui/skeleton'
-import { posterUrl } from '@/lib/media'
+import { posterUrl, tmdbType } from '@/lib/media'
 
 interface DetailData {
   overview: string | null
@@ -34,73 +35,43 @@ interface Props {
   footer?: ReactNode
 }
 
-export const tmdbType = (mediaType: MediaType): 'movie' | 'tv' => {
-  return mediaType === 'movie' ? 'movie' : 'tv'
-}
+const mapAniListDetail = (m: AniListMedia): DetailData => ({
+  overview: m.description ? m.description.replace(/<[^>]*>/g, '').trim() : null,
+  vote_average: m.averageScore != null ? m.averageScore / 10 : null,
+  genres: m.genres ?? [],
+  runtime: null,
+  poster_path: m.coverImage.medium
+})
 
-const mapAniListDetail = (m: AniListMedia): DetailData => {
-  return {
-    overview: m.description ? m.description.replace(/<[^>]*>/g, '').trim() : null,
-    vote_average: m.averageScore != null ? m.averageScore / 10 : null,
-    genres: m.genres ?? [],
-    runtime: null,
-    poster_path: m.coverImage.medium
-  }
-}
+const fallbackDetail = (item: DetailSource): DetailData => ({
+  overview: null,
+  vote_average: item.vote_average,
+  genres: item.genres ?? [],
+  runtime: null,
+  poster_path: item.poster_path
+})
 
 export const ItemDetailPanel = ({ item, mediaType, open, onClose, onBack, status, footer }: Props) => {
-  const [detail, setDetail] = useState<DetailData | null>(null)
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    if (!open || !item.source_id) return
-
-    setLoading(true)
-    setDetail(null)
-
-    if (item.source === 'anilist') {
-      fetchAniListItem(item.source_id)
-        .then(m => setDetail(mapAniListDetail(m)))
-        .catch(() => {
-          setDetail({
-            overview: null,
-            vote_average: item.vote_average,
-            genres: item.genres ?? [],
-            runtime: null,
-            poster_path: item.poster_path
-          })
-        })
-        .finally(() => setLoading(false))
-    } else if (item.source === 'tmdb') {
-      supabase.auth.getSession().then(({ data: sessionData }) => {
+  const { data: detail, isLoading: loading } = useQuery<DetailData>({
+    queryKey: ['item-detail', item.source, item.source_id, mediaType],
+    queryFn: async () => {
+      if (item.source === 'anilist') {
+        return mapAniListDetail(await fetchAniListItem(item.source_id!))
+      }
+      if (item.source === 'tmdb') {
+        const { data: sessionData } = await supabase.auth.getSession()
         const token = sessionData.session?.access_token
-        fetch(`${supabaseUrl$}/functions/v1/tmdb-search/detail/${item.source_id}?type=${tmdbType(mediaType)}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-          .then(r => (r.ok ? r.json() : Promise.reject()))
-          .then(data => setDetail(data))
-          .catch(() => {
-            setDetail({
-              overview: null,
-              vote_average: item.vote_average,
-              genres: item.genres ?? [],
-              runtime: null,
-              poster_path: item.poster_path
-            })
-          })
-          .finally(() => setLoading(false))
-      })
-    } else {
-      setDetail({
-        overview: null,
-        vote_average: item.vote_average,
-        genres: item.genres ?? [],
-        runtime: null,
-        poster_path: item.poster_path
-      })
-      setLoading(false)
-    }
-  }, [open, item.source_id, item.source, mediaType, item.vote_average, item.genres, item.poster_path])
+        const res = await fetch(
+          `${supabaseUrl$}/functions/v1/tmdb-search/detail/${item.source_id}?type=${tmdbType(mediaType)}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        if (!res.ok) throw new Error('Failed to load details')
+        return res.json()
+      }
+      return fallbackDetail(item)
+    },
+    enabled: open && !!item.source_id
+  })
 
   if (!open) return null
 

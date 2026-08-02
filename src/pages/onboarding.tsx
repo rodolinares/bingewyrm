@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod/v4'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -27,6 +27,8 @@ const Onboarding = () => {
     resolver: zodResolver(schema),
     defaultValues: { display_name: '' }
   })
+
+  const displayName = useWatch({ control: form.control, name: 'display_name', defaultValue: '' })
 
   const onSubmit = async (values: FormData) => {
     if (!user) return
@@ -61,7 +63,7 @@ const Onboarding = () => {
             />
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>{form.formState.errors.display_name?.message ?? '\u00A0'}</span>
-              <span>{form.watch('display_name').length}/30</span>
+              <span>{displayName.length}/30</span>
             </div>
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
