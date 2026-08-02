@@ -3,7 +3,7 @@ import { supabase, supabaseUrl$ } from '@/lib/supabase'
 import { fetchAniListItem, type AniListMedia } from '@/lib/anilist'
 import type { Item } from '@/queries/watchlists'
 import { Skeleton } from '@/components/ui/skeleton'
-import { tmdbImg } from '@/lib/media'
+import { posterUrl } from '@/lib/media'
 
 interface DetailData {
   overview: string | null
@@ -92,11 +92,7 @@ export function ItemDetailPanel({ item, mediaType, open, onClose }: Props) {
 
   if (!open) return null
 
-  const posterSrc = item.poster_path
-    ? item.source === 'anilist' || item.poster_path.startsWith('http')
-      ? item.poster_path
-      : tmdbImg(item.poster_path, 'w300')
-    : null
+  const posterSrc = posterUrl(item, 'w300')
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4">

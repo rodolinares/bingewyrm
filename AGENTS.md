@@ -132,7 +132,7 @@ Coverage threshold starts at 10% — ratchet up as coverage grows. Never lower.
 
 - Unit tests co-located: `src/lib/shuffle.test.ts` next to `src/lib/shuffle.ts`
 - Query/component tests: `src/queries/__tests__/groups.test.tsx` (separate dir for complex setup)
-- Test infrastructure: `src/__tests__/` (setup, mocks, test-utils)
+- Test infrastructure: `src/__tests__/` (setup, mocks)
 
 ### Conventions
 

@@ -90,6 +90,13 @@ Deno.serve(async (req: Request) => {
     const res = await fetch(tmdbUrl);
     const data = await res.json();
 
+    if (!res.ok) {
+      return new Response(JSON.stringify({ error: data.status_message || "Search failed" }), {
+        status: res.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const results = (data.results || []).slice(0, 10).map((item: Record<string, unknown>) => ({
       source_id: String(item.id),
       title: type === "movie" ? item.title : item.name,

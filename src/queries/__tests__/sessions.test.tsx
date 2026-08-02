@@ -177,15 +177,21 @@ describe('useSessionVotes', () => {
 })
 
 describe('useSessionParticipants', () => {
-  it('fetches participant user ids', async () => {
-    queryRef.current = [{ user_id: 'u1' }, { user_id: 'u2' }]
+  it('fetches participants with display names', async () => {
+    queryRef.current = [
+      { user_id: 'u1', users: { display_name: 'Alice' } },
+      { user_id: 'u2', users: { display_name: 'Bob' } }
+    ]
 
     const { result } = renderHook(() => useSessionParticipants('sess-1'), {
       wrapper: createWrapper()
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual(['u1', 'u2'])
+    expect(result.current.data).toEqual([
+      { user_id: 'u1', users: { display_name: 'Alice' } },
+      { user_id: 'u2', users: { display_name: 'Bob' } }
+    ])
   })
 })
 

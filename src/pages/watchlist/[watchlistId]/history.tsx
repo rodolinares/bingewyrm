@@ -3,11 +3,7 @@ import { useWatchlist } from '@/queries/watchlists'
 import { usePastSessions } from '@/queries/sessions'
 import { Spinner } from '@/components/ui/spinner'
 import { MEDIA_LABELS } from '@/lib/media'
-
-const OUTCOME_LABELS: Record<string, string> = {
-  saved: 'Saved',
-  discarded: 'Discarded'
-}
+import { OutcomeBadge } from '@/components/outcome-badge'
 
 const END_REASON_LABELS: Record<string, string> = {
   manual: 'Ended early',
@@ -69,17 +65,7 @@ export default function SessionHistory() {
                   {session.item_ids.length} items
                 </p>
               </div>
-              <span
-                className={`rounded px-1.5 py-0.5 text-xs font-medium ${
-                  session.outcome === 'saved'
-                    ? 'bg-green-500/20 text-green-400'
-                    : session.outcome === 'discarded'
-                      ? 'bg-destructive/20 text-destructive'
-                      : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                {session.outcome ? OUTCOME_LABELS[session.outcome] : 'Pending'}
-              </span>
+              <OutcomeBadge outcome={session.outcome} />
             </Link>
           ))}
         </div>

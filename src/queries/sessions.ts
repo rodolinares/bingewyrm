@@ -67,6 +67,7 @@ export function useCastVote() {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['votes', variables.sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['session-votes', variables.sessionId] })
     }
   })
 }
@@ -84,6 +85,7 @@ export function useDeleteVote() {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['votes', variables.sessionId] })
+      queryClient.invalidateQueries({ queryKey: ['session-votes', variables.sessionId] })
     }
   })
 }
@@ -123,10 +125,7 @@ export function useSessionParticipants(sessionId: string) {
         .select('user_id, users(display_name)')
         .eq('session_id', sessionId)
       if (error) throw error
-      return ((data ?? []) as { user_id: string; users: { display_name: string | null } | { display_name: string | null }[] }[]).map(p => ({
-        user_id: p.user_id,
-        users: Array.isArray(p.users) ? (p.users[0] ?? { display_name: null }) : (p.users ?? { display_name: null })
-      }))
+      return (data ?? []) as unknown as { user_id: string; users: { display_name: string | null } }[]
     },
     enabled: !!sessionId
   })

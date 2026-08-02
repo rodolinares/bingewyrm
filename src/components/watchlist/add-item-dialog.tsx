@@ -3,11 +3,12 @@ import { Button } from '@/components/ui/button'
 import { useAddItem } from '@/queries/watchlists'
 import { supabase, supabaseUrl$ } from '@/lib/supabase'
 import { searchAniList, type AniListMedia } from '@/lib/anilist'
-import { tmdbImg, MEDIA_LABELS as TYPE_LABELS } from '@/lib/media'
+import { posterUrl, MEDIA_LABELS as TYPE_LABELS } from '@/lib/media'
 import { Spinner } from '@/components/ui/spinner'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface SearchResult {
+  source: 'tmdb' | 'anilist'
   source_id: string
   title: string
   year: number | null
@@ -31,8 +32,6 @@ type MediaType = 'movie' | 'series' | 'anime' | 'anime_movie'
 interface Props {
   watchlistId: string
   mediaType: MediaType
-  userId: string
-  onAdded: () => void
 }
 
 function tmdbType(mediaType: MediaType): 'movie' | 'tv' {
@@ -45,6 +44,7 @@ function anilistFormat(mediaType: MediaType): 'TV' | 'MOVIE' {
 
 function mapAniListResults(results: AniListMedia[]): SearchResult[] {
   return results.map(m => ({
+    source: 'anilist',
     source_id: String(m.id),
     title: m.title.english ?? m.title.romaji,
     year: m.startDate.year,
@@ -55,7 +55,7 @@ function mapAniListResults(results: AniListMedia[]): SearchResult[] {
   }))
 }
 
-export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props) {
+export function AddItemDialog({ watchlistId, mediaType }: Props) {
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'search' | 'manual'>('search')
   const [query, setQuery] = useState('')
@@ -132,7 +132,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
           )
           if (!res.ok) throw new Error('Search failed')
           const data = await res.json()
-          setResults(data.results)
+          setResults((data.results ?? []).map((r: Omit<SearchResult, 'source'>) => ({ ...r, source: 'tmdb' })))
         } else {
           const format = anilistFormat(mediaType)
           const media = await searchAniList(searchQuery, format)
@@ -227,8 +227,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
         year: item.year ?? new Date().getFullYear(),
         poster_path: item.poster_path,
         vote_average: item.vote_average ?? null,
-        genres: item.genres ?? [],
-        added_by: userId
+        genres: item.genres ?? []
       })
       setSuccess(`Added "${item.title}"`)
       closeTimerRef.current = setTimeout(() => {
@@ -236,7 +235,6 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
         setDetail(null)
         setSuccess(null)
         fetchExistingIds()
-        onAdded()
       }, 1200)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to add item')
@@ -260,8 +258,7 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
           year: result.year ?? new Date().getFullYear(),
           poster_path: result.poster_path,
           vote_average: result.vote_average ?? null,
-          genres: result.genres ?? [],
-          added_by: userId
+          genres: result.genres ?? []
         })
         added++
       } catch {
@@ -281,7 +278,6 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
     setSelected(new Set())
     setSelectedItems(new Map())
     fetchExistingIds()
-    onAdded()
   }
 
   const handleManualAdd = async () => {
@@ -302,12 +298,10 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
         year,
         poster_path: null,
         vote_average: null,
-        genres: [],
-        added_by: userId
+        genres: []
       })
       setSuccess('Added item')
       closeTimerRef.current = setTimeout(() => handleClose(), 1500)
-      onAdded()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to add item')
     }
@@ -349,13 +343,9 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                 {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
 
                 <div className="flex gap-4">
-                  {detailItem.poster_path ? (
+                  {posterUrl(detailItem, 'w300') ? (
                     <img
-                      src={
-                        detailItem.poster_path.startsWith('http')
-                          ? detailItem.poster_path
-                          : tmdbImg(detailItem.poster_path, 'w300')
-                      }
+                      src={posterUrl(detailItem, 'w300')!}
                       alt=""
                       className="h-40 w-28 shrink-0 rounded object-cover"
                     />
@@ -513,12 +503,8 @@ export function AddItemDialog({ watchlistId, mediaType, userId, onAdded }: Props
                               </div>
                             ) : null}
                           </button>
-                          {r.poster_path ? (
-                            <img
-                              src={r.poster_path.startsWith('http') ? r.poster_path : tmdbImg(r.poster_path, 'w200')}
-                              alt=""
-                              className="h-16 w-12 rounded object-cover"
-                            />
+                          {posterUrl(r, 'w200') ? (
+                            <img src={posterUrl(r, 'w200')!} alt="" className="h-16 w-12 rounded object-cover" />
                           ) : (
                             <div className="flex h-16 w-12 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
                               No img

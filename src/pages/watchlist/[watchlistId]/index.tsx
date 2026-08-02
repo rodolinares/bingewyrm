@@ -18,6 +18,7 @@ import {
 import { useRealtimeItems } from '@/hooks/use-realtime'
 import { AddItemDialog } from '@/components/watchlist/add-item-dialog'
 import { ItemDetailPanel } from '@/components/watchlist/item-detail-panel'
+import { OutcomeBadge } from '@/components/outcome-badge'
 import { Button } from '@/components/ui/button'
 import { InfoIcon, EyeIcon, EyeSlashIcon, TrashIcon, XIcon, CheckIcon } from '@/components/icons'
 import { Spinner } from '@/components/ui/spinner'
@@ -169,14 +170,7 @@ export default function WatchlistDetail() {
               Start Session
             </Button>
           ) : null}
-          {user && (
-            <AddItemDialog
-              watchlistId={watchlistId!}
-              mediaType={watchlist.media_type}
-              userId={user.id}
-              onAdded={() => {}}
-            />
-          )}
+          {user && <AddItemDialog watchlistId={watchlistId!} mediaType={watchlist.media_type} />}
         </div>
       </div>
 
@@ -279,9 +273,7 @@ export default function WatchlistDetail() {
                       : 'border-muted-foreground/30 hover:border-muted-foreground'
                   }`}
                 >
-                  {selectedIds.has(item.id) && (
-                    <CheckIcon className="h-3 w-3" />
-                  )}
+                  {selectedIds.has(item.id) && <CheckIcon className="h-3 w-3" />}
                 </button>
               )}
               {posterUrl(item, 'w200') ? (
@@ -336,7 +328,7 @@ export default function WatchlistDetail() {
                         className="flex h-8 w-8 items-center justify-center rounded-md text-destructive hover:bg-destructive/10"
                         title="Confirm remove"
                       >
-                      <TrashIcon className="h-4 w-4" />
+                        <TrashIcon className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => setConfirmingId(null)}
@@ -388,15 +380,7 @@ export default function WatchlistDetail() {
                 {resolvedVotes.filter(v => v.value).length} total yes votes across {resolvedParticipants.length} voters
               </p>
             )}
-            <span
-              className={`mt-2 inline-block rounded px-1.5 py-0.5 text-xs font-medium ${
-                resolvedSession.outcome === 'saved'
-                  ? 'bg-green-500/20 text-green-400'
-                  : 'bg-destructive/20 text-destructive'
-              }`}
-            >
-              {resolvedSession.outcome}
-            </span>
+            <OutcomeBadge outcome={resolvedSession.outcome} className="mt-2" />
           </Link>
         </div>
       )}

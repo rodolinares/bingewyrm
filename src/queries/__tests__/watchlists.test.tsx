@@ -157,8 +157,7 @@ describe('useAddItem', () => {
       year: 2025,
       poster_path: '/new.jpg',
       vote_average: 8.0,
-      genres: ['Drama'],
-      added_by: 'user-1'
+      genres: ['Drama']
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))

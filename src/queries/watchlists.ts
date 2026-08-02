@@ -113,7 +113,7 @@ export function useAddItem() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (item: Omit<Item, 'id' | 'added_at' | 'watched' | 'removed_at'>) => {
+    mutationFn: async (item: Omit<Item, 'id' | 'added_at' | 'watched' | 'removed_at' | 'added_by'>) => {
       const { data, error } = await supabase.rpc('add_item', {
         p_watchlist_id: item.watchlist_id,
         p_title: item.title,
