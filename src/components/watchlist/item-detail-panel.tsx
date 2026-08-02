@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { supabase, supabaseUrl$ } from '@/lib/supabase'
 import { fetchAniListItem, type AniListMedia } from '@/lib/anilist'
-import type { Item } from '@/queries/watchlists'
 import { Skeleton } from '@/components/ui/skeleton'
 import { posterUrl } from '@/lib/media'
 
@@ -13,16 +12,29 @@ interface DetailData {
   poster_path: string | null
 }
 
-type MediaType = 'movie' | 'series' | 'anime' | 'anime_movie'
+export type MediaType = 'movie' | 'series' | 'anime' | 'anime_movie'
+
+export interface DetailSource {
+  title: string
+  source: string
+  source_id: string | null
+  year: number | null
+  poster_path: string | null
+  vote_average: number | null
+  genres?: string[]
+}
 
 interface Props {
-  item: Item
+  item: DetailSource
   mediaType: MediaType
   open: boolean
   onClose: () => void
+  onBack?: () => void
+  status?: ReactNode
+  footer?: ReactNode
 }
 
-function tmdbType(mediaType: MediaType): 'movie' | 'tv' {
+export function tmdbType(mediaType: MediaType): 'movie' | 'tv' {
   return mediaType === 'movie' ? 'movie' : 'tv'
 }
 
@@ -36,7 +48,7 @@ function mapAniListDetail(m: AniListMedia): DetailData {
   }
 }
 
-export function ItemDetailPanel({ item, mediaType, open, onClose }: Props) {
+export function ItemDetailPanel({ item, mediaType, open, onClose, onBack, status, footer }: Props) {
   const [detail, setDetail] = useState<DetailData | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -81,8 +93,8 @@ export function ItemDetailPanel({ item, mediaType, open, onClose }: Props) {
     } else {
       setDetail({
         overview: null,
-        vote_average: null,
-        genres: [],
+        vote_average: item.vote_average,
+        genres: item.genres ?? [],
         runtime: null,
         poster_path: item.poster_path
       })
@@ -93,13 +105,15 @@ export function ItemDetailPanel({ item, mediaType, open, onClose }: Props) {
   if (!open) return null
 
   const posterSrc = posterUrl(item, 'w300')
+  const rating = detail?.vote_average ?? item.vote_average
+  const genres = detail?.genres ?? item.genres ?? []
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
       <div className="flex h-[90dvh] w-full max-w-lg flex-col rounded-t-lg border border-border bg-card shadow-lg sm:rounded-lg sm:h-[80dvh]">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <button
-            onClick={onClose}
+            onClick={onBack ?? onClose}
             className="flex h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
           >
             &larr; Back
@@ -113,6 +127,7 @@ export function ItemDetailPanel({ item, mediaType, open, onClose }: Props) {
         </div>
 
         <div className="flex-1 overflow-auto p-4">
+          {status}
           <div className="flex gap-4">
             {posterSrc ? (
               <img src={posterSrc} alt="" className="h-40 w-28 shrink-0 rounded object-cover" />
@@ -124,18 +139,18 @@ export function ItemDetailPanel({ item, mediaType, open, onClose }: Props) {
             <div className="min-w-0 flex-1">
               <h2 className="text-lg font-bold text-foreground">{item.title}</h2>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                <span>{item.year}</span>
-                {item.vote_average != null && item.vote_average > 0 && (
+                {item.year != null && <span>{item.year}</span>}
+                {rating != null && rating > 0 && (
                   <span className="flex items-center gap-1">
                     <span className="text-yellow-400">★</span>
-                    {item.vote_average.toFixed(1)}
+                    {rating.toFixed(1)}
                   </span>
                 )}
                 {detail?.runtime != null && <span>{detail.runtime} min</span>}
               </div>
-              {(detail?.genres ?? item.genres)?.length > 0 && (
+              {genres.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
-                  {(detail?.genres ?? item.genres).map(g => (
+                  {genres.map(g => (
                     <span key={g} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                       {g}
                     </span>
@@ -155,6 +170,8 @@ export function ItemDetailPanel({ item, mediaType, open, onClose }: Props) {
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{detail.overview}</p>
           ) : null}
         </div>
+
+        {footer}
       </div>
     </div>
   )

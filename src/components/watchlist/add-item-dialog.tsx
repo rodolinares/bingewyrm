@@ -5,7 +5,7 @@ import { supabase, supabaseUrl$ } from '@/lib/supabase'
 import { searchAniList, type AniListMedia } from '@/lib/anilist'
 import { posterUrl, MEDIA_LABELS as TYPE_LABELS } from '@/lib/media'
 import { Spinner } from '@/components/ui/spinner'
-import { Skeleton } from '@/components/ui/skeleton'
+import { ItemDetailPanel, tmdbType, type MediaType } from '@/components/watchlist/item-detail-panel'
 
 interface SearchResult {
   source: 'tmdb' | 'anilist'
@@ -14,28 +14,13 @@ interface SearchResult {
   year: number | null
   poster_path: string | null
   overview?: string | null
-  vote_average?: number | null
+  vote_average: number | null
   genres?: string[]
 }
-
-interface DetailResult {
-  overview: string | null
-  vote_average: number | null
-  genres: string[]
-  runtime: number | null
-  poster_path: string | null
-  backdrop_path: string | null
-}
-
-type MediaType = 'movie' | 'series' | 'anime' | 'anime_movie'
 
 interface Props {
   watchlistId: string
   mediaType: MediaType
-}
-
-function tmdbType(mediaType: MediaType): 'movie' | 'tv' {
-  return mediaType === 'movie' ? 'movie' : 'tv'
 }
 
 function anilistFormat(mediaType: MediaType): 'TV' | 'MOVIE' {
@@ -67,8 +52,6 @@ export function AddItemDialog({ watchlistId, mediaType }: Props) {
   const [selectedItems, setSelectedItems] = useState<Map<string, SearchResult>>(new Map())
   const [existingIds, setExistingIds] = useState<Set<string>>(new Set())
   const [detailItem, setDetailItem] = useState<SearchResult | null>(null)
-  const [detail, setDetail] = useState<DetailResult | null>(null)
-  const [detailLoading, setDetailLoading] = useState(false)
   const addItem = useAddItem()
   const debounceRef = useRef<number | undefined>(undefined)
   const closeTimerRef = useRef<number | undefined>(undefined)
@@ -106,7 +89,6 @@ export function AddItemDialog({ watchlistId, mediaType }: Props) {
     setSelected(new Set())
     setSelectedItems(new Map())
     setDetailItem(null)
-    setDetail(null)
     setManualTitle('')
     setManualYear('')
     setTab('search')
@@ -170,51 +152,6 @@ export function AddItemDialog({ watchlistId, mediaType }: Props) {
     })
   }
 
-  const fetchDetail = async (item: SearchResult) => {
-    setDetailItem(item)
-    setDetailLoading(true)
-    setDetail(null)
-
-    if (mediaType === 'anime' || mediaType === 'anime_movie') {
-      // AniList: data already in search result
-      setDetail({
-        overview: item.overview ?? null,
-        vote_average: item.vote_average ?? null,
-        genres: item.genres ?? [],
-        runtime: null,
-        poster_path: item.poster_path,
-        backdrop_path: null
-      })
-      setDetailLoading(false)
-      return
-    }
-
-    // TMDb: fetch from detail endpoint
-    try {
-      const { data: sessionData } = await supabase.auth.getSession()
-      const token = sessionData.session?.access_token
-      const res = await fetch(
-        `${supabaseUrl$}/functions/v1/tmdb-search/detail/${item.source_id}?type=${tmdbType(mediaType)}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      if (!res.ok) throw new Error('Failed to load details')
-      const data = await res.json()
-      setDetail(data)
-    } catch {
-      // Fall back to search data
-      setDetail({
-        overview: item.overview ?? null,
-        vote_average: item.vote_average ?? null,
-        genres: item.genres ?? [],
-        runtime: null,
-        poster_path: item.poster_path,
-        backdrop_path: null
-      })
-    } finally {
-      setDetailLoading(false)
-    }
-  }
-
   const handleDetailAdd = async (item: SearchResult) => {
     setError(null)
     setSuccess(null)
@@ -232,7 +169,6 @@ export function AddItemDialog({ watchlistId, mediaType }: Props) {
       setSuccess(`Added "${item.title}"`)
       closeTimerRef.current = setTimeout(() => {
         setDetailItem(null)
-        setDetail(null)
         setSuccess(null)
         fetchExistingIds()
       }, 1200)
@@ -313,98 +249,40 @@ export function AddItemDialog({ watchlistId, mediaType }: Props) {
     return (
       <>
         <Button onClick={() => setOpen(true)}>Add Item</Button>
-        {open && (
-          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center sm:p-4">
-            <div className="flex h-[90dvh] w-full max-w-lg flex-col rounded-t-lg border border-border bg-card shadow-lg sm:rounded-lg sm:h-[80dvh]">
-              <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <button
-                  onClick={() => {
-                    setDetailItem(null)
-                    setDetail(null)
-                    setError(null)
-                    setSuccess(null)
-                  }}
-                  className="flex h-10 items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        <ItemDetailPanel
+          item={detailItem}
+          mediaType={mediaType}
+          open={open}
+          onClose={handleClose}
+          onBack={() => {
+            setDetailItem(null)
+            setError(null)
+            setSuccess(null)
+          }}
+          status={
+            <>
+              {success && (
+                <div className="mb-3 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">{success}</div>
+              )}
+              {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
+            </>
+          }
+          footer={
+            <div className="shrink-0 border-t border-border p-4">
+              {isAdded ? (
+                <div className="text-center text-sm text-emerald-400">Already in watchlist</div>
+              ) : (
+                <Button
+                  onClick={() => handleDetailAdd(detailItem)}
+                  disabled={addItem.isPending || !!success}
+                  className="w-full bg-success text-success-foreground hover:bg-success/80"
                 >
-                  &larr; Back
-                </button>
-                <button
-                  onClick={handleClose}
-                  className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
-                >
-                  &times;
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-auto p-4">
-                {success && (
-                  <div className="mb-3 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">{success}</div>
-                )}
-                {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
-
-                <div className="flex gap-4">
-                  {posterUrl(detailItem, 'w300') ? (
-                    <img
-                      src={posterUrl(detailItem, 'w300')!}
-                      alt=""
-                      className="h-40 w-28 shrink-0 rounded object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-40 w-28 shrink-0 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
-                      No img
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-lg font-bold text-foreground">{detailItem.title}</h2>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                      {detailItem.year && <span>{detailItem.year}</span>}
-                      {detail?.vote_average != null && detail.vote_average > 0 && (
-                        <span className="flex items-center gap-1">
-                          <span className="text-yellow-400">★</span>
-                          {detail.vote_average.toFixed(1)}
-                        </span>
-                      )}
-                      {detail?.runtime != null && <span>{detail.runtime} min</span>}
-                    </div>
-                    {detail?.genres && detail.genres.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {detail.genres.map(g => (
-                          <span key={g} className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                            {g}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {detailLoading ? (
-                  <div className="mt-4 space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-5/6" />
-                    <Skeleton className="h-4 w-4/6" />
-                  </div>
-                ) : detail?.overview ? (
-                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{detail.overview}</p>
-                ) : null}
-              </div>
-
-              <div className="shrink-0 border-t border-border p-4">
-                {isAdded ? (
-                  <div className="text-center text-sm text-emerald-400">Already in watchlist</div>
-                ) : (
-                  <Button
-                    onClick={() => handleDetailAdd(detailItem)}
-                    disabled={addItem.isPending || !!success}
-                    className="w-full bg-success text-success-foreground hover:bg-success/80"
-                  >
-                    {addItem.isPending ? 'Adding...' : `Add to ${TYPE_LABELS[mediaType]}`}
-                  </Button>
-                )}
-              </div>
+                  {addItem.isPending ? 'Adding...' : `Add to ${TYPE_LABELS[mediaType]}`}
+                </Button>
+              )}
             </div>
-          </div>
-        )}
+          }
+        />
       </>
     )
   }
@@ -531,7 +409,7 @@ export function AddItemDialog({ watchlistId, mediaType }: Props) {
                             <button
                               onClick={e => {
                                 e.stopPropagation()
-                                fetchDetail(r)
+                                setDetailItem(r)
                               }}
                               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
                               title="View details"
