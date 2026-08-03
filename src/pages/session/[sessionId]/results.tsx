@@ -13,6 +13,8 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
 import { posterUrl } from '@/lib/media'
+import { InfoIcon } from '@/components/icons'
+import { ItemDetailPanel } from '@/components/watchlist/item-detail-panel'
 
 interface RankedItem {
   id: string
@@ -20,6 +22,9 @@ interface RankedItem {
   year: number
   poster_path: string | null
   source: string
+  source_id: string | null
+  vote_average: number | null
+  genres: string[]
   added_at: string
   voteCount: number
 }
@@ -37,6 +42,7 @@ const ResultsPage = () => {
   const resolveOutcome = useResolveOutcome()
 
   const [confirmAction, setConfirmAction] = useState<'saved' | 'discarded' | null>(null)
+  const [detailItemId, setDetailItemId] = useState<string | null>(null)
 
   const ranked = useMemo(() => {
     if (!items || !votes) return []
@@ -50,6 +56,9 @@ const ResultsPage = () => {
       year: i.year,
       poster_path: i.poster_path,
       source: i.source,
+      source_id: i.source_id,
+      vote_average: i.vote_average,
+      genres: i.genres,
       added_at: i.added_at,
       voteCount: voteCounts.get(i.id) ?? 0
     }))
@@ -129,6 +138,13 @@ const ResultsPage = () => {
             <span className="text-sm font-medium text-foreground">
               {item.voteCount}/{voterCount}
             </span>
+            <button
+              onClick={() => setDetailItemId(item.id)}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+              title="View details"
+            >
+              <InfoIcon className="h-4 w-4" />
+            </button>
           </div>
         ))}
       </div>
@@ -176,6 +192,15 @@ const ResultsPage = () => {
             </div>
           )}
         </div>
+      )}
+
+      {detailItemId && (
+        <ItemDetailPanel
+          item={ranked.find(i => i.id === detailItemId)!}
+          mediaType={watchlist?.media_type ?? 'movie'}
+          open
+          onClose={() => setDetailItemId(null)}
+        />
       )}
     </div>
   )

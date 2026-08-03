@@ -36,6 +36,8 @@ Deno.serve(async (req: Request) => {
     if (pathParts.includes("detail")) {
       const id = pathParts[pathParts.indexOf("detail") + 1];
       const type = url.searchParams.get("type");
+      const rawRegion = url.searchParams.get("region") || "US";
+      const region = /^[A-Z]{2}$/i.test(rawRegion) ? rawRegion.toUpperCase() : "US";
 
       if (!id || !type || (type !== "movie" && type !== "tv")) {
         return new Response(JSON.stringify({ error: "Missing or invalid id/type" }), {
@@ -55,6 +57,18 @@ Deno.serve(async (req: Request) => {
         });
       }
 
+      let providers = null;
+      try {
+        const providersUrl = `${TMDB_BASE}/${type}/${id}/watch/providers?api_key=${TMDB_KEY}&language=en-US&watch_region=${region}`;
+        const providersRes = await fetch(providersUrl);
+        const providersData = await providersRes.json();
+        if (providersRes.ok) {
+          providers = providersData.results?.[region] ?? null;
+        }
+      } catch {
+        // watch providers optional
+      }
+
       return new Response(JSON.stringify({
         overview: data.overview,
         vote_average: data.vote_average,
@@ -62,6 +76,7 @@ Deno.serve(async (req: Request) => {
         runtime: data.runtime || data.episode_run_time?.[0] || null,
         poster_path: data.poster_path,
         backdrop_path: data.backdrop_path,
+        providers,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

@@ -1,5 +1,16 @@
-import { describe, it, expect } from 'vitest'
-import { tmdbImg, posterUrl, TMDB_IMG_BASE, MEDIA_LABELS } from './media'
+import { describe, it, expect, beforeEach } from 'vitest'
+import {
+  tmdbImg,
+  posterUrl,
+  TMDB_IMG_BASE,
+  MEDIA_LABELS,
+  detectRegion,
+  parseCountryCode,
+  getStoredRegion,
+  setStoredRegion,
+  mapTmdbProviders,
+  mapAniListProviders
+} from './media'
 
 describe('tmdbImg', () => {
   it('joins base, size, and path', () => {
@@ -35,5 +46,98 @@ describe('MEDIA_LABELS', () => {
       anime: 'Anime',
       anime_movie: 'Anime Movies'
     })
+  })
+})
+
+describe('detectRegion', () => {
+  it('extracts region from locale with region', () => {
+    expect(detectRegion('en-US')).toBe('US')
+    expect(detectRegion('de-DE')).toBe('DE')
+  })
+
+  it('normalizes lowercase region to uppercase', () => {
+    expect(detectRegion('pt-br')).toBe('BR')
+  })
+
+  it('falls back to US when locale has no region', () => {
+    expect(detectRegion('en')).toBe('US')
+    expect(detectRegion('')).toBe('US')
+  })
+})
+
+describe('parseCountryCode', () => {
+  it('extracts uppercase country code from geo payload', () => {
+    expect(parseCountryCode({ country_code: 'pe' })).toBe('PE')
+    expect(parseCountryCode({ country_code: 'US' })).toBe('US')
+  })
+
+  it('returns null for missing or malformed code', () => {
+    expect(parseCountryCode({})).toBeNull()
+    expect(parseCountryCode({ country_code: 42 })).toBeNull()
+    expect(parseCountryCode(null)).toBeNull()
+    expect(parseCountryCode({ country_code: 'USX' })).toBeNull()
+  })
+})
+
+describe('mapTmdbProviders', () => {
+  it('maps flatrate/rent/buy into categorized providers', () => {
+    const providers = mapTmdbProviders({
+      link: 'https://tmdb.org/watch',
+      flatrate: [{ provider_name: 'Netflix', logo_path: '/netflix.png' }],
+      rent: [{ provider_name: 'Apple TV', logo_path: '/apple.png' }],
+      buy: [{ provider_name: 'Prime Video', logo_path: '/prime.png' }]
+    })
+    expect(providers).toEqual([
+      { name: 'Netflix', logo_path: '/netflix.png', url: 'https://tmdb.org/watch', category: 'stream' },
+      { name: 'Apple TV', logo_path: '/apple.png', url: 'https://tmdb.org/watch', category: 'rent' },
+      { name: 'Prime Video', logo_path: '/prime.png', url: 'https://tmdb.org/watch', category: 'buy' }
+    ])
+  })
+
+  it('returns empty array for null region data', () => {
+    expect(mapTmdbProviders(null)).toEqual([])
+  })
+
+  it('handles missing categories', () => {
+    expect(mapTmdbProviders({ flatrate: [] })).toEqual([])
+  })
+})
+
+describe('mapAniListProviders', () => {
+  it('maps external links to stream providers', () => {
+    expect(
+      mapAniListProviders([
+        { site: 'Crunchyroll', url: 'https://crunchyroll.com/x' },
+        { site: 'Netflix', url: 'https://netflix.com/x' }
+      ])
+    ).toEqual([
+      { name: 'Crunchyroll', logo_path: null, url: 'https://crunchyroll.com/x', category: 'stream' },
+      { name: 'Netflix', logo_path: null, url: 'https://netflix.com/x', category: 'stream' }
+    ])
+  })
+
+  it('returns empty array when no links', () => {
+    expect(mapAniListProviders(undefined)).toEqual([])
+  })
+})
+
+describe('getStoredRegion / setStoredRegion', () => {
+  beforeEach(() => {
+    window.localStorage.clear()
+  })
+
+  it('returns null when nothing stored', () => {
+    expect(getStoredRegion()).toBeNull()
+  })
+
+  it('round-trips a stored region and normalizes to uppercase', () => {
+    setStoredRegion('pe')
+    expect(getStoredRegion()).toBe('PE')
+  })
+
+  it('clears stored region on null', () => {
+    setStoredRegion('PE')
+    setStoredRegion(null)
+    expect(getStoredRegion()).toBeNull()
   })
 })

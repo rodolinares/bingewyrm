@@ -1,9 +1,21 @@
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase, supabaseUrl$ } from '@/lib/supabase'
 import { fetchAniListItem, type AniListMedia } from '@/lib/anilist'
 import { Skeleton } from '@/components/ui/skeleton'
-import { posterUrl, tmdbType } from '@/lib/media'
+import {
+  posterUrl,
+  tmdbImg,
+  tmdbType,
+  getRegion,
+  getStoredRegion,
+  setStoredRegion,
+  mapTmdbProviders,
+  mapAniListProviders,
+  COUNTRIES,
+  type WatchProvider
+} from '@/lib/media'
 
 interface DetailData {
   overview: string | null
@@ -11,6 +23,7 @@ interface DetailData {
   genres: string[]
   runtime: number | null
   poster_path: string | null
+  providers: WatchProvider[]
 }
 
 export type MediaType = 'movie' | 'series' | 'anime' | 'anime_movie'
@@ -40,7 +53,8 @@ const mapAniListDetail = (m: AniListMedia): DetailData => ({
   vote_average: m.averageScore != null ? m.averageScore / 10 : null,
   genres: m.genres ?? [],
   runtime: null,
-  poster_path: m.coverImage.medium
+  poster_path: m.coverImage.medium,
+  providers: mapAniListProviders(m.externalLinks)
 })
 
 const fallbackDetail = (item: DetailSource): DetailData => ({
@@ -48,12 +62,41 @@ const fallbackDetail = (item: DetailSource): DetailData => ({
   vote_average: item.vote_average,
   genres: item.genres ?? [],
   runtime: null,
-  poster_path: item.poster_path
+  poster_path: item.poster_path,
+  providers: []
 })
 
+const ProviderChip = ({ provider }: { provider: WatchProvider }) => {
+  const content = (
+    <>
+      {provider.logo_path && <img src={tmdbImg(provider.logo_path, 'w45')} alt="" className="h-4 w-4 rounded-sm object-cover" />}
+      <span className="truncate text-xs font-medium text-foreground">{provider.name}</span>
+    </>
+  )
+  const cls =
+    'flex max-w-44 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 hover:bg-muted'
+  return provider.url ? (
+    <a href={provider.url} target="_blank" rel="noreferrer" className={cls} title={provider.url}>
+      {content}
+    </a>
+  ) : (
+    <span className={cls}>{content}</span>
+  )
+}
+
 export const ItemDetailPanel = ({ item, mediaType, open, onClose, onBack, status, footer }: Props) => {
+  const [regionOverride, setRegionOverride] = useState<string | null>(() => getStoredRegion())
+  const { data: autoRegion } = useQuery<string>({
+    queryKey: ['user-region'],
+    queryFn: getRegion,
+    enabled: open && !regionOverride,
+    staleTime: Infinity,
+    gcTime: Infinity
+  })
+  const region = regionOverride ?? autoRegion
+
   const { data: detail, isLoading: loading } = useQuery<DetailData>({
-    queryKey: ['item-detail', item.source, item.source_id, mediaType],
+    queryKey: ['item-detail', item.source, item.source_id, mediaType, region],
     queryFn: async () => {
       if (item.source === 'anilist') {
         return mapAniListDetail(await fetchAniListItem(item.source_id!))
@@ -62,15 +105,16 @@ export const ItemDetailPanel = ({ item, mediaType, open, onClose, onBack, status
         const { data: sessionData } = await supabase.auth.getSession()
         const token = sessionData.session?.access_token
         const res = await fetch(
-          `${supabaseUrl$}/functions/v1/tmdb-search/detail/${item.source_id}?type=${tmdbType(mediaType)}`,
+          `${supabaseUrl$}/functions/v1/tmdb-search/detail/${item.source_id}?type=${tmdbType(mediaType)}&region=${region}`,
           { headers: { Authorization: `Bearer ${token}` } }
         )
         if (!res.ok) throw new Error('Failed to load details')
-        return res.json()
+        const data = await res.json()
+        return { ...data, providers: mapTmdbProviders(data.providers) }
       }
       return fallbackDetail(item)
     },
-    enabled: open && !!item.source_id
+    enabled: open && !!item.source_id && !!region
   })
 
   if (!open) return null
@@ -140,6 +184,51 @@ export const ItemDetailPanel = ({ item, mediaType, open, onClose, onBack, status
           ) : detail?.overview ? (
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{detail.overview}</p>
           ) : null}
+
+          {!loading && detail && (item.source === 'tmdb' || detail.providers.length > 0) && (
+            <div className="mt-4">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold text-foreground">Where to watch</h3>
+                {item.source === 'tmdb' && (
+                  <select
+                    value={region ?? ''}
+                    onChange={e => {
+                      setStoredRegion(e.target.value)
+                      setRegionOverride(e.target.value)
+                    }}
+                    aria-label="Region"
+                    className="h-8 rounded-md border border-input bg-background px-2 text-xs text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {COUNTRIES.map(c => (
+                      <option key={c.code} value={c.code}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              {detail.providers.length > 0 ? (
+                <div className="mt-2 space-y-2">
+                  {(['stream', 'rent', 'buy'] as const).map(category => {
+                    const list = detail.providers.filter(p => p.category === category)
+                    if (list.length === 0) return null
+                    return (
+                      <div key={category} className="flex items-center gap-2">
+                        <span className="w-16 shrink-0 text-xs capitalize text-muted-foreground">{category}</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {list.map(p => (
+                            <ProviderChip key={p.name} provider={p} />
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <p className="mt-2 text-xs text-muted-foreground">No streaming options in {region}.</p>
+              )}
+            </div>
+          )}
         </div>
 
         {footer}

@@ -7,6 +7,7 @@ export interface AniListMedia {
   description: string | null
   averageScore: number | null
   genres: string[]
+  externalLinks?: { site: string; url: string }[]
 }
 
 interface AniListResponse {
@@ -59,6 +60,7 @@ const SINGLE_QUERY = `query ($id: Int) {
     description(asHtml: false)
     averageScore
     genres
+    externalLinks { site url }
   }
 }`
 
