@@ -69,7 +69,9 @@ const fallbackDetail = (item: DetailSource): DetailData => ({
 const ProviderChip = ({ provider }: { provider: WatchProvider }) => {
   const content = (
     <>
-      {provider.logo_path && <img src={tmdbImg(provider.logo_path, 'w45')} alt="" className="h-4 w-4 rounded-sm object-cover" />}
+      {provider.logo_path && (
+        <img src={tmdbImg(provider.logo_path, 'w45')} alt="" className="h-4 w-4 rounded-sm object-cover" />
+      )}
       <span className="truncate text-xs font-medium text-foreground">{provider.name}</span>
     </>
   )

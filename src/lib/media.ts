@@ -162,9 +162,7 @@ export const mapTmdbProviders = (regionData: TmdbRegionData | null): WatchProvid
   ]
 }
 
-export const mapAniListProviders = (
-  externalLinks: { site: string; url: string }[] | undefined
-): WatchProvider[] => {
+export const mapAniListProviders = (externalLinks: { site: string; url: string }[] | undefined): WatchProvider[] => {
   return (externalLinks ?? []).map(l => ({
     name: l.site,
     logo_path: null,
