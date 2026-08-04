@@ -21,6 +21,17 @@ interface MemberCountRow {
   count: number
 }
 
+const useGroupMutation = <TArgs, TData = void>(mutationFn: (args: TArgs) => Promise<TData>) => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] })
+    }
+  })
+}
+
 export const useGroups = () => {
   const { user } = useUser()
 
@@ -59,65 +70,33 @@ export const useGroups = () => {
   })
 }
 
-export const useCreateGroup = () => {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async (name: string) => {
-      const { data, error } = await supabase.rpc('create_group', { p_name: name })
-      if (error) throw error
-      return data as Group
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] })
-    }
+export const useCreateGroup = () =>
+  useGroupMutation(async (name: string) => {
+    const { data, error } = await supabase.rpc('create_group', { p_name: name })
+    if (error) throw error
+    return data as Group
   })
-}
 
-export const useUpdateGroup = () => {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async ({ id, name }: { id: string; name: string }) => {
-      const { error } = await supabase.rpc('update_group_name', { p_group_id: id, p_name: name })
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] })
-    }
+export const useUpdateGroup = () =>
+  useGroupMutation(async ({ id, name }: { id: string; name: string }) => {
+    const { error } = await supabase.rpc('update_group_name', { p_group_id: id, p_name: name })
+    if (error) throw error
   })
-}
 
-export const useDeleteGroup = () => {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.rpc('delete_group', { p_group_id: id })
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] })
-    }
+export const useDeleteGroup = () =>
+  useGroupMutation(async (id: string) => {
+    const { error } = await supabase.rpc('delete_group', { p_group_id: id })
+    if (error) throw error
   })
-}
 
-export const useRegenerateInvite = () => {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async (groupId: string) => {
-      const { data, error } = await supabase.rpc('regenerate_invite_code', {
-        p_group_id: groupId
-      })
-      if (error) throw error
-      return data as string
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] })
-    }
+export const useRegenerateInvite = () =>
+  useGroupMutation(async (groupId: string) => {
+    const { data, error } = await supabase.rpc('regenerate_invite_code', {
+      p_group_id: groupId
+    })
+    if (error) throw error
+    return data as string
   })
-}
 
 interface GroupMemberWithUser {
   user_id: string
@@ -142,22 +121,14 @@ export const useGroupMembers = (groupId: string | undefined) => {
   })
 }
 
-export const useTransferLeader = () => {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async ({ groupId, newLeaderId }: { groupId: string; newLeaderId: string }) => {
-      const { error } = await supabase.rpc('transfer_leader', {
-        p_group_id: groupId,
-        p_new_leader_id: newLeaderId
-      })
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] })
-    }
+export const useTransferLeader = () =>
+  useGroupMutation(async ({ groupId, newLeaderId }: { groupId: string; newLeaderId: string }) => {
+    const { error } = await supabase.rpc('transfer_leader', {
+      p_group_id: groupId,
+      p_new_leader_id: newLeaderId
+    })
+    if (error) throw error
   })
-}
 
 export const useGroupGenres = (groupId: string | undefined) => {
   return useQuery({
@@ -219,19 +190,11 @@ export const useRemoveGenreBlacklist = () => {
   })
 }
 
-export const useJoinGroup = () => {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async (inviteCode: string) => {
-      const { data, error } = await supabase.rpc('join_group', {
-        p_invite_code: inviteCode
-      })
-      if (error) throw error
-      return data as Group
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] })
-    }
+export const useJoinGroup = () =>
+  useGroupMutation(async (inviteCode: string) => {
+    const { data, error } = await supabase.rpc('join_group', {
+      p_invite_code: inviteCode
+    })
+    if (error) throw error
+    return data as Group
   })
-}

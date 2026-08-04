@@ -2,13 +2,9 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useCreateWatchlist } from '@/queries/watchlists'
+import { MEDIA_LABELS } from '@/lib/media'
 
-const MEDIA_TYPES = [
-  { value: 'movie', label: 'Movies' },
-  { value: 'series', label: 'Series' },
-  { value: 'anime', label: 'Anime' },
-  { value: 'anime_movie', label: 'Anime Movies' }
-] as const
+const MEDIA_TYPES = Object.entries(MEDIA_LABELS).map(([value, label]) => ({ value, label }))
 
 interface Props {
   groupId: string

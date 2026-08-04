@@ -1,42 +1,38 @@
-import { useState } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
-import { z } from 'zod/v4'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useState, type SyntheticEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { useUser } from '@/hooks/use-user'
 import { useUpdateProfile } from '@/queries/profile'
 import { useTheme } from '@/hooks/use-theme'
 import { Switch } from '@/components/ui/switch'
 
-const schema = z.object({
-  display_name: z
-    .string()
-    .min(2, 'At least 2 characters')
-    .max(30, 'At most 30 characters')
-    .regex(/^[\p{L}\p{M}' -]+$/u, 'Letters, spaces, apostrophes, and hyphens only')
-})
+const NAME_REGEX = /^[\p{L}\p{M}' -]+$/u
 
-type FormData = z.infer<typeof schema>
+const validate = (value: string): string | null => {
+  if (value.length < 2) return 'At least 2 characters'
+  if (value.length > 30) return 'At most 30 characters'
+  if (!NAME_REGEX.test(value)) return 'Letters, spaces, apostrophes, and hyphens only'
+  return null
+}
 
 const Settings = () => {
   const { profile } = useUser()
   const { theme, toggleTheme } = useTheme()
   const updateProfile = useUpdateProfile()
+  const [name, setName] = useState(profile?.display_name ?? '')
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: { display_name: profile?.display_name ?? '' }
-  })
-
-  const displayName = useWatch({ control: form.control, name: 'display_name', defaultValue: '' })
-
-  const onSubmit = async (values: FormData) => {
-    setError(null)
+  const onSubmit = async (e: SyntheticEvent) => {
+    e.preventDefault()
     setSaved(false)
+    const message = validate(name)
+    if (message) {
+      setError(message)
+      return
+    }
+    setError(null)
     try {
-      await updateProfile.mutateAsync(values.display_name)
+      await updateProfile.mutateAsync(name)
       setSaved(true)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to update')
@@ -52,10 +48,11 @@ const Settings = () => {
       {/* Display name */}
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-foreground">Display Name</h2>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+        <form onSubmit={onSubmit} className="space-y-3">
           <div className="flex gap-2">
             <input
-              {...form.register('display_name')}
+              value={name}
+              onChange={e => setName(e.target.value)}
               maxLength={30}
               className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-base text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
@@ -64,8 +61,8 @@ const Settings = () => {
             </Button>
           </div>
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{(form.formState.errors.display_name?.message ?? saved) ? 'Saved' : (error ?? '\u00A0')}</span>
-            <span>{displayName.length}/30</span>
+            <span>{error ?? (saved ? 'Saved' : '\u00A0')}</span>
+            <span>{name.length}/30</span>
           </div>
         </form>
       </section>

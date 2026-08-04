@@ -39,7 +39,6 @@ const mockVote = {
   item_id: 'item-1',
   user_id: 'user-1',
   value: true,
-  is_auto: false,
   created_at: '2024-01-01T00:00:00Z'
 }
 

@@ -1,7 +1,4 @@
 import { useOutletContext, useNavigate } from 'react-router'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod/v4'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import {
   useUpdateGroup,
@@ -15,7 +12,7 @@ import {
   useRemoveGenreBlacklist
 } from '@/queries/groups'
 import type { Group } from '@/queries/groups'
-import { useState } from 'react'
+import { useState, type SyntheticEvent } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useUser } from '@/hooks/use-user'
 
@@ -23,12 +20,6 @@ interface Context {
   group: Group
   isLeader: boolean
 }
-
-const renameSchema = z.object({
-  name: z.string().min(1, 'Required').max(50, 'At most 50 characters')
-})
-
-type RenameForm = z.infer<typeof renameSchema>
 
 const GroupSettings = () => {
   const { group, isLeader } = useOutletContext<Context>()
@@ -43,11 +34,8 @@ const GroupSettings = () => {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [confirmTransfer, setConfirmTransfer] = useState(false)
   const [newLeaderId, setNewLeaderId] = useState('')
-
-  const form = useForm<RenameForm>({
-    resolver: zodResolver(renameSchema),
-    defaultValues: { name: group.name }
-  })
+  const [renameName, setRenameName] = useState(group.name)
+  const [renameError, setRenameError] = useState<string | null>(null)
 
   const inviteUrl = `${window.location.origin}/invite/${group.invite_code}`
 
@@ -61,8 +49,18 @@ const GroupSettings = () => {
     await regenerateInvite.mutateAsync(group.id)
   }
 
-  const handleRename = async (values: RenameForm) => {
-    await updateGroup.mutateAsync({ id: group.id, name: values.name })
+  const handleRename = async (e: SyntheticEvent) => {
+    e.preventDefault()
+    if (renameName.trim().length === 0) {
+      setRenameError('Required')
+      return
+    }
+    if (renameName.length > 50) {
+      setRenameError('At most 50 characters')
+      return
+    }
+    setRenameError(null)
+    await updateGroup.mutateAsync({ id: group.id, name: renameName })
   }
 
   const handleDelete = async () => {
@@ -115,18 +113,17 @@ const GroupSettings = () => {
       {isLeader && (
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-foreground">Rename</h2>
-          <form onSubmit={form.handleSubmit(handleRename)} className="flex gap-2">
+          <form onSubmit={handleRename} className="flex gap-2">
             <input
-              {...form.register('name')}
+              value={renameName}
+              onChange={e => setRenameName(e.target.value)}
               className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-base text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
             <Button type="submit" disabled={updateGroup.isPending} className="h-10">
               Save
             </Button>
           </form>
-          {form.formState.errors.name && (
-            <p className="text-sm text-destructive">{form.formState.errors.name.message}</p>
-          )}
+          {renameError && <p className="text-sm text-destructive">{renameError}</p>}
         </section>
       )}
 

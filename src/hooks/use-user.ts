@@ -5,7 +5,6 @@ export interface UserProfile {
   id: string
   display_name: string | null
   email: string | null
-  google_account_id: string
   created_at: string
 }
 

@@ -1,45 +1,46 @@
-import { useState } from 'react'
+import { useState, type SyntheticEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
-import { useForm, useWatch } from 'react-hook-form'
-import { z } from 'zod/v4'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 import { useUser } from '@/hooks/use-user'
 
-const schema = z.object({
-  display_name: z
-    .string()
-    .min(2, 'At least 2 characters')
-    .max(30, 'At most 30 characters')
-    .regex(/^[\p{L}\p{M}' -]+$/u, 'Letters, spaces, apostrophes, and hyphens only')
-})
+const NAME_REGEX = /^[\p{L}\p{M}' -]+$/u
 
-type FormData = z.infer<typeof schema>
+const validate = (value: string): string | null => {
+  if (value.length < 2) return 'At least 2 characters'
+  if (value.length > 30) return 'At most 30 characters'
+  if (!NAME_REGEX.test(value)) return 'Letters, spaces, apostrophes, and hyphens only'
+  return null
+}
 
 const Onboarding = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { user } = useUser()
-  const [error, setError] = useState<string | null>(null)
+  const [displayName, setDisplayName] = useState('')
+  const [validationError, setValidationError] = useState<string | null>(null)
+  const [serverError, setServerError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: { display_name: '' }
-  })
-
-  const displayName = useWatch({ control: form.control, name: 'display_name', defaultValue: '' })
-
-  const onSubmit = async (values: FormData) => {
+  const onSubmit = async (e: SyntheticEvent) => {
+    e.preventDefault()
     if (!user) return
-    setError(null)
+    const message = validate(displayName)
+    if (message) {
+      setValidationError(message)
+      return
+    }
+    setValidationError(null)
+    setServerError(null)
+    setSaving(true)
 
     const { error: updateError } = await supabase.rpc('update_user_profile', {
-      p_display_name: values.display_name
+      p_display_name: displayName
     })
 
     if (updateError) {
-      setError(updateError.message)
+      setServerError(updateError.message)
+      setSaving(false)
       return
     }
 
@@ -53,24 +54,25 @@ const Onboarding = () => {
           <h1 className="text-2xl font-bold text-foreground">Welcome to BingeWyrm</h1>
           <p className="text-muted-foreground">Pick a display name for your group members to see.</p>
         </div>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
             <input
-              {...form.register('display_name')}
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value)}
               placeholder="Display name"
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               maxLength={30}
             />
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{form.formState.errors.display_name?.message ?? '\u00A0'}</span>
+              <span>{validationError ?? '\u00A0'}</span>
               <span>{displayName.length}/30</span>
             </div>
           </div>
-          {error && (
-            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">{error}</p>
+          {serverError && (
+            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">{serverError}</p>
           )}
-          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? 'Saving...' : 'Continue'}
+          <Button type="submit" className="w-full" disabled={saving}>
+            {saving ? 'Saving...' : 'Continue'}
           </Button>
         </form>
       </div>

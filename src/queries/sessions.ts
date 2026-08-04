@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import type { QueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Session, Item } from './watchlists'
 
@@ -33,25 +34,28 @@ export interface Vote {
   item_id: string
   user_id: string
   value: boolean
-  is_auto: boolean
   created_at: string
 }
 
-export const useMyVotes = (sessionId: string, userId: string | undefined) => {
+const invalidateSessionVotes = (queryClient: QueryClient, sessionId: string) => {
+  queryClient.invalidateQueries({ queryKey: ['votes', sessionId] })
+  queryClient.invalidateQueries({ queryKey: ['session-votes', sessionId] })
+}
+
+const useVotes = (sessionId: string, userId: string | undefined, requireUser: boolean) => {
   return useQuery({
-    queryKey: ['votes', sessionId, userId],
+    queryKey: userId ? ['votes', sessionId, userId] : ['session-votes', sessionId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('votes')
-        .select('*')
-        .eq('session_id', sessionId)
-        .eq('user_id', userId!)
+      const query = supabase.from('votes').select('*').eq('session_id', sessionId)
+      const { data, error } = await (userId ? query.eq('user_id', userId) : query)
       if (error) throw error
       return data as Vote[]
     },
-    enabled: !!sessionId && !!userId
+    enabled: !!sessionId && (requireUser ? !!userId : true)
   })
 }
+
+export const useMyVotes = (sessionId: string, userId: string | undefined) => useVotes(sessionId, userId, true)
 
 export const useCastVote = () => {
   const queryClient = useQueryClient()
@@ -65,10 +69,7 @@ export const useCastVote = () => {
       })
       if (error) throw error
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['votes', variables.sessionId] })
-      queryClient.invalidateQueries({ queryKey: ['session-votes', variables.sessionId] })
-    }
+    onSuccess: (_data, variables) => invalidateSessionVotes(queryClient, variables.sessionId)
   })
 }
 
@@ -83,10 +84,7 @@ export const useDeleteVote = () => {
       })
       if (error) throw error
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['votes', variables.sessionId] })
-      queryClient.invalidateQueries({ queryKey: ['session-votes', variables.sessionId] })
-    }
+    onSuccess: (_data, variables) => invalidateSessionVotes(queryClient, variables.sessionId)
   })
 }
 
@@ -104,17 +102,7 @@ export const useEndSession = () => {
   })
 }
 
-export const useSessionVotes = (sessionId: string) => {
-  return useQuery({
-    queryKey: ['session-votes', sessionId],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('votes').select('*').eq('session_id', sessionId)
-      if (error) throw error
-      return data as Vote[]
-    },
-    enabled: !!sessionId
-  })
-}
+export const useSessionVotes = (sessionId: string) => useVotes(sessionId, undefined, false)
 
 export const useSessionParticipants = (sessionId: string) => {
   return useQuery({
