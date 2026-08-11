@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import {
   tmdbImg,
   posterUrl,
+  formatDuration,
   TMDB_IMG_BASE,
   MEDIA_LABELS,
   detectRegion,
@@ -139,5 +140,23 @@ describe('getStoredRegion / setStoredRegion', () => {
     setStoredRegion('PE')
     setStoredRegion(null)
     expect(getStoredRegion()).toBeNull()
+  })
+})
+
+describe('formatDuration', () => {
+  it('returns null for unknown duration', () => {
+    expect(formatDuration(null)).toBeNull()
+    expect(formatDuration(undefined)).toBeNull()
+    expect(formatDuration(0)).toBeNull()
+    expect(formatDuration(-5)).toBeNull()
+  })
+
+  it('formats sub-hour durations as minutes', () => {
+    expect(formatDuration(45)).toBe('45m')
+  })
+
+  it('formats hour+ durations', () => {
+    expect(formatDuration(112)).toBe('1h 52m')
+    expect(formatDuration(120)).toBe('2h')
   })
 })

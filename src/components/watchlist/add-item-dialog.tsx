@@ -16,6 +16,7 @@ interface SearchResult {
   overview?: string | null
   vote_average: number | null
   genres?: string[]
+  duration: number | null
 }
 
 interface Props {
@@ -36,7 +37,8 @@ const mapAniListResults = (results: AniListMedia[]): SearchResult[] => {
     poster_path: m.coverImage.medium,
     overview: m.description ? m.description.replace(/<[^>]*>/g, '').trim() : null,
     vote_average: m.averageScore != null ? m.averageScore / 10 : null,
-    genres: m.genres ?? []
+    genres: m.genres ?? [],
+    duration: m.duration
   }))
 }
 
@@ -153,7 +155,8 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
         year: item.year ?? new Date().getFullYear(),
         poster_path: item.poster_path,
         vote_average: item.vote_average ?? null,
-        genres: item.genres ?? []
+        genres: item.genres ?? [],
+        duration: item.duration
       })
       setSuccess(`Added "${item.title}"`)
       closeTimerRef.current = setTimeout(() => {
@@ -182,7 +185,8 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
           year: result.year ?? new Date().getFullYear(),
           poster_path: result.poster_path,
           vote_average: result.vote_average ?? null,
-          genres: result.genres ?? []
+          genres: result.genres ?? [],
+          duration: result.duration
         })
         added++
       } catch {
@@ -221,7 +225,8 @@ export const AddItemDialog = ({ watchlistId, mediaType }: Props) => {
         year,
         poster_path: null,
         vote_average: null,
-        genres: []
+        genres: [],
+        duration: null
       })
       setSuccess('Added item')
       closeTimerRef.current = setTimeout(() => handleClose(), 1500)

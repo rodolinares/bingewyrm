@@ -20,6 +20,7 @@ export interface Item {
   poster_path: string | null
   vote_average: number | null
   genres: string[]
+  duration: number | null
   added_by: string
   added_at: string
   watched: boolean
@@ -122,7 +123,8 @@ export const useAddItem = () => {
         p_year: item.year,
         p_poster_path: item.poster_path,
         p_vote_average: item.vote_average,
-        p_genres: item.genres
+        p_genres: item.genres,
+        p_duration: item.duration
       })
       if (error) {
         if (error.code === '23505') throw new Error('This item is already in the watchlist')

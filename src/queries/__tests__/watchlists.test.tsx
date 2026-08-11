@@ -33,6 +33,7 @@ const mockItem = {
   poster_path: '/poster.jpg',
   vote_average: 7.5,
   genres: ['Action'],
+  duration: 120,
   added_by: 'user-1',
   added_at: '2024-01-01T00:00:00Z',
   watched: false,
@@ -157,7 +158,8 @@ describe('useAddItem', () => {
       year: 2025,
       poster_path: '/new.jpg',
       vote_average: 8.0,
-      genres: ['Drama']
+      genres: ['Drama'],
+      duration: 95
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))

@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button'
 import { InfoIcon, EyeIcon, EyeSlashIcon, TrashIcon, XIcon, CheckIcon } from '@/components/icons'
 import { Spinner } from '@/components/ui/spinner'
 import { useGroups } from '@/queries/groups'
-import { MEDIA_LABELS, posterUrl } from '@/lib/media'
+import { MEDIA_LABELS, posterUrl, formatDuration } from '@/lib/media'
 
 type SortBy = 'title' | 'year' | 'vote_average' | 'added_at'
 type SortDir = 'asc' | 'desc'
@@ -287,7 +287,16 @@ const WatchlistDetail = () => {
               )}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
-                <p className="text-xs text-muted-foreground">{item.year}</p>
+                <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span>{item.year}</span>
+                  {item.vote_average != null && item.vote_average > 0 && (
+                    <span className="flex items-center gap-0.5">
+                      <span className="text-yellow-400">★</span>
+                      {item.vote_average.toFixed(1)}
+                    </span>
+                  )}
+                  {formatDuration(item.duration) && <span>{formatDuration(item.duration)}</span>}
+                </div>
                 {item.watched && (
                   <span className="inline-block mt-1 rounded bg-primary/20 px-1.5 py-0.5 text-[10px] font-medium text-primary">
                     Watched

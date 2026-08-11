@@ -26,6 +26,14 @@ export const posterUrl = (item: MediaItem, size: string): string | null => {
   return tmdbImg(item.poster_path, size)
 }
 
+export const formatDuration = (minutes: number | null | undefined): string | null => {
+  if (minutes == null || minutes <= 0) return null
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  if (h === 0) return `${m}m`
+  return m === 0 ? `${h}h` : `${h}h ${m}m`
+}
+
 export type WatchCategory = 'stream' | 'rent' | 'buy'
 
 export interface WatchProvider {

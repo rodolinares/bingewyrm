@@ -7,6 +7,7 @@ export interface AniListMedia {
   description: string | null
   averageScore: number | null
   genres: string[]
+  duration: number | null
   externalLinks?: { site: string; url: string }[]
 }
 
@@ -31,6 +32,7 @@ const SEARCH_QUERY = `query ($search: String, $format: [MediaFormat]) {
       description(asHtml: false)
       averageScore
       genres
+      duration
     }
   }
 }`
@@ -60,6 +62,7 @@ const SINGLE_QUERY = `query ($id: Int) {
     description(asHtml: false)
     averageScore
     genres
+    duration
     externalLinks { site url }
   }
 }`

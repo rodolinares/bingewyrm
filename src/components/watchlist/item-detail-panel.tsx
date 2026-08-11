@@ -13,6 +13,7 @@ import {
   setStoredRegion,
   mapTmdbProviders,
   mapAniListProviders,
+  formatDuration,
   COUNTRIES,
   type WatchProvider
 } from '@/lib/media'
@@ -52,7 +53,7 @@ const mapAniListDetail = (m: AniListMedia): DetailData => ({
   overview: m.description ? m.description.replace(/<[^>]*>/g, '').trim() : null,
   vote_average: m.averageScore != null ? m.averageScore / 10 : null,
   genres: m.genres ?? [],
-  runtime: null,
+  runtime: m.duration,
   poster_path: m.coverImage.medium,
   providers: mapAniListProviders(m.externalLinks)
 })
@@ -163,7 +164,7 @@ export const ItemDetailPanel = ({ item, mediaType, open, onClose, onBack, status
                     {rating.toFixed(1)}
                   </span>
                 )}
-                {detail?.runtime != null && <span>{detail.runtime} min</span>}
+                {formatDuration(detail?.runtime) && <span>{formatDuration(detail?.runtime)}</span>}
               </div>
               {genres.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">

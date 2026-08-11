@@ -112,13 +112,33 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    const results = (data.results || []).slice(0, 10).map((item: Record<string, unknown>) => ({
+    const searchResults = (data.results || []).slice(0, 10) as Record<string, unknown>[];
+
+    // ponytail: search list has no runtime, so N+1 detail fetch per result.
+    // Parallel, bounded at 10 results — fine within TMDb free tier (50 req/s). Fetch detail lazily on demand if it ever grows.
+    const details = await Promise.all(
+      searchResults.map(async (item) => {
+        try {
+          const detailRes = await fetch(
+            `${TMDB_BASE}/${type}/${item.id}?api_key=${TMDB_KEY}&language=en-US`
+          );
+          if (!detailRes.ok) return null;
+          const detail = await detailRes.json() as Record<string, unknown>;
+          return detail.runtime || (detail.episode_run_time as unknown[] | undefined)?.[0] || null;
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    const results = searchResults.map((item, i) => ({
       source_id: String(item.id),
       title: type === "movie" ? item.title : item.name,
       year: (type === "movie" ? item.release_date : item.first_air_date as string || "").slice(0, 4) || null,
       poster_path: item.poster_path,
       overview: item.overview,
       vote_average: item.vote_average,
+      duration: details[i] as number | null,
     }));
 
     return new Response(JSON.stringify({ results }), {
