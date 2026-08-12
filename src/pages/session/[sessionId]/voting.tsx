@@ -18,7 +18,7 @@ import { useRealtimeSession } from '@/hooks/use-realtime'
 import { seededShuffle } from '@/lib/shuffle'
 import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
-import { posterUrl } from '@/lib/media'
+import { posterUrl, formatDuration } from '@/lib/media'
 import { ItemDetailPanel } from '@/components/watchlist/item-detail-panel'
 import { InfoIcon, EyeIcon } from '@/components/icons'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
@@ -420,7 +420,16 @@ const CardBody = ({ item }: { item: Item }) => {
     <>
       <Poster key={item.id} item={item} />
       <h3 className="text-center text-lg font-bold text-foreground">{item.title}</h3>
-      <p className="text-sm text-muted-foreground">{item.year}</p>
+      <div className="mt-0.5 flex flex-wrap items-center justify-center gap-2 text-sm text-muted-foreground">
+        <span>{item.year}</span>
+        {item.vote_average != null && item.vote_average > 0 && (
+          <span className="flex items-center gap-0.5">
+            <span className="text-yellow-400">★</span>
+            {item.vote_average.toFixed(1)}
+          </span>
+        )}
+        {formatDuration(item.duration) && <span>{formatDuration(item.duration)}</span>}
+      </div>
       {item.genres.length > 0 && (
         <div className="mt-3 flex flex-wrap justify-center gap-1.5">
           {item.genres.slice(0, 3).map(g => (

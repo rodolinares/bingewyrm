@@ -12,7 +12,7 @@ import {
 } from '@/queries/sessions'
 import { Spinner } from '@/components/ui/spinner'
 import { Button } from '@/components/ui/button'
-import { posterUrl } from '@/lib/media'
+import { posterUrl, formatDuration } from '@/lib/media'
 import { InfoIcon } from '@/components/icons'
 import { ItemDetailPanel } from '@/components/watchlist/item-detail-panel'
 
@@ -25,6 +25,7 @@ interface RankedItem {
   source_id: string | null
   vote_average: number | null
   genres: string[]
+  duration: number | null
   added_at: string
   voteCount: number
 }
@@ -59,6 +60,7 @@ const ResultsPage = () => {
       source_id: i.source_id,
       vote_average: i.vote_average,
       genres: i.genres,
+      duration: i.duration,
       added_at: i.added_at,
       voteCount: voteCounts.get(i.id) ?? 0
     }))
@@ -133,7 +135,16 @@ const ResultsPage = () => {
             )}
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
-              <p className="text-xs text-muted-foreground">{item.year}</p>
+              <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span>{item.year}</span>
+                {item.vote_average != null && item.vote_average > 0 && (
+                  <span className="flex items-center gap-0.5">
+                    <span className="text-yellow-400">★</span>
+                    {item.vote_average.toFixed(1)}
+                  </span>
+                )}
+                {formatDuration(item.duration) && <span>{formatDuration(item.duration)}</span>}
+              </div>
             </div>
             <span className="text-sm font-medium text-foreground">
               {item.voteCount}/{voterCount}
