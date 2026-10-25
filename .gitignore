@@ -6,3 +6,5 @@ dist
 *.tsbuildinfo
 supabase/.temp/
 coverage/
+
+.mcp.json
