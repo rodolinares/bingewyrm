@@ -143,7 +143,7 @@ src/
   queries/            groups, watchlists, sessions, profile (TanStack Query hooks)
 supabase/
   functions/          tmdb-search Edge Function (search + detail + watch providers)
-  migrations/         00001–00019 SQL migrations
+  migrations/         00001–00021 SQL migrations
 docs/
   (design tokens live in src/index.css @theme inline)
   bingewyrm-skipped.md     Deferred features tracker
