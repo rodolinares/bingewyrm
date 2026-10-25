@@ -15,7 +15,9 @@ watchlists, then run timed voting sessions where members swipe to keep or discar
 - **Genre blacklist** — leader can blacklist genres to exclude items from session pools
 - **Voting sessions** — leader starts, members vote yes/no, timed or manual end
 - **All members see sessions** — active session / results links visible to everyone
-- **Results** — save, recycle, or discard based on votes
+- **Results** — save or discard based on votes
+- **Where to watch** — streaming/rent/buy providers in the detail panel, with a region picker
+- **User settings** — display name, email, light/dark theme
 - **Realtime** — live item additions + session-ended notifications via Supabase Realtime
 - **Touch-first** — swipe gestures on mobile, responsive layout, bottom tab nav
 - **Invite flow** — new users join group → onboarding → redirected to invited group
@@ -63,7 +65,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 Run all migrations in `supabase/migrations/` against your Supabase project
 (in order). The migrations create:
 
-- Tables: `users`, `groups`, `group_members`, `watchlists`, `items`, `sessions`, `session_participants`, `votes`
+- Tables: `users`, `groups`, `group_members`, `watchlists`, `items`, `sessions`, `session_participants`, `votes`, `group_genre_blacklist`
 - RLS policies for all tables
 - SECURITY DEFINER RPCs for all write operations (required — `auth.uid()` returns NULL in INSERT WITH CHECK context)
 - pg_cron job to auto-close expired sessions
@@ -77,8 +79,9 @@ supabase functions deploy tmdb-search
 ```
 
 The Edge Function provides:
+
 - `GET /tmdb-search?q=...&type=movie|tv` — search with rating + overview
-- `GET /tmdb-search/detail/{id}?type=movie|tv` — full details (genres, runtime, backdrop)
+- `GET /tmdb-search/detail/{id}?type=movie|tv&region=XX` — full details (genres, runtime, backdrop) plus watch providers for `region` (default `US`)
 
 ### Auth
 
@@ -94,18 +97,22 @@ Enable Google provider in Authentication → Providers.
 Cloudflare Workers — push to deploy. `wrangler.toml` serves `dist/` as static assets with SPA fallback (`not_found_handling`).
 
 Set env vars in Cloudflare dashboard:
+
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 
 ### Commands
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start dev server |
-| `pnpm build` | Type-check + build |
-| `pnpm lint` | ESLint |
-| `pnpm format` | Prettier (src only) |
-| `pnpm format:check` | Prettier check without writing |
+| Command              | Description                    |
+| -------------------- | ------------------------------ |
+| `pnpm dev`           | Start dev server               |
+| `pnpm build`         | Type-check + build             |
+| `pnpm lint`          | ESLint                         |
+| `pnpm format`        | Prettier (src only)            |
+| `pnpm format:check`  | Prettier check without writing |
+| `pnpm test`          | Vitest single run              |
+| `pnpm test:watch`    | Vitest watch mode              |
+| `pnpm test:coverage` | Vitest with coverage report    |
 
 ### Git Workflow
 
@@ -117,24 +124,26 @@ Set env vars in Cloudflare dashboard:
 
 ```
 src/
-  components/
+  components/         error-boundary, icons (inline SVG), outcome-badge
     group/            create-group-dialog, create-watchlist-dialog
-    ui/               button, dialog (shadcn/base-ui)
+    ui/               button, dialog, skeleton, spinner, switch (shadcn/base-ui)
     watchlist/        add-item-dialog (search + manual entry, batch add, detail panel),
-                      item-detail-panel (overlay with description, rating, genres)
-  hooks/              use-user, use-realtime
-  lib/                supabase client, anilist GraphQL, shuffle, utils (cn helper)
+                      item-detail-panel (overlay with description, rating, genres, where to watch)
+  hooks/              use-user, use-realtime, use-theme
+  lib/                supabase client, anilist GraphQL, media (TMDb images, providers, region),
+                      shuffle, utils (cn helper)
   pages/
     auth/             login, callback
     groups/           group list, group layout (sidebar + bottom nav), settings
     watchlist/        detail (with client-side sort), start-session, history
     session/          voting (swipe), results
     invite/           auto-join
-    onboarding/       display name form
-  queries/            groups, watchlists, sessions (TanStack Query hooks)
+    settings/         user settings (display name, email, theme)
+    onboarding.tsx    display name form
+  queries/            groups, watchlists, sessions, profile (TanStack Query hooks)
 supabase/
-  functions/          tmdb-search Edge Function (search + detail)
-  migrations/         00001–00011 SQL migrations
+  functions/          tmdb-search Edge Function (search + detail + watch providers)
+  migrations/         00001–00019 SQL migrations
 docs/
   (design tokens live in src/index.css @theme inline)
   bingewyrm-skipped.md     Deferred features tracker

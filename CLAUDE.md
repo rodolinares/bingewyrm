@@ -1,4 +1,4 @@
-# Agents — BingeWyrm
+# Claude: BingeWyrm
 
 Instructions for AI agents working on this codebase.
 
@@ -23,11 +23,12 @@ writes go through SECURITY DEFINER RPCs via `supabase.rpc(...)`. This is
 required because `auth.uid()` returns NULL in INSERT WITH CHECK context.
 
 Available RPCs:
+
 - `create_group`, `update_group_name`, `delete_group`, `regenerate_invite_code`
 - `join_group`, `transfer_leader`
 - `create_watchlist`
 - `add_item`, `toggle_item_watched`, `remove_item`
-- `start_session`, `cast_vote`, `end_session`, `resolve_outcome`
+- `start_session`, `cast_vote`, `delete_vote`, `end_session`, `resolve_outcome`
 - `update_user_profile`
 - `get_member_count`
 - `remove_items`
@@ -62,6 +63,7 @@ One line. No body unless asked.
 ### Prettier
 
 Exact config (no trailing commas, no semis, single quotes):
+
 ```
 semi: false
 singleQuote: true
@@ -90,26 +92,30 @@ derived state.
 
 ## File Map
 
-| Path | Purpose |
-|------|---------|
-| `src/App.tsx` | `AppLayout` (shell: header, footer, Outlet) |
-| `src/router.tsx` | Route tree, auth loaders (`requireAuth`, `requireOnboarding`) |
-| `src/lib/supabase.ts` | Supabase client, `supabaseUrl$` |
-| `src/lib/anilist.ts` | AniList GraphQL search (enriched: description, averageScore, genres) |
-| `src/lib/shuffle.ts` | Deterministic mulberry32 PRNG shuffle |
-| `src/lib/utils.ts` | `cn()` helper (clsx + tailwind-merge) |
-| `src/hooks/use-user.ts` | Session + profile (TanStack Query) |
-| `src/hooks/use-realtime.ts` | `useRealtimeSession`, `useRealtimeItems` (shared `useRealtime` helper) |
-| `src/queries/groups.ts` | Group CRUD hooks (all RPCs) |
-| `src/queries/watchlists.ts` | Watchlist/item hooks (all RPCs) |
-| `src/queries/sessions.ts` | Session/vote hooks (all RPCs), `useLastSessionByOutcome` |
-| `src/components/watchlist/add-item-dialog.tsx` | Batch add, multi-select, detail panel, existing badges, manual entry |
-| `src/components/watchlist/item-detail-panel.tsx` | Item detail panel (overlay with description, rating, genres) |
-| `supabase/migrations/` | SQL migrations 00001–00011 |
-| `supabase/functions/tmdb-search/` | TMDb proxy Edge Function (search + detail endpoints) |
-| `src/index.css` | Design tokens (`@theme inline`), reference copy was `docs/bingewyrm-theme.css` |
-| `docs/bingewyrm-skipped.md` | Deferred features tracker |
-| `wrangler.toml` | Cloudflare Workers config (static assets, SPA fallback) |
+| Path                                             | Purpose                                                                              |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `src/App.tsx`                                    | `AppLayout` (shell: header, footer, Outlet)                                          |
+| `src/router.tsx`                                 | Route tree, auth loaders (`requireAuth`, `requireOnboarding`)                        |
+| `src/lib/supabase.ts`                            | Supabase client, `supabaseUrl$`                                                      |
+| `src/lib/anilist.ts`                             | AniList GraphQL search (enriched: description, averageScore, genres)                 |
+| `src/lib/shuffle.ts`                             | Deterministic mulberry32 PRNG shuffle                                                |
+| `src/lib/utils.ts`                               | `cn()` helper (clsx + tailwind-merge)                                                |
+| `src/lib/media.ts`                               | TMDb image URLs, media labels, duration format, watch providers, region detect/store |
+| `src/hooks/use-user.ts`                          | Session + profile (TanStack Query)                                                   |
+| `src/hooks/use-theme.ts`                         | Light/dark theme, persisted in localStorage                                          |
+| `src/hooks/use-realtime.ts`                      | `useRealtimeSession`, `useRealtimeItems` (shared `useRealtime` helper)               |
+| `src/queries/groups.ts`                          | Group CRUD hooks (all RPCs)                                                          |
+| `src/queries/watchlists.ts`                      | Watchlist/item hooks (all RPCs)                                                      |
+| `src/queries/sessions.ts`                        | Session/vote hooks (all RPCs), `useLastSessionByOutcome`                             |
+| `src/queries/profile.ts`                         | `useUpdateProfile`                                                                   |
+| `src/components/icons.tsx`                       | Inline SVG icons (no icon library)                                                   |
+| `src/components/watchlist/add-item-dialog.tsx`   | Batch add, multi-select, detail panel, existing badges, manual entry                 |
+| `src/components/watchlist/item-detail-panel.tsx` | Item detail panel (overlay with description, rating, genres)                         |
+| `supabase/migrations/`                           | SQL migrations 00001–00019                                                           |
+| `supabase/functions/tmdb-search/`                | TMDb proxy Edge Function (search + detail endpoints)                                 |
+| `src/index.css`                                  | Design tokens (`@theme inline`), reference copy was `docs/bingewyrm-theme.css`       |
+| `docs/bingewyrm-skipped.md`                      | Deferred features tracker                                                            |
+| `wrangler.toml`                                  | Cloudflare Workers config (static assets, SPA fallback)                              |
 
 ## Tests
 
@@ -127,7 +133,7 @@ pnpm test:watch    # watch mode
 pnpm test:coverage # with coverage report
 ```
 
-Coverage threshold starts at 10% — ratchet up as coverage grows. Never lower.
+Coverage thresholds live in `vitest.config.ts`. Ratchet up as coverage grows. Never lower.
 
 ### File naming
 
@@ -157,16 +163,16 @@ Coverage threshold starts at 10% — ratchet up as coverage grows. Never lower.
 
 ### What to test by layer
 
-| Layer | What | Example |
-|-------|------|---------|
-| Pure functions | Edge cases, determinism, type correctness | `shuffle.ts`, `media.ts` |
-| Query hooks | RPC called with right args, error handling, cache invalidation | `queries/groups.ts` |
-| Components | Form validation, conditional rendering, user interaction | dialogs, pages |
-| Edge Functions | Request parsing, response format, error codes | `tmdb-search` |
+| Layer          | What                                                           | Example                  |
+| -------------- | -------------------------------------------------------------- | ------------------------ |
+| Pure functions | Edge cases, determinism, type correctness                      | `shuffle.ts`, `media.ts` |
+| Query hooks    | RPC called with right args, error handling, cache invalidation | `queries/groups.ts`      |
+| Components     | Form validation, conditional rendering, user interaction       | dialogs, pages           |
+| Edge Functions | Request parsing, response format, error codes                  | `tmdb-search`            |
 
 ### Coverage target
 
-- **Baseline**: 10% (statements, branches, functions, lines)
+- **Baseline**: statements 20%, branches 8%, functions 30%, lines 20%
 - **New queries**: must have test for success + error path
 - **New pure functions**: must have unit tests
 - **New components**: must have render + interaction tests for non-trivial logic
@@ -174,7 +180,7 @@ Coverage threshold starts at 10% — ratchet up as coverage grows. Never lower.
 ## Gotchas
 
 - `@supabase/ssr` is NOT used — this is a Vite SPA, not SSR
-- `lucide-react` is only used for `XIcon` in dialog close button
+- No icon library: icons (including the dialog `XIcon`) come from `src/components/icons.tsx`
 - Invite links are UUID-based, auto-join, no approval
 - Leader transfer removes the outgoing leader from members atomically
 - `pnpm-lock.yaml` must stay in sync — run `pnpm install` after dep changes
