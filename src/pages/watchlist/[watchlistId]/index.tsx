@@ -189,20 +189,22 @@ const WatchlistDetail = () => {
               </option>
             ))}
           </select>
-          <button
-            onClick={() => {
-              setEditMode(!editMode)
-              setSelectedIds(new Set())
-              setBatchConfirm(false)
-            }}
-            className={`flex h-8 items-center rounded-md border px-2 text-xs font-medium transition-colors ${
-              editMode
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-input text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {editMode ? 'Done' : 'Select'}
-          </button>
+          {isLeader && (
+            <button
+              onClick={() => {
+                setEditMode(!editMode)
+                setSelectedIds(new Set())
+                setBatchConfirm(false)
+              }}
+              className={`flex h-8 items-center rounded-md border px-2 text-xs font-medium transition-colors ${
+                editMode
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-input text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {editMode ? 'Done' : 'Select'}
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {editMode &&
@@ -328,7 +330,7 @@ const WatchlistDetail = () => {
                 >
                   {item.watched ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
                 </button>
-                {(item.added_by === user?.id || isLeader) &&
+                {isLeader &&
                   (confirmingId === item.id ? (
                     <div className="flex items-center gap-1">
                       <button
