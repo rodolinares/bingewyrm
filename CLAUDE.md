@@ -111,7 +111,7 @@ derived state.
 | `src/components/icons.tsx`                       | Inline SVG icons (no icon library)                                                   |
 | `src/components/watchlist/add-item-dialog.tsx`   | Batch add, multi-select, detail panel, existing badges, manual entry                 |
 | `src/components/watchlist/item-detail-panel.tsx` | Item detail panel (overlay with description, rating, genres)                         |
-| `supabase/migrations/`                           | SQL migrations 00001–00021                                                           |
+| `supabase/migrations/`                           | SQL migrations 00001–00022                                                           |
 | `supabase/functions/tmdb-search/`                | TMDb proxy Edge Function (search + detail endpoints)                                 |
 | `src/index.css`                                  | Design tokens (`@theme inline`), reference copy was `docs/bingewyrm-theme.css`       |
 | `docs/bingewyrm-skipped.md`                      | Deferred features tracker                                                            |
